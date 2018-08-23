@@ -6,16 +6,6 @@
 //  Copyright © 2018 Marcus Rossel. All rights reserved.
 //
 
-#warning("Temporary")
-class Track { }
-extension Track {
-   final class Manager {
-      var runningCategory: Category? {
-         return Category(title: "Category Title", color: .blue)
-      }
-   }
-}
-
 import UIKit
 
 // MARK: - App Launch

@@ -8,6 +8,16 @@
 
 import UIKit
 
+#warning("Temporary")
+class Track { }
+extension Track {
+   final class Manager {
+      var runningCategory: Category? {
+         return Category(title: "Category Title", color: .blue)
+      }
+   }
+}
+
 final class _Track: Codable {
    var start: Date
    var end: Date?

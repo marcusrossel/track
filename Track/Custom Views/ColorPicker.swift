@@ -12,10 +12,10 @@ import UIKit
 final class ColorPicker: UIView {
 
    /// The sliders for changing the values of the color components.
-   private var sliders: [UIColor.Component: UISlider] = [:]
+   private var sliders: [UIColor.Component: UISlider]
    
    /// The view showing the currently selected color.
-   private let selectionPanel = UIView()
+   private let selectionPanel: UIView
    
    /// The color currently selected within the color picker.
    var selection: UIColor {
@@ -24,10 +24,11 @@ final class ColorPicker: UIView {
          selectionPanel.backgroundColor = selection
          
          let changedComponents = differingComponents(between: selection, and: oldValue)
-         for pair in makeSliderTrackColors(for: selection, components: changedComponents) {
-            let (component, trackColor) = pair
+         
+         for (component, tint) in makeSliderTints(for: selection, components: changedComponents) {
             sliders[component]?.value = Float(selection.decomposed[component]!)
-            sliders[component]?.minimumTrackTintColor = trackColor
+            sliders[component]?.minimumTrackTintColor = tint.track
+            sliders[component]?.thumbTintColor = tint.thumb
          }
       }
    }
@@ -35,39 +36,39 @@ final class ColorPicker: UIView {
    /// Creates a color picker in the state of having selected a given color.
    init(selection: UIColor) {
       // Phase 1.
-      self.selection = selection
+      self.selection = .clear
+      selectionPanel = UIView()
+      let defaultSliders = UIColor.Component.allCases.map { ($0, UISlider()) }
+      sliders = Dictionary(uniqueKeysWithValues: defaultSliders)
       
       // Phase 2.
       super.init(frame: .zero)
       
       // Phase 3.
-      setupSliders(with: selection)
-      setupDisplayPanel(with: selection)
+      setupSelectionPanel(with: selection)
+      setupSliders()
+      callSelectionSetter(color: selection)
       setupLayoutConstraints()
    }
    
-   /// A convenience method for setting up the sliders' style and functional properties.
-   private func setupSliders(with color: UIColor) {
-      // For each component - gets the track color, creates a slider, sets the sliders position and
-      // hooks it up to a action method for value change.
-      for trackComponent in makeSliderTrackColors(for: color) {
-         let (component, trackColor) = trackComponent
-         let colorValue = color.decomposed[component]!
-         let slider = UISlider()
-         
+   /// Makes sure the selection's setter is called. This sets up the sliders properly.
+   private func callSelectionSetter(color: UIColor) {
+      selection = color
+   }
+   
+   /// Sets up fixed properties for the sliders.
+   private func setupSliders() {
+      for (_, slider) in sliders {
+         slider.setShadow(radius: 3, opacity: 0.25, offset: CGSize(width: 0, height: 1))
          slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
-         slider.value = Float(colorValue)
-         slider.minimumTrackTintColor = trackColor
-         
-         sliders[component] = slider
       }
    }
    
-   /// A convenience method for setting up the display panel's style properties.
-   private func setupDisplayPanel(with color: UIColor) {
+   /// A convenience method for setting up the selection panel's style properties.
+   private func setupSelectionPanel(with color: UIColor) {
       selectionPanel.backgroundColor = color
       selectionPanel.layer.cornerRadius = 15
-      selectionPanel.setDefaultShadow()
+      selectionPanel.setShadow()
    }
    
    /// A convenience method for retrieving the color component associated with a given slider.
@@ -99,38 +100,52 @@ final class ColorPicker: UIView {
 
 extension ColorPicker {
    
-   /// Calculates the colors of slider tracks for a given color and components.
-   private func makeSliderTrackColors(
+   /// Calculates the colors of slider tracks and thumbs for a given color and components.
+   private func makeSliderTints(
       for color: UIColor,
-      components: Set<UIColor.Component> = Set(UIColor.Component.allCases)
-   ) -> [UIColor.Component: UIColor] {
+      components tragetComponents: Set<UIColor.Component> = Set(UIColor.Component.allCases)
+   ) -> [UIColor.Component: (track: UIColor, thumb: UIColor)] {
       
-      // The function used to determine how intense the base color values should be for the
-      // component's track.
-      let transparency: (CGFloat) -> CGFloat = { colorValue in
-         // Causes the intensity to be between 0.1 and 0.4
-         return 0.9 - (colorValue * 0.3)
+      // Sets up helper function for calculating the tints' color values.
+      let trackMaximum: CGFloat = 0.8
+      let trackDesaturation: (CGFloat) -> CGFloat = { 0.75 - ($0 * 0.3) }
+      
+      let thumbMaximum: (CGFloat) -> CGFloat = { 0.7 + ($0 * 0.3) }
+      let thumbDesaturation: (CGFloat) -> CGFloat = { 0.5 + ($0 * 0.5) }
+      
+      let colorComponentValues = color.decomposed
+      var tints: [UIColor.Component: (track: UIColor, thumb: UIColor)] = [:]
+      
+      // Calculates and sets the tint colors for each target component.
+      for targetComponent in tragetComponents {
+         // Gets the value for the current target component.
+         let targetComponentValue = colorComponentValues[targetComponent]
+         
+         var trackComponentValues: [UIColor.Component: CGFloat] = [:]
+         var thumbComponentValues: [UIColor.Component: CGFloat] = [:]
+         
+         // Fills the above dictionaries with the desaturation values.
+         for tintComponent in [UIColor.Component.red, .green, .blue] {
+            trackComponentValues[tintComponent] = targetComponentValue.map(trackDesaturation)
+            thumbComponentValues[tintComponent] = targetComponentValue.map(thumbDesaturation)
+         }
+         
+         // Sets the tints' color values to the maximum values for the target component.
+         trackComponentValues[targetComponent] = trackMaximum
+         thumbComponentValues[targetComponent] = targetComponentValue.map(thumbMaximum)
+         
+         // Makes sure the alpha is always set to 1.
+         trackComponentValues[.alpha] = 1
+         thumbComponentValues[.alpha] = 1
+         
+         // Creates the tint colors.
+         let trackColor = UIColor(components: trackComponentValues)
+         let thumbColor = UIColor(components: thumbComponentValues)
+         
+         tints[targetComponent] = (track: trackColor, thumb: thumbColor)
       }
       
-      let componentValues = color.decomposed
-      var trackComponents: [UIColor.Component: UIColor] = [:]
-      
-      for component in components {
-         let componentValue = componentValues[component]!
-         
-         var trackColorComponents: [UIColor.Component: CGFloat] = [
-            .red:   transparency(componentValue),
-            .green: transparency(componentValue),
-            .blue:  transparency(componentValue),
-         ]
-         
-         trackColorComponents[component] = 0.8
-         trackColorComponents[.alpha] = 1
-         
-         trackComponents[component] = UIColor(components: trackColorComponents)
-      }
-      
-      return trackComponents
+      return tints
    }
 }
 
