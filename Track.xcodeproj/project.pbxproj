@@ -20,6 +20,7 @@
 		DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA52212AD96700121EFA /* TimeTracker.swift */; };
 		DDA5AA55212AFA6C00121EFA /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA54212AFA6C00121EFA /* CategorySelectionController.swift */; };
 		DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB291A321300D8A00DC7659 /* ImageLoader.swift */; };
+		DDB291A921306AA600DC7659 /* PopoverHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB291A821306AA600DC7659 /* PopoverHandler.swift */; };
 		DDBD0515212602D2005DB627 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD0514212602D2005DB627 /* AppDelegate.swift */; };
 		DDBD051C212602D3005DB627 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDBD051B212602D3005DB627 /* Assets.xcassets */; };
 		DDBD051F212602D3005DB627 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DDBD051D212602D3005DB627 /* LaunchScreen.storyboard */; };
@@ -27,7 +28,6 @@
 		DDBD053921261182005DB627 /* SettingsRootController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD053821261182005DB627 /* SettingsRootController.swift */; };
 		DDBD054721262321005DB627 /* CategoriesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD054621262321005DB627 /* CategoriesController.swift */; };
 		DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05492126267B005DB627 /* ColorPicker.swift */; };
-		DDBD054D212629A2005DB627 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD054C212629A2005DB627 /* Extensions.swift */; };
 		DDBD054F2126D5B7005DB627 /* CategoriesTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD054E2126D5B7005DB627 /* CategoriesTableViewCell.swift */; };
 		DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05542126EAD0005DB627 /* ColorDot.swift */; };
 		DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05572127051D005DB627 /* Category+Manager.swift */; };
@@ -49,6 +49,7 @@
 		DDA5AA52212AD96700121EFA /* TimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeTracker.swift; sourceTree = "<group>"; };
 		DDA5AA54212AFA6C00121EFA /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
 		DDB291A321300D8A00DC7659 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
+		DDB291A821306AA600DC7659 /* PopoverHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverHandler.swift; sourceTree = "<group>"; };
 		DDBD0511212602D2005DB627 /* Track.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Track.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDBD0514212602D2005DB627 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DDBD051B212602D3005DB627 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -58,7 +59,6 @@
 		DDBD053821261182005DB627 /* SettingsRootController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootController.swift; sourceTree = "<group>"; };
 		DDBD054621262321005DB627 /* CategoriesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesController.swift; sourceTree = "<group>"; };
 		DDBD05492126267B005DB627 /* ColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPicker.swift; sourceTree = "<group>"; };
-		DDBD054C212629A2005DB627 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		DDBD054E2126D5B7005DB627 /* CategoriesTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesTableViewCell.swift; sourceTree = "<group>"; };
 		DDBD05542126EAD0005DB627 /* ColorDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDot.swift; sourceTree = "<group>"; };
 		DDBD05572127051D005DB627 /* Category+Manager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Category+Manager.swift"; sourceTree = "<group>"; };
@@ -106,6 +106,17 @@
 			path = Tabs;
 			sourceTree = "<group>";
 		};
+		DDB291A721306A5800DC7659 /* Custom Handlers */ = {
+			isa = PBXGroup;
+			children = (
+				DDB291A821306AA600DC7659 /* PopoverHandler.swift */,
+				DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */,
+				DDB291A321300D8A00DC7659 /* ImageLoader.swift */,
+				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
+			);
+			path = "Custom Handlers";
+			sourceTree = "<group>";
+		};
 		DDBD0508212602D2005DB627 = {
 			isa = PBXGroup;
 			children = (
@@ -127,9 +138,9 @@
 			children = (
 				DDBD053521260C73005DB627 /* App */,
 				DD35EEF0212DA17C007DED53 /* Tabs */,
-				DDBD055621270509005DB627 /* Logic */,
+				DDBD055621270509005DB627 /* Model */,
 				DDBD055B21270707005DB627 /* Custom Views */,
-				DDBD054C212629A2005DB627 /* Extensions.swift */,
+				DDB291A721306A5800DC7659 /* Custom Handlers */,
 				DD433B55212E00E0006D0DC2 /* Code Dump.swift */,
 				DDBD051B212602D3005DB627 /* Assets.xcassets */,
 				DDBD051D212602D3005DB627 /* LaunchScreen.storyboard */,
@@ -201,16 +212,13 @@
 			path = Categories;
 			sourceTree = "<group>";
 		};
-		DDBD055621270509005DB627 /* Logic */ = {
+		DDBD055621270509005DB627 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
-				DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */,
-				DDB291A321300D8A00DC7659 /* ImageLoader.swift */,
 				DDBD05672127322E005DB627 /* Tag */,
 				DDBD056621273227005DB627 /* Category */,
 			);
-			path = Logic;
+			path = Model;
 			sourceTree = "<group>";
 		};
 		DDBD055B21270707005DB627 /* Custom Views */ = {
@@ -315,6 +323,7 @@
 				DDA5AA55212AFA6C00121EFA /* CategorySelectionController.swift in Sources */,
 				DD21EFB52128CBCC00C15367 /* CategoryCreationController.swift in Sources */,
 				DD21EFAD2128A88400C15367 /* TodayTabCoordinator.swift in Sources */,
+				DDB291A921306AA600DC7659 /* PopoverHandler.swift in Sources */,
 				DD21EFB12128A8C200C15367 /* SettingsTabCoordinator.swift in Sources */,
 				DDBD053921261182005DB627 /* SettingsRootController.swift in Sources */,
 				DD35EEF3212DAB1B007DED53 /* AutoLayoutHelper.swift in Sources */,
@@ -328,7 +337,6 @@
 				DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */,
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,
 				DDBD053721260CA3005DB627 /* AppCoordinator.swift in Sources */,
-				DDBD054D212629A2005DB627 /* Extensions.swift in Sources */,
 				DDBD055A21270633005DB627 /* Tag.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,
 				DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */,

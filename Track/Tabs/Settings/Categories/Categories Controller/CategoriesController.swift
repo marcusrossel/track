@@ -105,6 +105,8 @@ extension CategoriesController {
       }
    }
    
+   #warning("Tag")
+   
    private func setupCell(_ cell: CategoriesTableViewCell, forRow row: Int) {
       let category = categoryManager.categories[row]
       
@@ -133,6 +135,8 @@ extension CategoriesController {
       let lastRow = tableView.numberOfRows(inSection: Section.categories.rawValue) - 1
       return IndexPath(row: lastRow, section: Section.categories.rawValue)
    }
+   
+   #warning("Tag")
    
    override func tableView(
       _ tableView: UITableView,

@@ -8,11 +8,12 @@
 
 import UIKit
 
-final class TimerTabCoordinator: NSObject, Coordinator {
+final class TimerTabCoordinator: Coordinator {
    
    private var hasRunBefore = false
    
    let navigationController = UINavigationController()
+   private var popoverHandler: PopoverHandler?
    
    private let categoryManager: Category.Manager
    private let trackManager: Track.Manager
@@ -37,53 +38,26 @@ final class TimerTabCoordinator: NSObject, Coordinator {
 
       navigationController.pushViewController(controller, animated: true)
    }
-   
-   #warning("Temporary")
-   func testController() {
-      let timeTracker = TimeTracker(startDate: Date())
-      let controller = UIViewController()
-      controller.view.backgroundColor = .white
-      controller.view.addSubview(timeTracker)
-      
-      timeTracker.translatesAutoresizingMaskIntoConstraints = false
-      NSLayoutConstraint.activate([
-         timeTracker.heightAnchor.constraint(equalTo: controller.view.heightAnchor),
-         timeTracker.widthAnchor.constraint(equalTo: controller.view.widthAnchor),
-         timeTracker.leadingAnchor.constraint(equalTo: controller.view.leadingAnchor),
-         timeTracker.trailingAnchor.constraint(equalTo: controller.view.trailingAnchor)
-      ])
-   }
 }
 
-extension TimerTabCoordinator: TimerControllerDelegate, UIPopoverPresentationControllerDelegate {
+extension TimerTabCoordinator: TimerControllerDelegate {
    
    func timerControllerDidStop(_ timerController: TimerController) {
       print("Stop")
    }
    
    func timerControllerDidSwitch(_ timerController: TimerController) {
-      let categorySelecttionController = CategorySelectionController(
+      let categorySelectionController = CategorySelectionController(
          categories: categoryManager.categories
       )
       
-      let referencePoint = UIView()
-      let position = CGPoint(
-         x: timerController.switchButton.bounds.origin.x / 2,
-         y: timerController.switchButton.bounds.origin.y / 2
-      )
-      referencePoint.frame = CGRect(origin: position, size: .zero)
-      timerController.switchButton.addSubview(referencePoint)
+      popoverHandler = PopoverHandler(
+         presentedController: categorySelectionController,
+         sourceView: timerController.switchButton
+      ) {
+         self.popoverHandler = nil
+      }
       
-      categorySelecttionController.modalPresentationStyle = .popover
-      categorySelecttionController.popoverPresentationController?.delegate = self
-      categorySelecttionController.popoverPresentationController?.sourceView = referencePoint
-      
-      navigationController.present(categorySelecttionController, animated: true, completion: nil)
-   }
-   
-   // Makes sure a popover is presented as such.
-   func adaptivePresentationStyle(for controller: UIPresentationController)
-      -> UIModalPresentationStyle {
-         return .none
+      popoverHandler?.present(in: navigationController)
    }
 }

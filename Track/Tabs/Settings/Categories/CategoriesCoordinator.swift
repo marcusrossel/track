@@ -10,15 +10,16 @@ import UIKit
 
 // MARK: - Categories Coordinator
 
-final class CategoriesCoordinator: NSObject, Coordinator {
+final class CategoriesCoordinator: Coordinator {
    
    #warning("Hacky")
    private var asyncStorage: [String: Any] = [:]
    
    private var childCoordinators: [Coordinator] = []
-   let categoryManager: Category.Manager
-   
    let navigationController: UINavigationController
+   private var popoverHandler: PopoverHandler?
+   
+   let categoryManager: Category.Manager
    
    var categoriesController: CategoriesController {
       for child in navigationController.children.reversed() {
@@ -48,16 +49,16 @@ final class CategoriesCoordinator: NSObject, Coordinator {
 
 // MARK: - Categories Controller Delegate
 
-extension CategoriesCoordinator:
-   CategoriesControllerDelegate, UIPopoverPresentationControllerDelegate
-{
+extension CategoriesCoordinator: CategoriesControllerDelegate {
    
+   /// A categories controller shows a non-large title navigation bar.
    func setupNavigationBar(for controller: CategoriesController) {
       controller.title = "Categories"
       navigationController.isNavigationBarHidden = false
       navigationController.navigationBar.prefersLargeTitles = false
    }
    
+   /// Handles a new category request, by showing a category creation controller.
    func categoriesControllerDidRequestNewCategory(_ controller: CategoriesController) {
       let categoryCreationController = CategoryCreationController(
          categoryManager: categoryManager, delegate: self
@@ -65,49 +66,43 @@ extension CategoriesCoordinator:
       navigationController.pushViewController(categoryCreationController, animated: true)
    }
    
+   /// Handles a category controller's color dot being tapped, by creating a color picker popover
+   /// and changing the associated category's color according to the selection.
    func categoriesController(
-      _ controller: CategoriesController, didTapColorDotForCell cell: CategoriesTableViewCell
+      _ controller: CategoriesController,
+      didTapColorDotForCell cell: CategoriesTableViewCell
    ) {
+      // Gets the category associated with the tapped color dot's cell.
       guard let category = categoryManager.uniqueCategory(with: cell.title) else {
          fatalError("Expected category manager to contain exactly one category for title.")
       }
       
+      // Sets up a color picker with the color dot's color.
       let colorPicker = ColorPicker(selection: cell.color)
+      
+      // Sets up the popover handler a color picker controller.
+      popoverHandler = PopoverHandler(
+         presentedController: makeController(for: colorPicker),
+         sourceView: cell.colorDot
+      ) {
+         category.color = colorPicker.selection
+         controller.tableView.reloadData()
+         self.popoverHandler = nil
+      }
+      
+      // Presents the color picker controller as a popover.
+      popoverHandler?.present(in: navigationController)
+   }
+   
+   /// Creates a view controller for a color picker given a certain selection.
+   private func makeController(for colorPicker: ColorPicker) -> UIViewController {
       colorPicker.hide(.alpha)
       
       let colorPickerController = UIViewController()
       colorPickerController.view = colorPicker
       colorPickerController.preferredContentSize = CGSize(width: 250, height: 200)
-
-      let referencePoint = UIView()
-      referencePoint.frame = CGRect(origin: cell.colorDot.center, size: .zero)
-      cell.addSubview(referencePoint)
       
-      colorPickerController.modalPresentationStyle = .popover
-      colorPickerController.popoverPresentationController?.delegate = self
-      colorPickerController.popoverPresentationController?.sourceView = referencePoint
-      
-      navigationController.present(colorPickerController, animated: true) {
-         referencePoint.removeFromSuperview()
-      }
-      
-      asyncStorage["colorPickerCompletion: () -> ()"] = {
-         category.color = colorPicker.selection
-         controller.tableView.reloadData()
-      }
-   }
-   
-   // Makes sure a popover is presented as such.
-   func adaptivePresentationStyle(for controller: UIPresentationController)
-   -> UIModalPresentationStyle {
-      return .none
-   }
-   
-   func popoverPresentationControllerDidDismissPopover(
-      _ popoverPresentationController: UIPopoverPresentationController
-   ) {
-      (asyncStorage["colorPickerCompletion: () -> ()"] as? () -> ())?()
-      asyncStorage["colorPickerCompletion: () -> ()"] = nil
+      return colorPickerController
    }
 }
 
