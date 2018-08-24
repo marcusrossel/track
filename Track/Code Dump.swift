@@ -13,7 +13,7 @@ class Track { }
 extension Track {
    final class Manager {
       var runningCategory: Category? {
-         return Category(title: "Category Title", color: .blue)
+         return Category(title: "Category Title", color: .white)
       }
    }
 }

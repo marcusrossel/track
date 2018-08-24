@@ -101,34 +101,10 @@ extension TimerController {
          titleLabel, timeTracker, buttonStackView
       ])
       enclosingStackView.axis = .vertical
-      enclosingStackView.alignment = .fill
+      enclosingStackView.alignment = .center
       enclosingStackView.distribution = .fillEqually
       
-      setupViewsForAutoLayout([enclosingStackView])
-      
-      let guide = view.safeAreaLayoutGuide
-      
-      let top = enclosingStackView.topAnchor.constraint(
-         equalTo: guide.topAnchor, constant: .defaultSpacing
-      )
-      let bottom = enclosingStackView.bottomAnchor.constraint(
-         equalTo: guide.bottomAnchor, constant: -.defaultSpacing
-      )
-      let leading = enclosingStackView.leadingAnchor.constraint(
-         equalTo: guide.leadingAnchor, constant: .defaultSpacing
-      )
-      let trailing = enclosingStackView.trailingAnchor.constraint(
-         equalTo: guide.trailingAnchor, constant: -.defaultSpacing
-      )
-      
-      NSLayoutConstraint.activate([top, bottom, leading, trailing])
-   }
-   
-   private func setupViewsForAutoLayout(_ views: [UIView]) {
-      for view in views {
-         view.translatesAutoresizingMaskIntoConstraints = false
-         self.view.addSubview(view)
-      }
+      AutoLayoutHelper(rootView: view, viewToConstrain: enclosingStackView)
+         .constrainView(withInset: .defaultSpacing)
    }
 }
-

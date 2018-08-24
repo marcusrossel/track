@@ -52,7 +52,13 @@ final class TimeTracker: UIView {
       }
       
       // Sets up the view's layout constraints.
+      setupTimeLabelFont()
       AutoLayoutHelper(rootView: self, viewToConstrain: timeLabel).constrainView()
+   }
+   
+   private func setupTimeLabelFont() {
+      let font = UIFont.boldSystemFont(ofSize: 70)
+      timeLabel.font = font
    }
    
    /// A convenience method for creating a new timer that calls `updateLabel()` every second.

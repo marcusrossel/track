@@ -87,7 +87,9 @@ extension CategoriesCoordinator:
       colorPickerController.popoverPresentationController?.delegate = self
       colorPickerController.popoverPresentationController?.sourceView = referencePoint
       
-      navigationController.present(colorPickerController, animated: true, completion: nil)
+      navigationController.present(colorPickerController, animated: true) {
+         referencePoint.removeFromSuperview()
+      }
       
       asyncStorage["colorPickerCompletion: () -> ()"] = {
          category.color = colorPicker.selection

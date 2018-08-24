@@ -176,7 +176,6 @@
 				DD21EFB02128A8C200C15367 /* SettingsTabCoordinator.swift */,
 				DDBD054021261B12005DB627 /* Root */,
 				DDBD054121261B56005DB627 /* Categories */,
-				DDBD054221261B5C005DB627 /* Tags */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -206,13 +205,6 @@
 				DD35EEEF212D6906007DED53 /* Category Creation Controller */,
 			);
 			path = Categories;
-			sourceTree = "<group>";
-		};
-		DDBD054221261B5C005DB627 /* Tags */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Tags;
 			sourceTree = "<group>";
 		};
 		DDBD055621270509005DB627 /* Logic */ = {
@@ -499,6 +491,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.marcusrossel.Track;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
