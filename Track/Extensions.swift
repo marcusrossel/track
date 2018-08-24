@@ -44,13 +44,6 @@ extension CGFloat {
    }
 }
 
-extension CGSize {
-   
-   static var defaultIcon: CGSize {
-      return CGSize(width: 30, height: 30)
-   }
-}
-
 extension UIView {
    
    func setShadow(radius: CGFloat = 8, opacity: Float = 0.5, offset: CGSize = .zero) {

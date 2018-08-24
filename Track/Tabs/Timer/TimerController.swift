@@ -35,14 +35,10 @@ final class TimerController: UIViewController {
       titleLabel.text = category.title
       // timeTracker = ?
       
-      let buttonSize = CGSize(width: 60, height: 60)
-      let playImage = UIImage(named: "Play Button")?.resizedKeepingAspect(forSize: buttonSize)
-      let stopImage = UIImage(named: "Stop Button")?.resizedKeepingAspect(forSize: buttonSize)
-      let switchImage = UIImage(named: "Switch Button")?.resizedKeepingAspect(forSize: buttonSize)
-      
-      playPauseButton.setImage(playImage, for: .normal)
-      stopButton.setImage(stopImage, for: .normal)
-      switchButton.setImage(switchImage, for: .normal)
+      let imageLoader = ImageLoader()
+      playPauseButton.setImage(imageLoader[button: .play], for: .normal)
+      stopButton.setImage(imageLoader[button: .stop], for: .normal)
+      switchButton.setImage(imageLoader[button: .switch], for: .normal)
       
       playPauseButton.addTarget(self, action: #selector(didPressPlayPause(_:)), for: .touchUpInside)
       stopButton.addTarget(self, action: #selector(didPressStop), for: .touchUpInside)

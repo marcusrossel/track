@@ -127,12 +127,15 @@ final class AppCoordinator: NSObject {
    /// The controllers' tab bar items are also setup in the process.
    private func makeTabControllers() -> [UIViewController] {
       let tabControllers = childCoordinators.map { $0.navigationController }
-      
       let tabNames = ["Timer", "Today", "Record", "Settings"]
-      let tabBarIcons = tabNames.map { tabName in UIImage(named: tabName + " Icon") }
+      let tabIcons = [ImageLoader.Icon.timer, .today, .record, .settings]
       
+      let imageLoader = ImageLoader()
+   
+      // Populates each tab controller with its tab name and icon.
       for index in (0...3) {
-         let item = UITabBarItem(title: tabNames[index], image: tabBarIcons[index], tag: index)
+         let image = imageLoader[icon: tabIcons[index]]
+         let item = UITabBarItem(title: tabNames[index], image: image, tag: index)
          tabControllers[index].tabBarItem = item
       }
       

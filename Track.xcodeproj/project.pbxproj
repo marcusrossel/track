@@ -19,6 +19,7 @@
 		DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4F212AD89C00121EFA /* TimerController.swift */; };
 		DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA52212AD96700121EFA /* TimeTracker.swift */; };
 		DDA5AA55212AFA6C00121EFA /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA54212AFA6C00121EFA /* CategorySelectionController.swift */; };
+		DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB291A321300D8A00DC7659 /* ImageLoader.swift */; };
 		DDBD0515212602D2005DB627 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD0514212602D2005DB627 /* AppDelegate.swift */; };
 		DDBD051C212602D3005DB627 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDBD051B212602D3005DB627 /* Assets.xcassets */; };
 		DDBD051F212602D3005DB627 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DDBD051D212602D3005DB627 /* LaunchScreen.storyboard */; };
@@ -47,6 +48,7 @@
 		DDA5AA4F212AD89C00121EFA /* TimerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerController.swift; sourceTree = "<group>"; };
 		DDA5AA52212AD96700121EFA /* TimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeTracker.swift; sourceTree = "<group>"; };
 		DDA5AA54212AFA6C00121EFA /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
+		DDB291A321300D8A00DC7659 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		DDBD0511212602D2005DB627 /* Track.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Track.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDBD0514212602D2005DB627 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DDBD051B212602D3005DB627 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -102,14 +104,6 @@
 				DDBD053421260BD5005DB627 /* Settings */,
 			);
 			path = Tabs;
-			sourceTree = "<group>";
-		};
-		DD35EEF1212DAAE0007DED53 /* Auto Layout */ = {
-			isa = PBXGroup;
-			children = (
-				DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */,
-			);
-			path = "Auto Layout";
 			sourceTree = "<group>";
 		};
 		DDBD0508212602D2005DB627 = {
@@ -210,10 +204,11 @@
 		DDBD055621270509005DB627 /* Logic */ = {
 			isa = PBXGroup;
 			children = (
-				DDBD056321272319005DB627 /* Persistence */,
+				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
+				DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */,
+				DDB291A321300D8A00DC7659 /* ImageLoader.swift */,
 				DDBD05672127322E005DB627 /* Tag */,
 				DDBD056621273227005DB627 /* Category */,
-				DD35EEF1212DAAE0007DED53 /* Auto Layout */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -226,14 +221,6 @@
 				DDBD05542126EAD0005DB627 /* ColorDot.swift */,
 			);
 			path = "Custom Views";
-			sourceTree = "<group>";
-		};
-		DDBD056321272319005DB627 /* Persistence */ = {
-			isa = PBXGroup;
-			children = (
-				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
-			);
-			path = Persistence;
 			sourceTree = "<group>";
 		};
 		DDBD056621273227005DB627 /* Category */ = {
@@ -336,6 +323,7 @@
 				DDBD054721262321005DB627 /* CategoriesController.swift in Sources */,
 				DDBD054F2126D5B7005DB627 /* CategoriesTableViewCell.swift in Sources */,
 				DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */,
+				DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */,
 				DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */,
 				DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */,
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,

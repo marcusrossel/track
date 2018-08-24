@@ -53,10 +53,9 @@ class SettingsRootController: UITableViewController {
       categoriesCell.accessoryType = .disclosureIndicator
       tagsCell.accessoryType = .disclosureIndicator
       
-      categoriesCell.imageView?.image =  UIImage(named: "Books Icon")?
-         .resizedKeepingAspect(forSize: .defaultIcon)
-      tagsCell.imageView?.image = UIImage(named: "Tags Icon")?
-         .resizedKeepingAspect(forSize: .defaultIcon)
+      let imageLoader = ImageLoader()
+      categoriesCell.imageView?.image = imageLoader[icon: .books]
+      tagsCell.imageView?.image = imageLoader[icon: .tags]
    }
    
    override func viewWillAppear(_ animated: Bool) {

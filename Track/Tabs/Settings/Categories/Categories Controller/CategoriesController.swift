@@ -193,18 +193,18 @@ extension CategoriesController: CategoryModificationTableViewCellDataSource {
       atRow row: Int
    ) {
       let actionTitle: String
-      let imageName: String
+      let buttonType: ImageLoader.Button
       let targetAction: (taget: Any?, action: Selector)
       
       switch ModificationAction(rawValue: row) {
       case .add?:
          actionTitle = "Add"
-         imageName = "Add Button"
+         buttonType = .add
          targetAction = (self, #selector(didRequestNewCategory))
          
       case .edit?:
          actionTitle = isEditing ? "End Editing" : "Edit"
-         imageName = (isEditing ? "Stop " : "Home ") + "Button"
+         buttonType = isEditing ? .stop : .home
          targetAction = (self, #selector(didRequestEditToggle))
          
          cell.imageView.fadeTransition(duration: 0.3)
@@ -215,11 +215,8 @@ extension CategoriesController: CategoryModificationTableViewCellDataSource {
       }
       
       let imageSize = CGSize(width: 40, height: 40)
-      guard let image = UIImage(named: imageName)?
-         .resizedKeepingAspect(forSize: imageSize)
-      else {
-            fatalError("Inconsistency with asset catalogue.")
-      }
+      let imageLoader = ImageLoader(useDefaultSizes: false)
+      let image = imageLoader[button: buttonType].resizedKeepingAspect(forSize: imageSize)
       
       cell.text = actionTitle
       cell.image = image
