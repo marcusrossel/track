@@ -21,6 +21,11 @@ protocol CategoryCreationControllerDelegate {
    func categoryCreationControllerCanNotSaveCategory(
       _ categoryCreationController: CategoryCreationController
    )
+   
+   func categoryCreationControllerDidRequestSave(
+      _ categoryCreationController: CategoryCreationController,
+      forCategory category: Category
+   )
 }
 
 extension CategoryCreationControllerDelegate {
@@ -57,6 +62,16 @@ final class CategoryCreationController: UIViewController {
       setupLayoutConstraints()
    }
    
+   private func setupLayoutConstraints() {
+      let stackView = UIStackView()
+      stackView.axis = .vertical
+      stackView.alignment = .fill
+      stackView.distribution = .fillProportionally
+      
+      AutoLayoutHelper(rootView: view , viewToConstrain: stackView)
+         .constrainView(withInset: .defaultSpacing)
+   }
+   
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
       coordinator.setupNavigationBar(for: self)
@@ -67,9 +82,23 @@ final class CategoryCreationController: UIViewController {
    required init?(coder aDecoder: NSCoder) { fatalError("App does not use storyboard or XIB.") }
 }
 
+// MARK: - Public API
+
+extension CategoryCreationController {
+   
+   func saveCategoryIfPossible() {
+      guard let category = category else { return }
+      coordinator.categoryCreationControllerDidRequestSave(self, forCategory: category)
+   }
+}
+
 // MARK: - Text Field Delegate
 
 extension CategoryCreationController: UITextFieldDelegate {
+   
+   func textFieldDidChange(_ textField: UITextField) {
+      
+   }
    
    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
       textField.returnKeyType = .done
@@ -104,44 +133,6 @@ extension CategoryCreationController: UITextFieldDelegate {
       let newText = oldText.replacingCharacters(in: range, with: replacement)
       
       return newText.count <= 30
-   }
-}
-
-// MARK: - Auto Layout
-
-extension CategoryCreationController {
-   
-   private func setupLayoutConstraints() {
-      let stackView = UIStackView()
-      stackView.axis = .vertical
-      stackView.alignment = .fill
-      stackView.distribution = .fillProportionally
-      
-      setupViewsForAutoLayout([stackView])
-      
-      let guide = view.safeAreaLayoutGuide
-      
-      let top = stackView.topAnchor.constraint(
-         equalTo: guide.topAnchor, constant: .defaultSpacing
-      )
-      let bottom = stackView.bottomAnchor.constraint(
-         equalTo: guide.bottomAnchor, constant: -.defaultSpacing
-      )
-      let leading = stackView.leadingAnchor.constraint(
-         equalTo: guide.leadingAnchor, constant: .defaultSpacing
-      )
-      let trailing = stackView.trailingAnchor.constraint(
-         equalTo: guide.trailingAnchor, constant: -.defaultSpacing
-      )
-      
-      NSLayoutConstraint.activate([top, bottom, leading, trailing])
-   }
-   
-   private func setupViewsForAutoLayout(_ views: [UIView]) {
-      for view in views {
-         view.translatesAutoresizingMaskIntoConstraints = false
-         self.view.addSubview(view)
-      }
    }
 }
 

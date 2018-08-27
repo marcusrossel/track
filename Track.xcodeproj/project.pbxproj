@@ -215,8 +215,8 @@
 		DDBD055621270509005DB627 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				DDBD05672127322E005DB627 /* Tag */,
 				DDBD056621273227005DB627 /* Category */,
+				DDBD05672127322E005DB627 /* Tag */,
 			);
 			path = Model;
 			sourceTree = "<group>";

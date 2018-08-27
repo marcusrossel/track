@@ -88,22 +88,9 @@ extension CategoriesTableViewCell {
       
       setupViewsForAutoLayout([stackView])
       
-      let guide = contentView.safeAreaLayoutGuide
-      
-      let top = stackView.topAnchor.constraint(equalTo: guide.topAnchor)
-      let bottom = stackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor)
-      let leading = stackView.leadingAnchor.constraint(
-         equalTo: guide.leadingAnchor, constant: .defaultSpacing
+      AutoLayoutHelper(rootView: contentView, viewToConstrain: stackView).constrainView(including:
+         [.top(inset: 0), .bottom(inset: 0), .leading(inset: .defaultSpacing)]
       )
-      
-      NSLayoutConstraint.activate([top, bottom, leading])
-   }
-   
-   private func setupViewsForAutoLayout(_ views: [UIView]) {
-      for view in views {
-         view.translatesAutoresizingMaskIntoConstraints = false
-         contentView.addSubview(view)
-      }
    }
 }
 

@@ -11,42 +11,106 @@ import UIKit
 /// A helper for simple auto layout tasks.
 final class AutoLayoutHelper {
    
+   /// The edges being constrained by the auto layout helper.
+   enum Edge {
+      case top(inset: CGFloat)
+      case bottom(inset: CGFloat)
+      case leading(inset: CGFloat)
+      case trailing(inset: CGFloat)
+      
+      /// All cases of edges with an inset of `0`.
+      static let allCases: [Edge] = [
+         .top(inset: 0), .bottom(inset: 0), .leading(inset: 0), .trailing(inset: 0)
+      ]
+      
+      /// A getter for the edge's inset.
+      fileprivate var inset: CGFloat {
+         switch self {
+         case .top(inset: let inset): return inset
+         case .bottom(inset: let inset): return inset
+         case .leading(inset: let inset): return inset
+         case .trailing(inset: let inset): return inset
+         }
+      }
+      
+      /// A multiplier that determines in which direction an inset needs to be added for each edge.
+      fileprivate var insetMultiplier: CGFloat {
+         switch self {
+         case .top, .leading: return 1
+         case .bottom, .trailing: return -1
+         }
+      }
+      
+      /// An "Either"-type for the anchors the can be associated with an edge.
+      fileprivate enum Anchor {
+         case xAxis(NSLayoutXAxisAnchor)
+         case yAxis(NSLayoutYAxisAnchor)
+      }
+      
+      /// Gets the anchor associated with an edge of a given view.
+      fileprivate func anchor(for view: UIView) -> Anchor {
+         switch self {
+         case .top: return .yAxis(view.topAnchor)
+         case .bottom: return .yAxis(view.bottomAnchor)
+         case .leading: return .xAxis(view.leadingAnchor)
+         case .trailing: return .xAxis(view.trailingAnchor)
+         }
+      }
+      
+      /// Gets the anchor associated with an edge of a given layout guide.
+      fileprivate func anchor(for layoutGuide: UILayoutGuide) -> Anchor {
+         switch self {
+         case .top: return .yAxis(layoutGuide.topAnchor)
+         case .bottom: return .yAxis(layoutGuide.bottomAnchor)
+         case .leading: return .xAxis(layoutGuide.leadingAnchor)
+         case .trailing: return .xAxis(layoutGuide.trailingAnchor)
+         }
+      }
+   }
+   
    /// The view to which the views to layout should be subviews.
    let rootView: UIView
    
-   /// The layout guide used when constraining views to the root view.
-   let layoutGuide: UILayoutGuide
-   
    /// The view to be constrained in `constrainView(withInset:)`.
    var viewToConstrain: UIView?
-   
-   /// Creates an auto layout helper instance working with the given parameters.
-   /// If no layout guide is given, it defaults to the root view's safe area layout guide.
-   init(rootView: UIView, viewToConstrain: UIView? = nil, layoutGuide: UILayoutGuide? = nil) {
+
+   init(rootView: UIView, viewToConstrain: UIView? = nil) {
       self.rootView = rootView
       self.viewToConstrain = viewToConstrain
-      self.layoutGuide = layoutGuide ?? rootView.safeAreaLayoutGuide
    }
    
-   /// Sets layout contraints between all sides of the view to constrain and the root view, at a
-   /// given inset. By default the inset is `0`.
+   /// Sets layout contraints between all specified edges of the view to constrain and the root
+   /// view, at given insets. By default the general inset and the edges' insets are `0`.
    /// If `viewToConstrain` is `nil`, nothing happens and `false` is returned.
    @discardableResult
-   func constrainView(withInset inset: CGFloat = 0) -> Bool {
+   func constrainView(
+      generalInset: CGFloat = 0,
+      including included: [Edge] = Edge.allCases
+   ) -> Bool {
+      // Aborts if there is no view to constrain.
       guard let view = viewToConstrain else { return false }
       
       setupViewsForAutoLayout([view])
       
-      let top = view.topAnchor.constraint(equalTo: layoutGuide.topAnchor, constant: inset)
-      let bottom = view.bottomAnchor.constraint(equalTo: layoutGuide.bottomAnchor, constant: inset)
-      let leading = view.leadingAnchor.constraint(
-         equalTo: layoutGuide.leadingAnchor, constant: inset
-      )
-      let trailing = view.trailingAnchor.constraint(
-         equalTo: layoutGuide.trailingAnchor, constant: inset
-      )
+      // Collects the constraints that should be activated.
+      var constraints: [NSLayoutConstraint] = []
       
-      NSLayoutConstraint.activate([top, bottom, leading, trailing])
+      // Adds the constraints for all included edges.
+      for edge in included {
+         let inset = edge.insetMultiplier * (edge.inset + generalInset)
+         
+         // Adds the constraint between view to constrain and layout guide.
+         switch (edge.anchor(for: view), edge.anchor(for: rootView.safeAreaLayoutGuide)) {
+         case let (.xAxis(first), .xAxis(second)):
+            constraints += [first.constraint(equalTo: second, constant: inset)]
+         case let (.yAxis(first), .yAxis(second)):
+            constraints += [first.constraint(equalTo: second, constant: inset)]
+         default:
+            fatalError("Internal inconsistency in `anchor(for:)` methods.")
+         }
+      }
+      
+      NSLayoutConstraint.activate(constraints)
       return true
    }
    

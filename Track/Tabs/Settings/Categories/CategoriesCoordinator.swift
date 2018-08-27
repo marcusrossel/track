@@ -10,26 +10,20 @@ import UIKit
 
 // MARK: - Categories Coordinator
 
+/// The coordinator to handle everything inside the "Categories" settings-area.
 final class CategoriesCoordinator: Coordinator {
    
-   #warning("Hacky")
-   private var asyncStorage: [String: Any] = [:]
-   
-   private var childCoordinators: [Coordinator] = []
+   /// The navigation controller managing the coordinators controllers.
    let navigationController: UINavigationController
+   
+   /// A handler for popover-presentation of controllers.
+   /// This variable will only be populated when a popover is currently being shown,
    private var popoverHandler: PopoverHandler?
    
-   let categoryManager: Category.Manager
+   /// A reference to the category manager that can be passed to any controllers in need of it.
+   private let categoryManager: Category.Manager
    
-   var categoriesController: CategoriesController {
-      for child in navigationController.children.reversed() {
-         if let controller = child as? CategoriesController {
-            return controller
-         }
-      }
-      fatalError("Expected there to be a `CategoriesController`.")
-   }
-   
+   /// Creates a categories coordinator with given controllers and managers.
    init(
       categoryManager: Category.Manager = Category.Manager(),
       navigationController: UINavigationController = UINavigationController()
@@ -38,6 +32,8 @@ final class CategoriesCoordinator: Coordinator {
       self.navigationController = navigationController
    }
    
+   /// Causes controll to be handed over to the coordinator.
+   /// This causes a categories controller to be shown.
    func run() {
       let categoriesController = CategoriesController(
          categoryManager: categoryManager, delegate: self
@@ -110,46 +106,48 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
 
 extension CategoriesCoordinator: CategoryCreationControllerDelegate {
    
-   @objc private func saveCategoryForCategoryCreationController() {
-      guard
-         let controller = asyncStorage["categoryCreationController: CategoryCreationController"]
-         as? CategoryCreationController
-      else {
-         fatalError("Internal inconsistency with async storage.")
-      }
+   /// A category creation controller shows a non-large title navigation bar with save button.
+   func setupNavigationBar(for controller: CategoryCreationController) {
+      controller.title = "Create Category"
+      navigationController.isNavigationBarHidden = false
+      navigationController.navigationBar.prefersLargeTitles = false
       
-      guard let category = controller.category else {
-         fatalError("Internal inconsistency with save button for category creation controller.")
-      }
-      
-      guard categoryManager.insert(category, atIndex: 0) else {
-         fatalError("Internal inconsistency between category manager and creation controller.")
-      }
-      
+      // Adds the save button to the navigation bar.
+      navigationController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+         barButtonSystemItem: .save,
+         target: self,
+         action: #selector(didPressSaveButton(_:))
+      )
+   }
+   
+   /// The action for category creation controller's save button (in the navigation bar).
+   @objc private func didPressSaveButton(_ sender: UIBarButtonItem) {
+      // Class the category creation controller's `saveCategoryIfPossible()`.
+      (navigationController.topViewController as? CategoryCreationController)?
+         .saveCategoryIfPossible()
+   }
+   
+   /// Saves the category associated with a category creation controller.
+   /// This also causes the controller to be popped.
+   func categoryCreationControllerDidRequestSave(
+      _ categoryCreationController: CategoryCreationController,
+      forCategory category: Category
+   ) {
+      let _ = categoryManager.insert(category, atIndex: 0)
       navigationController.popViewController(animated: true)
    }
    
+   /// Enables the save button, as there is a category that can be saved.
    func categoryCreationControllerCanSaveCategory(
       _ categoryCreationController: CategoryCreationController
    ) {
       navigationController.navigationItem.rightBarButtonItem?.isEnabled = true
    }
    
+   /// Disables the save button, as there is no category that can be saved.
    func categoryCreationControllerCanNotSaveCategory(
       _ categoryCreationController: CategoryCreationController
    ) {
       navigationController.navigationItem.rightBarButtonItem?.isEnabled = false
-   }
-   
-   func setupNavigationBar(for controller: CategoryCreationController) {
-      controller.title = "Create Category"
-      navigationController.isNavigationBarHidden = false
-      navigationController.navigationBar.prefersLargeTitles = false
-      
-      navigationController.navigationItem.rightBarButtonItem = UIBarButtonItem(
-         barButtonSystemItem: .save,
-         target: self,
-         action: #selector(saveCategoryForCategoryCreationController)
-      )
    }
 }
