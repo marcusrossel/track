@@ -101,6 +101,6 @@ extension TimerController {
       enclosingStackView.distribution = .fillEqually
       
       AutoLayoutHelper(rootView: view, viewToConstrain: enclosingStackView)
-         .constrainView(withInset: .defaultSpacing)
+         .constrainView(generalInset: .defaultSpacing)
    }
 }

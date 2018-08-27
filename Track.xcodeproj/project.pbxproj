@@ -15,7 +15,7 @@
 		DD35EEF3212DAB1B007DED53 /* AutoLayoutHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */; };
 		DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD433B55212E00E0006D0DC2 /* Code Dump.swift */; };
 		DDA5AA482129CB5A00121EFA /* CategoriesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA472129CB5A00121EFA /* CategoriesCoordinator.swift */; };
-		DDA5AA4C212A0BD300121EFA /* CategoryModificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4B212A0BD300121EFA /* CategoryModificationTableViewCell.swift */; };
+		DDA5AA4C212A0BD300121EFA /* SplitTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4B212A0BD300121EFA /* SplitTableViewCell.swift */; };
 		DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4F212AD89C00121EFA /* TimerController.swift */; };
 		DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA52212AD96700121EFA /* TimeTracker.swift */; };
 		DDA5AA55212AFA6C00121EFA /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA54212AFA6C00121EFA /* CategorySelectionController.swift */; };
@@ -44,7 +44,7 @@
 		DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLayoutHelper.swift; sourceTree = "<group>"; };
 		DD433B55212E00E0006D0DC2 /* Code Dump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Code Dump.swift"; sourceTree = "<group>"; };
 		DDA5AA472129CB5A00121EFA /* CategoriesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesCoordinator.swift; sourceTree = "<group>"; };
-		DDA5AA4B212A0BD300121EFA /* CategoryModificationTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryModificationTableViewCell.swift; sourceTree = "<group>"; };
+		DDA5AA4B212A0BD300121EFA /* SplitTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitTableViewCell.swift; sourceTree = "<group>"; };
 		DDA5AA4F212AD89C00121EFA /* TimerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerController.swift; sourceTree = "<group>"; };
 		DDA5AA52212AD96700121EFA /* TimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeTracker.swift; sourceTree = "<group>"; };
 		DDA5AA54212AFA6C00121EFA /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
@@ -82,7 +82,6 @@
 			children = (
 				DDBD054621262321005DB627 /* CategoriesController.swift */,
 				DDBD054E2126D5B7005DB627 /* CategoriesTableViewCell.swift */,
-				DDA5AA4B212A0BD300121EFA /* CategoryModificationTableViewCell.swift */,
 			);
 			path = "Categories Controller";
 			sourceTree = "<group>";
@@ -227,6 +226,7 @@
 				DDA5AA52212AD96700121EFA /* TimeTracker.swift */,
 				DDBD05492126267B005DB627 /* ColorPicker.swift */,
 				DDBD05542126EAD0005DB627 /* ColorDot.swift */,
+				DDA5AA4B212A0BD300121EFA /* SplitTableViewCell.swift */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -328,7 +328,7 @@
 				DDBD053921261182005DB627 /* SettingsRootController.swift in Sources */,
 				DD35EEF3212DAB1B007DED53 /* AutoLayoutHelper.swift in Sources */,
 				DD21EFAF2128A8A800C15367 /* RecordTabCoordinator.swift in Sources */,
-				DDA5AA4C212A0BD300121EFA /* CategoryModificationTableViewCell.swift in Sources */,
+				DDA5AA4C212A0BD300121EFA /* SplitTableViewCell.swift in Sources */,
 				DDBD054721262321005DB627 /* CategoriesController.swift in Sources */,
 				DDBD054F2126D5B7005DB627 /* CategoriesTableViewCell.swift in Sources */,
 				DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */,

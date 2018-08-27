@@ -46,10 +46,6 @@ final class CategoriesController: UITableViewController {
          CategoriesTableViewCell.self,
          forCellReuseIdentifier: CategoriesTableViewCell.identifier
       )
-      tableView.register(
-         CategoryModificationTableViewCell.self,
-         forCellReuseIdentifier: CategoryModificationTableViewCell.identifier
-      )
       
       tableView.rowHeight = .defaultHeight
    }
@@ -79,41 +75,109 @@ extension CategoriesController {
    }
    
    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-      return (section == Section.categories.rawValue) ? categoryManager.categories.count : 1
+      switch Section(rawValue: section) {
+      case .categories?: return categoryManager.categories.count
+      case .modifiers?: return ModificationAction.allCases.count
+      default: fatalError("Non exhaustive switch over variable domain.")
+      }
    }
    
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
    -> UITableViewCell {
-      if indexPath.section == Section.categories.rawValue {
-         guard
-            let cell = tableView.dequeueReusableCell(
-               withIdentifier: CategoriesTableViewCell.identifier, for: indexPath
-            ) as? CategoriesTableViewCell
-         else { fatalError("Dequeued unexpected type of table view cell.") }
-         
-         setupCell(cell, forRow: indexPath.row)
-         return cell
-      } else {
-         guard
-            let cell = tableView.dequeueReusableCell(
-               withIdentifier: CategoryModificationTableViewCell.identifier, for: indexPath
-            ) as? CategoryModificationTableViewCell
-         else { fatalError("Dequeued unexpected type of table view cell.") }
-         
-         cell.datasource = self
-         return cell
+      // Dequeues the cell.
+      guard
+         let cell = tableView.dequeueReusableCell(
+            withIdentifier: CategoriesTableViewCell.identifier, for: indexPath
+         ) as? CategoriesTableViewCell
+      else { fatalError("Dequeued unexpected type of table view cell.") }
+      
+      // Sets up the cell according to its section.
+      switch Section(rawValue: indexPath.section) {
+      case .categories?: setupCategoriesCell(cell, forRow: indexPath.row)
+      case .modifiers?: setupModificationCell(cell, forRow: indexPath.row)
+      default: fatalError("Non exhaustive switch over variable domain.")
       }
+
+      return cell
    }
    
-   #warning("Tag")
-   
-   private func setupCell(_ cell: CategoriesTableViewCell, forRow row: Int) {
+   private func setupCategoriesCell(_ cell: CategoriesTableViewCell, forRow row: Int) {
       let category = categoryManager.categories[row]
       
       cell.title = category.title
       cell.color = category.color
       cell.titleTextField.delegate = self
       cell.setTarget(self, action: #selector(colorDotWasTapped(_:)))
+   }
+}
+
+// MARK: - Modification Cell Setup
+
+extension CategoriesController {
+   
+   private enum ModificationAction: Int, CaseIterable {
+      case add
+      case edit
+   }
+   
+   private func setupModificationCell(_ cell: CategoriesTableViewCell, forRow row: Int) {
+      let actionTitle: String
+      let buttonType: ImageLoader.Button
+      let targetAction: (taget: Any?, action: Selector)
+      
+      switch ModificationAction(rawValue: row) {
+      case .add?:
+         actionTitle = "Add"
+         buttonType = .add
+         targetAction = (self, #selector(didRequestNewCategory))
+         
+      case .edit?:
+         actionTitle = isEditing ? "End Editing" : "Edit"
+         buttonType = isEditing ? .stop : .home
+         targetAction = (self, #selector(didRequestEditToggle))
+
+      default:
+         fatalError("Non exhaustive switch over variable domain.")
+      }
+      
+      let imageView = modificationImageView(for: buttonType)
+
+      cell.title = actionTitle
+      cell.color = .white
+      cell.colorDot.subviews.forEach { $0.removeFromSuperview() }
+      cell.colorDot.addSubview(imageView)
+      
+      cell.accessoryType = .none
+      cell.titleTextField.isUserInteractionEnabled = false
+      cell.colorDot.isUserInteractionEnabled = false
+      
+      cell.addGestureRecognizer(
+         UITapGestureRecognizer(target: targetAction.0, action: targetAction.1)
+      )
+   }
+   
+   private func modificationImageView(for buttonType: ImageLoader.Button) -> UIImageView {
+      let imageSize = CGSize(width: 40, height: 40)
+      let imageLoader = ImageLoader(useDefaultSizes: false)
+      
+      let image = imageLoader[button: buttonType].resizedKeepingAspect(forSize: imageSize)
+      let imageView = UIImageView(image: image)
+      
+      return imageView
+   }
+   
+   @objc private func didRequestNewCategory() {
+      coordinator.categoriesControllerDidRequestNewCategory(self)
+   }
+   
+   @objc private func didRequestEditToggle() {
+      setEditing(!isEditing, animated: true)
+      
+      let editCellPath = IndexPath(
+         row: ModificationAction.edit.rawValue,
+         section: Section.modifiers.rawValue
+      )
+      tableView.reloadRows(at: [editCellPath], with: .fade)
    }
 }
 
@@ -135,8 +199,6 @@ extension CategoriesController {
       let lastRow = tableView.numberOfRows(inSection: Section.categories.rawValue) - 1
       return IndexPath(row: lastRow, section: Section.categories.rawValue)
    }
-   
-   #warning("Tag")
    
    override func tableView(
       _ tableView: UITableView,
@@ -175,78 +237,6 @@ extension CategoriesController {
       to destinationIndexPath: IndexPath
    ) {
       categoryManager.move(categoryAtIndex: sourceIndexPath.row, to: destinationIndexPath.row)
-   }
-}
-
-// MARK: - Category Modification Table View Cell Data Source
-
-extension CategoriesController: CategoryModificationTableViewCellDataSource {
-   
-   private enum ModificationAction: Int, CaseIterable {
-      case add
-      case edit
-   }
-   
-   func numberOfActionsForTableViewCell(_ cell: CategoryModificationTableViewCell) -> Int {
-      return ModificationAction.allCases.count
-   }
-   
-   func tableViewCell(
-      _ categoryModificationTableViewCell: CategoryModificationTableViewCell,
-      needsSetupForCell cell: CategoryModificationActionCell,
-      atRow row: Int
-   ) {
-      let actionTitle: String
-      let buttonType: ImageLoader.Button
-      let targetAction: (taget: Any?, action: Selector)
-      
-      switch ModificationAction(rawValue: row) {
-      case .add?:
-         actionTitle = "Add"
-         buttonType = .add
-         targetAction = (self, #selector(didRequestNewCategory))
-         
-      case .edit?:
-         actionTitle = isEditing ? "End Editing" : "Edit"
-         buttonType = isEditing ? .stop : .home
-         targetAction = (self, #selector(didRequestEditToggle))
-         
-         cell.imageView.fadeTransition(duration: 0.3)
-         cell.textLabel.fadeTransition(duration: 0.3)
-         
-      default:
-         fatalError("Internal inconsistency between data source methods.")
-      }
-      
-      let imageSize = CGSize(width: 40, height: 40)
-      let imageLoader = ImageLoader(useDefaultSizes: false)
-      let image = imageLoader[button: buttonType].resizedKeepingAspect(forSize: imageSize)
-      
-      cell.text = actionTitle
-      cell.image = image
-      cell.textLabel.isUserInteractionEnabled = false
-      cell.imageView.isUserInteractionEnabled = false
-      cell.addGestureRecognizer(
-         UITapGestureRecognizer(target: targetAction.0, action: targetAction.1)
-      )
-   }
-   
-   @objc private func didRequestNewCategory() {
-      coordinator.categoriesControllerDidRequestNewCategory(self)
-   }
-   
-   @objc private func didRequestEditToggle() {
-      setEditing(!isEditing, animated: true)
-      let editActionPath = IndexPath(row: 0, section: Section.modifiers.rawValue)
-      
-      guard
-         let modificationCell = tableView.cellForRow(at: editActionPath)
-         as? CategoryModificationTableViewCell
-      else {
-         fatalError("Received table view cell of unexpected type.")
-      }
-      
-      modificationCell.collectionView.reloadData()
    }
 }
 

@@ -69,7 +69,7 @@ final class CategoryCreationController: UIViewController {
       stackView.distribution = .fillProportionally
       
       AutoLayoutHelper(rootView: view , viewToConstrain: stackView)
-         .constrainView(withInset: .defaultSpacing)
+         .constrainView(generalInset: .defaultSpacing)
    }
    
    override func viewWillAppear(_ animated: Bool) {

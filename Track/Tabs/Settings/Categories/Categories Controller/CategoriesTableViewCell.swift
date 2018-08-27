@@ -13,7 +13,7 @@ final class CategoriesTableViewCell: UITableViewCell {
    static let identifier = "CategoriesTableViewCell"
    
    private(set) var titleTextField = UITextField()
-   private(set) var colorDot = ColorDot(diameter: 40, color: .black)
+   /*private(set)*/ var colorDot = ColorDot(diameter: 40, color: .black)
    
    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
       // Phase 2.
@@ -85,8 +85,6 @@ extension CategoriesTableViewCell {
       stackView.alignment = .center
       stackView.distribution = .fill
       stackView.spacing = .defaultSpacing
-      
-      setupViewsForAutoLayout([stackView])
       
       AutoLayoutHelper(rootView: contentView, viewToConstrain: stackView).constrainView(including:
          [.top(inset: 0), .bottom(inset: 0), .leading(inset: .defaultSpacing)]

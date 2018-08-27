@@ -72,10 +72,10 @@ final class AppCoordinator: NSObject {
    
    #warning("Test code")
    private lazy var categoryManager: Category.Manager = {
-      let categories: [Category] = ["One", "Two", "Three", "Four", "Five"].map {
+      let categories: [Category] = (1...20).map {
          let rgba = (1...3).map { _ in CGFloat.random(in: 0...1)}
          let color = UIColor(red: rgba[0], green: rgba[1], blue: rgba[2], alpha: 1)
-         return Category(title: $0, color: color)
+         return Category(title: String($0), color: color)
       }
       
       return Category.Manager(categories: categories)!
