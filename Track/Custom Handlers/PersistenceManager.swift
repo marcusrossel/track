@@ -14,15 +14,15 @@ final class PersistenceManager {
    /// An item that can be persisted by the manager.
    /// Every item has an associated storage type, used by the manager.
    enum Item: String {
+      case tracks
       case categories
       case tags
-      case tracks
       
       /// The actual type used by the persistence manager to read and write a certain item.
       enum StorageType {
+         static let tracks = Set<Track>.self
          static let categories = [Category].self
          static let tags = [Tag].self
-         static let tracks = [Track].self
       }
    }
    

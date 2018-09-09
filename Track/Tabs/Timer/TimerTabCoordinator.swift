@@ -100,7 +100,11 @@ extension TimerTabCoordinator: UITableViewDataSource, UITableViewDelegate {
    
    private func change(to category: Category) {
       if let timerController = navigationController.viewControllers[0] as? TimerController {
-         timerController.category = category
+         let trackForCategory =
+            trackManager.todaysTrack(for: category) ??
+            trackManager.createTrack(for: category)!
+         
+         timerController.track = trackForCategory
          navigationController.dismiss(animated: true, completion: nil)
       } else {
          let controller = TimerController(

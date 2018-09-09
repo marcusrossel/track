@@ -53,12 +53,8 @@ final class AppCoordinator: NSObject {
       // Reads the array of categories stored on disk.
       // If no such file is found, the `categories` are set as an empty array.
       // If there were any other errors, a fatal error occurs.
-      do {
-         let readCategories = try persistenceManager.read(.categories, as: [Category].self)
-         categories = readCategories ?? []
-      } catch {
-         fatalError("Persistence manager was unable to read categories.")
-      }
+      do { categories = try persistenceManager.read(.categories, as: [Category].self) ?? [] }
+      catch { fatalError("Persistence manager was unable to read categories.") }
       
       // Tries to initialize a manager from the loaded array of categories.
       // This can only fail if the loaded categories are in some way invalid. In this case something
@@ -70,7 +66,7 @@ final class AppCoordinator: NSObject {
       return categoryManager
    }()
    
-//   #warning("Test code")
+//   #warning("For test data.")
 //   private lazy var _categoryManager: Category.Manager = {
 //      let categories: [Category] = (1...20).map {
 //         let rgba = (1...3).map { _ in CGFloat.random(in: 0...1)}
@@ -81,8 +77,26 @@ final class AppCoordinator: NSObject {
 //      return Category.Manager(categories: categories)!
 //   }()
    
-   #warning("WIP")
-   private lazy var trackManager: Track.Manager = Track.Manager()
+   private lazy var trackManager: Track.Manager = {
+      let tracks: Set<Track>
+      
+      // Reads the array of tracks stored on disk.
+      // If no such file is found, the `tracks` are set as an empty array.
+      // If there were any other errors, a fatal error occurs.
+      do { tracks = try persistenceManager.read(.tracks, as: Set<Track>.self) ?? [] }
+      catch {
+         fatalError("Persistence manager was unable to read tracks.")
+      }
+      
+      // Tries to initialize a manager from the loaded array of tracks.
+      // This can only fail if the loaded tracks are in some way invalid. In this case something
+      // internal is wrong, and a fatal error occurs.
+      guard let trackManager = Track.Manager(tracks: tracks) else {
+         fatalError("Read invalid tracks from disk.")
+      }
+      
+      return trackManager
+   }()
    
    /// Initializes an app coordinator from the window in which it will display its content.
    init(window: UIWindow) {

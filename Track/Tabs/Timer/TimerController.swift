@@ -18,16 +18,17 @@ final class TimerController: UIViewController {
 
    private var coordinator: TimerControllerDelegate?
 
-   var category: Category {
+   var track: Track {
       didSet {
-         setupTitleLabel()
-         setupTimeTracker()
+         titleLabel.text = track.category.title
+         timeTracker.track = track
       }
    }
+   
    private let trackManager: Track.Manager
    
    private let titleLabel = UILabel()
-   private let timeTracker = TimeTracker()
+   private let timeTracker: TimeTracker
    private let playPauseButton = UIButton()
    private let stopButton = UIButton()
    let switchButton = UIButton()
@@ -35,16 +36,15 @@ final class TimerController: UIViewController {
    init(category: Category, trackManager: Track.Manager, delegate: TimerControllerDelegate? = nil) {
       // Phase 1.
       coordinator = delegate
-      self.category = category
       self.trackManager = trackManager
-
+      track = trackManager.todaysTrack(for: category) ?? trackManager.createTrack(for: category)!
+      timeTracker = TimeTracker(track: track)
+      
       // Phase 2.
       super.init(nibName: nil, bundle: nil)
       
       // Phase 3.
-      
       setupTitleLabel()
-      setupTimeTracker()
       setupButtons()
       
       view.backgroundColor = .white
@@ -53,21 +53,12 @@ final class TimerController: UIViewController {
    }
    
    private func setupTitleLabel() {
-      titleLabel.text = category.title
+      titleLabel.text = track.category.title
       
       titleLabel.textAlignment = .center
       let font = UIFont.boldSystemFont(ofSize: 200)
       titleLabel.font = font
       titleLabel.adjustsFontSizeToFitWidth = true
-   }
-   
-   private func setupTimeTracker() {
-      if let track = trackManager.todaysTrack(for: category) {
-         timeTracker.interval = track.interval
-      } else {
-         trackManager.createTrack(for: category)
-         timeTracker.interval = 0
-      }
    }
    
    private func setupButtons() {
@@ -79,15 +70,12 @@ final class TimerController: UIViewController {
       playPauseButton.addTarget(self, action: #selector(didPressPlayPause(_:)), for: .touchUpInside)
       stopButton.addTarget(self, action: #selector(didPressStop), for: .touchUpInside)
       switchButton.addTarget(self, action: #selector(didPressSwitch), for: .touchUpInside)
-      
    }
    
    // MARK: - Requirements
    
-   required init?(coder aDecoder: NSCoder) { fatalError("App does not use storyboard or XIB.") }
-   
-   // Pressing the stop button calls the coordinator.
-   // the coordinator then pops the timercontroller and displays a categoryselection controller.
+   /// Do not call this initializer! This view does not support storyboards or XIB.
+   required init?(coder aDecoder: NSCoder) { fatalError("View doesn't support storyboard or XIB.") }
    
    // the categoryselectioncontroller shows a list of categories with the amount of time associated
    // with them today.
@@ -102,10 +90,29 @@ final class TimerController: UIViewController {
 extension TimerController {
    
    @objc private func didPressPlayPause(_ sender: UIButton) {
-      print("Play/Pause")
+      let imageLoader = ImageLoader()
+      switch track.isTracking {
+      case true:
+         playPauseButton.setImage(imageLoader[button: .play], for: .normal)
+         if let trackOverflow = track.stop() {
+            guard trackManager.addTracks(trackOverflow) else {
+               fatalError("Undescribed error.")
+            }
+         }
+         
+      case false:
+         playPauseButton.setImage(imageLoader[button: .pause], for: .normal)
+         track.track()
+      }
    }
    
    @objc private func didPressStop() {
+      if let trackOverflow = track.stop() {
+         guard trackManager.addTracks(trackOverflow) else {
+            fatalError("Undescribed error.")
+         }
+      }
+      
       coordinator?.timerControllerDidStop(self)
    }
    
