@@ -66,23 +66,29 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
    /// and changing the associated category's color according to the selection.
    func categoriesController(
       _ controller: CategoriesController,
-      didTapColorDotForCell cell: CategoriesTableViewCell
+      didTapColorDotForCell cell: EditableCategoryCell
    ) {
       // Gets the category associated with the tapped color dot's cell.
       guard let category = categoryManager.uniqueCategory(with: cell.title) else {
          fatalError("Expected category manager to contain exactly one category for title.")
       }
-      
+
       // Sets up a color picker with the color dot's color.
       let colorPicker = ColorPicker(selection: cell.color)
       
-      // Sets up the popover handler a color picker controller.
+      // Sets up the popover handler for a color picker controller.
       popoverHandler = PopoverHandler(
          presentedController: makeController(for: colorPicker),
          sourceView: cell.colorDot
       ) {
          category.color = colorPicker.selection
-         controller.tableView.reloadData()
+         
+         // Reloads the affected cell.
+         guard let cellPath = controller.tableView.indexPath(for: cell) else {
+            fatalError("Expected cell to be part of table view.")
+         }
+         controller.tableView.reloadRows(at: [cellPath], with: .fade)
+         
          self.popoverHandler = nil
       }
       
@@ -90,7 +96,7 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
       popoverHandler?.present(in: navigationController)
    }
    
-   /// Creates a view controller for a color picker given a certain selection.
+   /// Creates a view controller for a given color picker.
    private func makeController(for colorPicker: ColorPicker) -> UIViewController {
       colorPicker.hide(.alpha)
       
@@ -122,7 +128,6 @@ extension CategoriesCoordinator: CategoryCreationControllerDelegate {
    
    /// The action for category creation controller's save button (in the navigation bar).
    @objc private func didPressSaveButton(_ sender: UIBarButtonItem) {
-      // Class the category creation controller's `saveCategoryIfPossible()`.
       (navigationController.topViewController as? CategoryCreationController)?
          .saveCategoryIfPossible()
    }

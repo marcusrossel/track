@@ -12,42 +12,41 @@ import UIKit
 final class TimeTracker: UIView {
 
    /// A timer firing every second to update the view.
-   private var timer: Timer
+   private var timer = Timer()
    
    /// The label displaying the time.
-   let timeLabel: UILabel
+   let timeLabel = UILabel()
    
    /// The starting point of the tracked interval.
-   private(set) var startDate: Date { didSet { updateLabel() } }
+   private var startDate = Date() { didSet { updateLabel() } }
    
    /// A fixed time interval to be shown, instead of the interval from the start date.
-   private(set) var fixedInterval: TimeInterval?
+   private var fixedInterval: TimeInterval?
    
    /// The interval currently shown by the view.
-   /// The fixed interval will be returned if one is set, otherwise the interval from the start
-   /// date.
    var interval: TimeInterval {
-      if let fixed = fixedInterval { return fixed }
-      else { return Date().timeIntervalSince(startDate) }
+      get { return fixedInterval ?? Date().timeIntervalSince(startDate) }
+      set {
+         if fixedInterval != nil {
+            fixedInterval = newValue
+         } else {
+            startDate = startDate(for: newValue)
+         }
+      }
    }
    
-   /// Creates a timer from a start date and optionally a fixed interval.
-   /// If a fixed interval is given, the timer will use it immediately.
-   init(startDate: Date, fixedInterval: TimeInterval? = nil) {
-      // Phase 1.
-      timer = Timer()
-      timeLabel = UILabel()
-      self.startDate = startDate
-      
+   /// Creates a timer from an initial interval and an option of starting in a paused state.
+   /// If no interval is given, the timer will start at `0`.
+   init(interval: TimeInterval = 0, isPaused: Bool = true) {
       // Phase 2.
       super.init(frame: .zero)
       
       // Phase 3.
-      if fixedInterval != nil {
-         self.fixedInterval = fixedInterval
-         // The label must be updated once manually, as no timer is being set.
+      if isPaused {
+         fixedInterval = interval
          updateLabel()
       } else {
+         startDate = startDate(for: interval)
          timer = makeUpdateTimer()
       }
       
@@ -56,9 +55,17 @@ final class TimeTracker: UIView {
       AutoLayoutHelper(rootView: self, viewToConstrain: timeLabel).constrainView()
    }
    
+   /// A convenience method for getting a date that lies a given time interval in the past from now.
+   private func startDate(for interval: TimeInterval) -> Date {
+      return Date().addingTimeInterval(-interval)
+   }
+   
+   /// A convenience method for styling the time label.
    private func setupTimeLabelFont() {
-      let font = UIFont.boldSystemFont(ofSize: 70)
+      timeLabel.textAlignment = .center
+      let font = UIFont.systemFont(ofSize: 100)
       timeLabel.font = font
+      timeLabel.adjustsFontSizeToFitWidth = true
    }
    
    /// A convenience method for creating a new timer that calls `updateLabel()` every second.
@@ -84,19 +91,17 @@ final class TimeTracker: UIView {
    }
    
    /// Fixes the timer at the current interval.
-   /// Unfixing it will cause the start date to be adjusted, as to fit the fixed interval upon
-   /// continuation.
-   func fixInterval() {
+   func pause() {
       fixedInterval = interval
       timer.invalidate()
    }
    
    /// Unfixes the timer from a set interval.
-   /// This will cause the start date to be adjusted, as to fit the previously fixed interval.
-   func unfixInterval() {
+   func unpause() {
       guard let fixed = fixedInterval else { return }
       
-      startDate = Date().addingTimeInterval(-fixed)
+      // Causes the start date to be adjusted, as to fit the previously fixed interval.
+      startDate = startDate(for: fixed)
       fixedInterval = nil
       timer = makeUpdateTimer()
    }

@@ -16,25 +16,61 @@ protocol TimerControllerDelegate {
 
 final class TimerController: UIViewController {
 
-   private let coordinator: TimerControllerDelegate
+   private var coordinator: TimerControllerDelegate?
+
+   var category: Category {
+      didSet {
+         setupTitleLabel()
+         setupTimeTracker()
+      }
+   }
+   private let trackManager: Track.Manager
    
    private let titleLabel = UILabel()
-   private let timeTracker = TimeTracker(startDate: Date(), fixedInterval: 0)
+   private let timeTracker = TimeTracker()
    private let playPauseButton = UIButton()
    private let stopButton = UIButton()
    let switchButton = UIButton()
    
-   init(delegate: TimerControllerDelegate, category: Category) {
+   init(category: Category, trackManager: Track.Manager, delegate: TimerControllerDelegate? = nil) {
       // Phase 1.
       coordinator = delegate
+      self.category = category
+      self.trackManager = trackManager
 
       // Phase 2.
       super.init(nibName: nil, bundle: nil)
       
       // Phase 3.
-      titleLabel.text = category.title
-      // timeTracker = ?
       
+      setupTitleLabel()
+      setupTimeTracker()
+      setupButtons()
+      
+      view.backgroundColor = .white
+      
+      setupLayoutConstraints()
+   }
+   
+   private func setupTitleLabel() {
+      titleLabel.text = category.title
+      
+      titleLabel.textAlignment = .center
+      let font = UIFont.boldSystemFont(ofSize: 200)
+      titleLabel.font = font
+      titleLabel.adjustsFontSizeToFitWidth = true
+   }
+   
+   private func setupTimeTracker() {
+      if let track = trackManager.todaysTrack(for: category) {
+         timeTracker.interval = track.interval
+      } else {
+         trackManager.createTrack(for: category)
+         timeTracker.interval = 0
+      }
+   }
+   
+   private func setupButtons() {
       let imageLoader = ImageLoader()
       playPauseButton.setImage(imageLoader[button: .play], for: .normal)
       stopButton.setImage(imageLoader[button: .stop], for: .normal)
@@ -44,9 +80,6 @@ final class TimerController: UIViewController {
       stopButton.addTarget(self, action: #selector(didPressStop), for: .touchUpInside)
       switchButton.addTarget(self, action: #selector(didPressSwitch), for: .touchUpInside)
       
-      view.backgroundColor = category.color
-      
-      setupLayoutConstraints()
    }
    
    // MARK: - Requirements
@@ -73,11 +106,11 @@ extension TimerController {
    }
    
    @objc private func didPressStop() {
-      coordinator.timerControllerDidStop(self)
+      coordinator?.timerControllerDidStop(self)
    }
    
    @objc private func didPressSwitch() {
-      coordinator.timerControllerDidSwitch(self)
+      coordinator?.timerControllerDidSwitch(self)
    }
 }
 
@@ -90,17 +123,31 @@ extension TimerController {
          playPauseButton, stopButton, switchButton
       ])
       buttonStackView.axis = .horizontal
-      buttonStackView.alignment = .center
+      buttonStackView.alignment = .bottom
       buttonStackView.distribution = .fillEqually
       
-      let enclosingStackView = UIStackView(arrangedSubviews: [
-         titleLabel, timeTracker, buttonStackView
-      ])
-      enclosingStackView.axis = .vertical
-      enclosingStackView.alignment = .center
-      enclosingStackView.distribution = .fillEqually
+      let viewsToLayout = [titleLabel, timeTracker, buttonStackView]
+      let guide = view.safeAreaLayoutGuide
       
-      AutoLayoutHelper(rootView: view, viewToConstrain: enclosingStackView)
-         .constrainView(generalInset: .defaultSpacing)
+      AutoLayoutHelper(rootView: view).setupViewsForAutoLayout(viewsToLayout)
+      
+      titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: .defaultSpacing)
+         .isActive = true
+      
+      timeTracker.centerYAnchor.constraint(equalTo: guide.centerYAnchor).isActive = true
+      
+      buttonStackView.bottomAnchor.constraint(
+         equalTo: guide.bottomAnchor, constant: -.defaultSpacing
+      ).isActive = true
+      
+      for viewToLayout in viewsToLayout {
+         viewToLayout.leadingAnchor.constraint(
+            equalTo: guide.leadingAnchor, constant: .defaultSpacing
+         ).isActive = true
+         
+         viewToLayout.trailingAnchor.constraint(
+            equalTo: guide.trailingAnchor, constant: -.defaultSpacing
+         ).isActive = true
+      }
    }
 }

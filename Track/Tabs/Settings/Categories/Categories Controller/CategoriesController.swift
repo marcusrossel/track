@@ -10,10 +10,11 @@ import UIKit
 
 // MARK: - Categoties Controller Delegate
 
+/// A delegate providing functionality external to a categories controller.
 protocol CategoriesControllerDelegate {
    
    func categoriesController(
-      _ controller: CategoriesController, didTapColorDotForCell cell: CategoriesTableViewCell
+      _ controller: CategoriesController, didTapColorDotForCell cell: EditableCategoryCell
    )
    
    func categoriesControllerDidRequestNewCategory(_ controller: CategoriesController)
@@ -23,17 +24,27 @@ protocol CategoriesControllerDelegate {
 
 extension CategoriesControllerDelegate {
    
+   /// A default implementation for the `setupNavigationBar(for:)`-method, to make its
+   /// implementation effectively optional.
    func setupNavigationBar(for controller: CategoriesController) { }
 }
 
-// MARK: - Categoties Controller
+// MARK: - Categories Controller
 
+/// A view controller that displays a list of all categories and allows editing of their title and
+/// color. They can also be reordered or deleted.
+/// Additionally the controller provides the pathway for adding new categories.
 final class CategoriesController: UITableViewController {
 
-   private let coordinator: CategoriesControllerDelegate
+   /// A coordinator that provides external (delegate) functionality.
+   private var coordinator: CategoriesControllerDelegate?
+   
+   /// A category manager giving the controller access to all categories.
    private let categoryManager: Category.Manager
    
-   init(categoryManager: Category.Manager, delegate: CategoriesControllerDelegate) {
+   /// Creates a new categories controller from a category manager.
+   /// Optionally a delegate can be provided to add external functionality.
+   init(categoryManager: Category.Manager, delegate: CategoriesControllerDelegate? = nil) {
       // Phase 1.
       self.categoryManager = categoryManager
       coordinator = delegate
@@ -42,9 +53,16 @@ final class CategoriesController: UITableViewController {
       super.init(style: .grouped)
       
       // Phase 3.
+      setupTableView()
+   }
+   
+   /// A convenience method for registering the table view's cells and setting its properties.
+   private func setupTableView() {
       tableView.register(
-         CategoriesTableViewCell.self,
-         forCellReuseIdentifier: CategoriesTableViewCell.identifier
+         ButtonCell.self, forCellReuseIdentifier: ButtonCell.identifier
+      )
+      tableView.register(
+         EditableCategoryCell.self, forCellReuseIdentifier: EditableCategoryCell.identifier
       )
       
       tableView.rowHeight = .defaultHeight
@@ -52,28 +70,47 @@ final class CategoriesController: UITableViewController {
    
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
-      coordinator.setupNavigationBar(for: self)
+      
+      // A navigation bar has the chance to be updated on appearance of the controller.
+      coordinator?.setupNavigationBar(for: self)
+      
+      // The table view should always reload its data on appearance, as to capture changes that
+      // might have been made to categories or the category manager.
       tableView.reloadData()
    }
    
    // MARK: - Requirements
    
-   required init?(coder aDecoder: NSCoder) { fatalError("App does not use storyboard or XIB.") }
+   /// Do not call this initializer! This view does not support storyboards or XIB.
+   required init?(coder aDecoder: NSCoder) { fatalError("View doesn't support storyboard or XIB.") }
 }
 
-// MARK: - Table View Cell Creation
+// MARK: - Table View Data Source And Delegate
 
 extension CategoriesController {
    
+   /// All of the different sections shown by a categories controller.
+   /// The order of the cases matches the order of the sections in the table view.
    enum Section: Int, CaseIterable {
-      case categories
       case modifiers
+      case categories
+   }
+   
+   /// All of the different actions on categories, that should be displayed as cells in the table
+   /// view.
+   private enum ModificationAction: Int, CaseIterable {
+      case add
+      case edit
    }
 
+   /// There are as many sections as cases in `Section`.
    override func numberOfSections(in tableView: UITableView) -> Int {
       return Section.allCases.count
    }
    
+   /// There are as many rows:
+   /// - .modifiers: as cases in `ModificationAction`.
+   /// - .categories: as categories in the category manager.
    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
       switch Section(rawValue: section) {
       case .categories?: return categoryManager.categories.count
@@ -82,102 +119,97 @@ extension CategoriesController {
       }
    }
    
+   /// Delegates the setup of the cell to a different method according to it section.
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
    -> UITableViewCell {
-      // Dequeues the cell.
-      guard
-         let cell = tableView.dequeueReusableCell(
-            withIdentifier: CategoriesTableViewCell.identifier, for: indexPath
-         ) as? CategoriesTableViewCell
-      else { fatalError("Dequeued unexpected type of table view cell.") }
-      
+      #warning("Not reusing cells.")
       // Sets up the cell according to its section.
       switch Section(rawValue: indexPath.section) {
-      case .categories?: setupCategoriesCell(cell, forRow: indexPath.row)
-      case .modifiers?: setupModificationCell(cell, forRow: indexPath.row)
-      default: fatalError("Non exhaustive switch over variable domain.")
+      case .categories?:
+         let cell = EditableCategoryCell(
+            style: .default, reuseIdentifier: EditableCategoryCell.identifier
+         )
+         
+         // Sets up and returns the cell.
+         setupCategoriesCell(cell, forRow: indexPath.row)
+         return cell
+         
+      case .modifiers?:
+         let cell = ButtonCell(style: .default, reuseIdentifier: ButtonCell.identifier)
+         
+         // Sets up and returns the cell.
+         setupModifierCell(cell, forRow: indexPath.row)
+         return cell
+         
+      default:
+         fatalError("Non exhaustive switch over variable domain.")
       }
-
-      return cell
    }
+}
+
+// MARK: - Cell Setup
+
+extension CategoriesController {
    
-   private func setupCategoriesCell(_ cell: CategoriesTableViewCell, forRow row: Int) {
+   /// A convenience method for setting up a cell from the categories section.
+   private func setupCategoriesCell(_ cell: EditableCategoryCell, forRow row: Int) {
       let category = categoryManager.categories[row]
       
       cell.title = category.title
       cell.color = category.color
-      cell.titleTextField.delegate = self
-      cell.setTarget(self, action: #selector(colorDotWasTapped(_:)))
-   }
-}
-
-// MARK: - Modification Cell Setup
-
-extension CategoriesController {
-   
-   private enum ModificationAction: Int, CaseIterable {
-      case add
-      case edit
+      cell.textField.delegate = self
+      cell.colorTapHandler = {
+         self.coordinator?.categoriesController(self, didTapColorDotForCell: $0)
+      }
    }
    
-   private func setupModificationCell(_ cell: CategoriesTableViewCell, forRow row: Int) {
-      let actionTitle: String
-      let buttonType: ImageLoader.Button
-      let targetAction: (taget: Any?, action: Selector)
+   /// A convenience method for setting up a cell from the modifiers section.
+   private func setupModifierCell(_ cell: ButtonCell, forRow row: Int) {
       
+      // Sets up the button cell individually for every modification action.
       switch ModificationAction(rawValue: row) {
       case .add?:
-         actionTitle = "Add"
-         buttonType = .add
-         targetAction = (self, #selector(didRequestNewCategory))
+         cell.title = "Add"
+         cell.buttonImage = modifierCellImage(for: .add)
+         cell.tapHandler = { _ in
+            self.coordinator?.categoriesControllerDidRequestNewCategory(self)
+         }
          
       case .edit?:
-         actionTitle = isEditing ? "End Editing" : "Edit"
-         buttonType = isEditing ? .stop : .home
-         targetAction = (self, #selector(didRequestEditToggle))
+         // Toggles between the edit and end-editing representation of the edit button depending on
+         // whether the table view is currently in editing mode.
+         cell.title = isEditing ? "End Editing" : "Edit"
+         cell.buttonImage = modifierCellImage(for: isEditing ? .stop : .home)
+         cell.tapHandler = toggleEditHandler
 
       default:
          fatalError("Non exhaustive switch over variable domain.")
       }
-      
-      let imageView = modificationImageView(for: buttonType)
-
-      cell.title = actionTitle
-      cell.color = .white
-      cell.colorDot.subviews.forEach { $0.removeFromSuperview() }
-      cell.colorDot.addSubview(imageView)
-      
-      cell.accessoryType = .none
-      cell.titleTextField.isUserInteractionEnabled = false
-      cell.colorDot.isUserInteractionEnabled = false
-      
-      cell.addGestureRecognizer(
-         UITapGestureRecognizer(target: targetAction.0, action: targetAction.1)
-      )
    }
    
-   private func modificationImageView(for buttonType: ImageLoader.Button) -> UIImageView {
-      let imageSize = CGSize(width: 40, height: 40)
-      let imageLoader = ImageLoader(useDefaultSizes: false)
-      
-      let image = imageLoader[button: buttonType].resizedKeepingAspect(forSize: imageSize)
-      let imageView = UIImageView(image: image)
-      
-      return imageView
-   }
-   
-   @objc private func didRequestNewCategory() {
-      coordinator.categoriesControllerDidRequestNewCategory(self)
-   }
-   
-   @objc private func didRequestEditToggle() {
+   /// The tap handler for the edit button.
+   private func toggleEditHandler(_ cell: ButtonCell) {
+      // Toggles the editing mode.
       setEditing(!isEditing, animated: true)
       
+      // Gets the path of the cell that induced the toggle.
       let editCellPath = IndexPath(
          row: ModificationAction.edit.rawValue,
          section: Section.modifiers.rawValue
       )
+      
+      // Reloads the cell that induced the toggle.
       tableView.reloadRows(at: [editCellPath], with: .fade)
+   }
+   
+   /// A convenience method for getting a button image sized for a cell in the modifiers section.
+   private func modifierCellImage(for buttonType: ImageLoader.Button) -> UIImage {
+      let imageLoader = ImageLoader(useDefaultSizes: false)
+      let image = imageLoader[button: buttonType]
+      
+      let imageSize = CGSize(width: 40, height: 40)
+      
+      return image.resizedKeepingAspect(forSize: imageSize)
    }
 }
 
@@ -185,71 +217,105 @@ extension CategoriesController {
 
 extension CategoriesController {
 
+   /// Allows editing of any cell in the categories section.
    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
       return (indexPath.section == Section.categories.rawValue)
    }
    
+   /// Makes sure the reordering of cells from the categories section stays within that section.
    override func tableView(
       _ tableView: UITableView, targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath,
       toProposedIndexPath proposedDestinationIndexPath: IndexPath
    ) -> IndexPath {
-      guard proposedDestinationIndexPath.section == Section.modifiers.rawValue
-      else { return proposedDestinationIndexPath }
+      // Allows the proposed destination if it is still in the categories section.
+      guard proposedDestinationIndexPath.section != Section.categories.rawValue else {
+         return proposedDestinationIndexPath
+      }
       
-      let lastRow = tableView.numberOfRows(inSection: Section.categories.rawValue) - 1
-      return IndexPath(row: lastRow, section: Section.categories.rawValue)
+      let proposedSection = proposedDestinationIndexPath.section
+      let newRow: Int
+      
+      // Sets the cell's new row according to whether the cell was tried to be repositioned to a
+      // section above or below the categories section.
+      if proposedSection < Section.categories.rawValue {
+         newRow = 0
+      } else {
+         newRow = tableView.numberOfRows(inSection: Section.categories.rawValue) - 1
+      }
+      
+      // Moves the cell back to the categories section.
+      return IndexPath(row: newRow, section: Section.categories.rawValue)
    }
    
+   /// Handles the deletion of cells from the categories section.
    override func tableView(
       _ tableView: UITableView,
       commit editingStyle: UITableViewCell.EditingStyle,
       forRowAt indexPath: IndexPath
    ) {
+      // Makes sure only the case of deletion is handled.
       guard case .delete = editingStyle else { return }
       
       let category = categoryManager.categories[indexPath.row]
       
+      // Prompts the user for confirmation of deletion and only then deletes the category.
+      promptForDeletionConfirmation(of: category) {
+         self.categoryManager.remove(atIndex: indexPath.row)
+         tableView.deleteRows(at: [indexPath], with: .automatic)
+      }
+   }
+   
+   /// A convenience method for displaying a deletion alert view.
+   private func promptForDeletionConfirmation(
+      of category: Category,
+      onConfirmation deletionHandler: @escaping () -> ()
+   ) {
+      // Creates an alert controller.
       let conformationController = UIAlertController(
          title: "Delete \"\(category.title)\"?",
          message: "All tracks for this category will be removed.",
          preferredStyle: .alert
       )
       
+      // Creates the alert controllers actions and adds them to it.
       let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
       let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
-         self.categoryManager.remove(atIndex: indexPath.row)
-         tableView.deleteRows(at: [indexPath], with: .automatic)
+         deletionHandler()
       }
-   
+      
       conformationController.addAction(deleteAction)
       conformationController.addAction(cancelAction)
       
+      // Presents the alert controller.
       present(conformationController, animated: true, completion: nil)
    }
    
+   /// Allows reordering of all cells in the categories section.
    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
       return (indexPath.section == Section.categories.rawValue)
    }
    
+   /// Propagates the reordering of cells from the categories section
    override func tableView(
       _ tableView: UITableView,
       moveRowAt sourceIndexPath: IndexPath,
       to destinationIndexPath: IndexPath
    ) {
+      // Makes sure the reordering was valid.
+      guard
+         sourceIndexPath.section == Section.categories.rawValue &&
+         destinationIndexPath.section == Section.categories.rawValue
+      else {
+         fatalError("Internal inconsistency in `CategoriesController`.")
+      }
+      
+      // Changes the order of categories according to the cells.
       categoryManager.move(categoryAtIndex: sourceIndexPath.row, to: destinationIndexPath.row)
    }
 }
 
-// MARK: - Color Picker Handler
-
-extension CategoriesController {
-   
-   @objc private func colorDotWasTapped(_ cell: CategoriesTableViewCell) {
-      coordinator.categoriesController(self, didTapColorDotForCell: cell)
-   }
-}
-
 // MARK: - Text Field Delegate
+#warning("Buggy.")
 
 extension CategoriesController: UITextFieldDelegate {
    
@@ -257,11 +323,11 @@ extension CategoriesController: UITextFieldDelegate {
       let categoriesCellCount = tableView.numberOfRows(inSection: Section.categories.rawValue)
       for row in 0..<categoriesCellCount {
          let indexPath = IndexPath(row: row, section: Section.categories.rawValue)
-         guard let cell = tableView.cellForRow(at: indexPath) as? CategoriesTableViewCell else {
+         guard let cell = tableView.cellForRow(at: indexPath) as? CategoryCell else {
             fatalError("Accessed unexpected type of table view cell.")
          }
          
-         if cell.titleTextField === textField { return categoryManager.categories[row] }
+         if cell.textField === textField { return categoryManager.categories[row] }
       }
       
       return nil

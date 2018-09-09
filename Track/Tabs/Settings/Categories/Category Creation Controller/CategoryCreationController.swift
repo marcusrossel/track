@@ -6,13 +6,13 @@
 //  Copyright © 2018 Marcus Rossel. All rights reserved.
 //
 
+#warning("Incomplete.")
+
 import UIKit
 
 // MARK: - Category Creation Controller Delegate
 
 protocol CategoryCreationControllerDelegate {
-   
-   func setupNavigationBar(for controller: CategoryCreationController)
    
    func categoryCreationControllerCanSaveCategory(
       _ categoryCreationController: CategoryCreationController
@@ -26,6 +26,8 @@ protocol CategoryCreationControllerDelegate {
       _ categoryCreationController: CategoryCreationController,
       forCategory category: Category
    )
+   
+   func setupNavigationBar(for controller: CategoryCreationController)
 }
 
 extension CategoryCreationControllerDelegate {
@@ -37,7 +39,7 @@ extension CategoryCreationControllerDelegate {
 
 final class CategoryCreationController: UIViewController {
 
-   private let coordinator: CategoryCreationControllerDelegate
+   private var coordinator: CategoryCreationControllerDelegate?
    private let categoryManager: Category.Manager
    
    let titleTextField: UITextField
@@ -45,17 +47,20 @@ final class CategoryCreationController: UIViewController {
    
    private(set) var category: Category?
    
-   init(categoryManager: Category.Manager, delegate: CategoryCreationControllerDelegate) {
+   init(categoryManager: Category.Manager, delegate: CategoryCreationControllerDelegate? = nil) {
       // Phase 1.
       coordinator = delegate
       self.categoryManager = categoryManager
       titleTextField = UITextField()
       colorPicker = ColorPicker(selection: .gray)
+      colorPicker.hide(.alpha)
       
       // Phase 2.
       super.init(nibName: nil, bundle: nil)
       
       // Phase 3.
+      view.backgroundColor = .white
+      
       titleTextField.placeholder = "Category Title"
       titleTextField.delegate = self
       
@@ -63,7 +68,7 @@ final class CategoryCreationController: UIViewController {
    }
    
    private func setupLayoutConstraints() {
-      let stackView = UIStackView()
+      let stackView = UIStackView(arrangedSubviews: [titleTextField, colorPicker])
       stackView.axis = .vertical
       stackView.alignment = .fill
       stackView.distribution = .fillProportionally
@@ -74,7 +79,7 @@ final class CategoryCreationController: UIViewController {
    
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
-      coordinator.setupNavigationBar(for: self)
+      coordinator?.setupNavigationBar(for: self)
    }
    
    // MARK: - Requirements
@@ -88,7 +93,7 @@ extension CategoryCreationController {
    
    func saveCategoryIfPossible() {
       guard let category = category else { return }
-      coordinator.categoryCreationControllerDidRequestSave(self, forCategory: category)
+      coordinator?.categoryCreationControllerDidRequestSave(self, forCategory: category)
    }
 }
 
@@ -115,10 +120,10 @@ extension CategoryCreationController: UITextFieldDelegate {
       
       if categoryManager.uniqueCategory(with: trimmedText) != nil || trimmedText.isEmpty {
          category = nil
-         coordinator.categoryCreationControllerCanNotSaveCategory(self)
+         coordinator?.categoryCreationControllerCanNotSaveCategory(self)
       } else {
          category = Category(title: trimmedText, color: colorPicker.selection)
-         coordinator.categoryCreationControllerCanSaveCategory(self)
+         coordinator?.categoryCreationControllerCanSaveCategory(self)
       }
       
       return true

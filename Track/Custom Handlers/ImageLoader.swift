@@ -27,7 +27,6 @@ final class ImageLoader {
       /// The default size for images of this type.
       static let defaultSize = CGSize(width: 30, height: 30)
       
-      case bookStack = "book stack"
       case books
       case record
       case settings

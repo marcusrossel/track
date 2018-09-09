@@ -27,7 +27,7 @@ extension SettingsRootControllerDelegate {
 
 class SettingsRootController: UITableViewController {
    
-   private var coordinator: SettingsRootControllerDelegate
+   private var coordinator: SettingsRootControllerDelegate?
    
    private var categoriesCell = UITableViewCell(style: .default, reuseIdentifier: nil)
    private var tagsCell = UITableViewCell(style: .default, reuseIdentifier: nil)
@@ -36,7 +36,7 @@ class SettingsRootController: UITableViewController {
       return [categoriesCell, tagsCell]
    }
    
-   init(delegate: SettingsRootControllerDelegate) {
+   init(delegate: SettingsRootControllerDelegate? = nil) {
       // Phase 1.
       coordinator = delegate
       
@@ -60,7 +60,7 @@ class SettingsRootController: UITableViewController {
    
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
-      coordinator.setupNavigationBar(for: self)
+      coordinator?.setupNavigationBar(for: self)
    }
    
    // MARK: - Requirements
@@ -91,8 +91,8 @@ extension SettingsRootController {
       let selection = cells[index]
       
       switch selection {
-      case categoriesCell: coordinator.didSelectCategories()
-      case tagsCell:       coordinator.didSelectTags()
+      case categoriesCell: coordinator?.didSelectCategories()
+      case tagsCell:       coordinator?.didSelectTags()
       default:             fatalError("Non exhaustive switch over variable domain.")
       }
    }

@@ -8,13 +8,11 @@
 
 import UIKit
 
-final class TodayTabCoordinator: Coordinator {
+final class TodayTabCoordinator: NSObject, Coordinator {
    
    let navigationController = UINavigationController()
    
-   init(categoryManager: Category.Manager, trackManager: Track.Manager) {
-      
-   }
+   init(categoryManager: Category.Manager, trackManager: Track.Manager) { }
    
    func run() { }
 }

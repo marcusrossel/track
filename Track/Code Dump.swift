@@ -47,13 +47,8 @@ extension CGFloat {
 }
 
 extension CGRect {
-   
-   var center: CGPoint {
-      let centerX = origin.x + size.width / 2
-      let centerY = origin.y + size.height / 2
-      
-      return CGPoint(x: centerX, y: centerY)
-   }
+
+   var center: CGPoint { return CGPoint(x: midX, y: midY) }
 }
 
 extension UIView {
@@ -137,32 +132,6 @@ extension UIImage {
 
 
 // MARK: - Trash
-
-#warning("Temporary")
-class Track { }
-extension Track {
-   final class Manager {
-      var runningCategory: Category? {
-         return Category(title: "Category Title", color: .white)
-      }
-   }
-}
-
-final class _Track: Codable {
-   var start: Date
-   var end: Date?
-   var categoryID: Category.ID
-}
-
-final class _TrackManager {
-   
-   private(set) var tracks: [_Track] = []
-   
-   var runningTrack: _Track? {
-      return tracks.first { $0.end == nil }
-   }
-   
-}
 
 func _textColor(contrasting background: UIColor, whitePreferenceModifier: CGFloat = 10)
 -> UIColor {

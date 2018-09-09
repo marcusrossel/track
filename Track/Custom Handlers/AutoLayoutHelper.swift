@@ -26,10 +26,9 @@ final class AutoLayoutHelper {
       /// A getter for the edge's inset.
       fileprivate var inset: CGFloat {
          switch self {
-         case .top(inset: let inset): return inset
-         case .bottom(inset: let inset): return inset
-         case .leading(inset: let inset): return inset
-         case .trailing(inset: let inset): return inset
+         case .top(inset: let inset), .bottom(inset: let inset),
+              .leading(inset: let inset), .trailing(inset: let inset):
+            return inset
          }
       }
       
@@ -92,9 +91,6 @@ final class AutoLayoutHelper {
       
       setupViewsForAutoLayout([view])
       
-      // Collects the constraints that should be activated.
-      var constraints: [NSLayoutConstraint] = []
-      
       // Adds the constraints for all included edges.
       for edge in included {
          let inset = edge.insetMultiplier * (edge.inset + generalInset)
@@ -102,15 +98,14 @@ final class AutoLayoutHelper {
          // Adds the constraint between view to constrain and layout guide.
          switch (edge.anchor(for: view), edge.anchor(for: rootView.safeAreaLayoutGuide)) {
          case let (.xAxis(first), .xAxis(second)):
-            constraints += [first.constraint(equalTo: second, constant: inset)]
+            first.constraint(equalTo: second, constant: inset).isActive = true
          case let (.yAxis(first), .yAxis(second)):
-            constraints += [first.constraint(equalTo: second, constant: inset)]
+            first.constraint(equalTo: second, constant: inset).isActive = true
          default:
             fatalError("Internal inconsistency in `anchor(for:)` methods.")
          }
       }
       
-      NSLayoutConstraint.activate(constraints)
       return true
    }
    

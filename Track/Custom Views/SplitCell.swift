@@ -1,5 +1,5 @@
 //
-//  CategoryModificationTableViewCell.swift
+//  SplitCell.swift
 //  Track
 //
 //  Created by Marcus Rossel on 19.08.18.
@@ -8,14 +8,14 @@
 
 import UIKit
 
-// MARK: - Split Table View Cell Data Source
+// MARK: - Split Cell Data Source
 
-protocol SplitTableViewCellDataSource: AnyObject {
+protocol SplitCellDataSource: AnyObject {
    
-   func numberOfSubcellsForSplitCell(_ cell: SplitTableViewCell) -> Int
+   func numberOfSubcellsForSplitCell(_ cell: SplitCell) -> Int
    
    func splitCell(
-      _ cell: SplitTableViewCell,
+      _ cell: SplitCell,
       needsSetupForSubcell subcell: UICollectionViewCell,
       atPosition position: Int
    )
@@ -25,20 +25,20 @@ protocol SplitTableViewCellDataSource: AnyObject {
 
 /// A table view cell in which one can layout a row of independant subcells.
 /// Any table view using this type should disable seperators, to get an acceptable UI.
-final class SplitTableViewCell: UITableViewCell {
+final class SplitCell: UITableViewCell {
    
    /// An identifier associated with the table view cell.
    /// This can be used when registering and dequeueing a split cell.
-   static let identifier = "SplitTableViewCell"
+   static let identifier = "SplitCell"
    
    /// The identifer used to identify the subcells layed out by the split cell.
-   private let subcellIdentifier = "SplitTableViewCell.Subcell"
+   private let subcellIdentifier = "SplitCell.Subcell"
 
    /// The collection view that holds the split cell's subcells.
    private let collectionView: UICollectionView
    
    /// The split cell's data source.
-   weak var datasource: SplitTableViewCellDataSource?
+   weak var datasource: SplitCellDataSource?
    
    /// The type of subcell layed out by the split cell.
    var subcellType: AnyClass = UICollectionViewCell.self {
@@ -91,7 +91,7 @@ final class SplitTableViewCell: UITableViewCell {
 
 // MARK: - Collection View Data Source
 
-extension SplitTableViewCell: UICollectionViewDataSource {
+extension SplitCell: UICollectionViewDataSource {
    
    /// Specifies the number of subcells in a split cell.
    /// The value is specified by the data source, or `0` if no data source is set.
@@ -127,7 +127,7 @@ extension SplitTableViewCell: UICollectionViewDataSource {
 
 // MARK: - Collection View Delegate Flow Layout
 
-extension SplitTableViewCell: UICollectionViewDelegateFlowLayout {
+extension SplitCell: UICollectionViewDelegateFlowLayout {
    
    /// Sets the size of each subcell as to fit the number of them specified by the data source
    /// within the split cell.

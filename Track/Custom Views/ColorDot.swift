@@ -14,24 +14,13 @@ final class ColorDot: UIView {
    /// The diameter of the circle.
    var diameter: CGFloat {
       didSet {
-         // Adjust the frame and corner radius to resize the circle to the new diameter.
-         layer.cornerRadius = diameter / 2
+         // Adjusts the frame to resize the circle to the new diameter.
          frame = CGRect(origin: frame.origin, size: ColorDot.size(for: diameter))
       }
    }
    
    /// The color of the circle.
-   /// A color dot always has a visible color, so it can never have an alpha value of `0`.
-   /// Attempting to assign a color with an alpha of `0` will have no effect.
-   var color: UIColor {
-      didSet {
-         guard color.cgColor.alpha != 0 else {
-            color = oldValue
-            return
-         }
-         backgroundColor = color
-      }
-   }
+   var color: UIColor
    
    init(diameter: CGFloat, color: UIColor) {
       // Phase 1.
@@ -42,22 +31,21 @@ final class ColorDot: UIView {
       super.init(frame: CGRect(origin: .zero, size: ColorDot.size(for: diameter)))
       
       // Phase 3.
-      callPropertySetters(color: color, diameter: diameter)
-      constrainAspectRatio()
+      backgroundColor = .clear
    }
-   
-   /// Forces the propery setters to be called.
-   private func callPropertySetters(color: UIColor, diameter: CGFloat) {
-      self.color = color
-      self.diameter = diameter
-   }
-   
-   /// Constrains the view to always be squared, to avoid the circle from becoming an oval.
-   private func constrainAspectRatio() {
-      let squareRatio = heightAnchor.constraint(equalTo: widthAnchor)
-      squareRatio.priority = .required
+
+   /// Draws the circle with the specified diameter and color.
+   override func draw(_ rect: CGRect) {
+      let path = UIBezierPath(
+         arcCenter: rect.center,
+         radius: diameter / 2,
+         startAngle: 0,
+         endAngle: 360.degreesAsRadians,
+         clockwise: true
+      )
       
-      NSLayoutConstraint.activate([squareRatio])
+      color.setFill()
+      path.fill()
    }
    
    // MARK: - Requirements
@@ -78,16 +66,5 @@ extension ColorDot {
    /// A color dot's initrinsic content size is a square for its diameter.
    override var intrinsicContentSize: CGSize {
       return ColorDot.size(for: diameter)
-   }
-   
-   /// A color dot always has a visible color, so it can never have an alpha value of `0`.
-   /// Attempting to assign a `nil`, or a color with an alpha of `0` will have no effect.
-   override var backgroundColor: UIColor? {
-      didSet {
-         guard let newColor = backgroundColor, newColor.cgColor.alpha != 0 else {
-            backgroundColor = oldValue
-            return
-         }
-      }
    }
 }

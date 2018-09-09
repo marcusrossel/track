@@ -61,7 +61,7 @@ final class PersistenceManager {
    
    /// Persists a given value for a given item.
    /// If the type of the given value does not match the expected type for the persistence item,
-   /// reading that item will fail.
+   /// writing that item will fail.
    func write<T: Encodable>(_ item: Item, value: T) throws {
       try JSONEncoder()
          .encode(value)

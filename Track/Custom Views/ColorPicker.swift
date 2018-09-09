@@ -191,38 +191,37 @@ extension ColorPicker {
       
       let guide = safeAreaLayoutGuide
       
-      let panelTop = selectionPanel.topAnchor.constraint(
+      selectionPanel.topAnchor.constraint(
          equalTo: guide.topAnchor, constant: .defaultSpacing
-      )
-      let panelLeading = selectionPanel.leadingAnchor.constraint(
+      ).isActive = true
+      
+      selectionPanel.leadingAnchor.constraint(
          equalTo: guide.leadingAnchor, constant: .defaultSpacing
-      )
-      let panelTrailing = selectionPanel.trailingAnchor.constraint(
+      ).isActive  = true
+      
+      selectionPanel.trailingAnchor.constraint(
          equalTo: guide.trailingAnchor, constant: -.defaultSpacing
-      )
+      ).isActive = true
 
-      let slidersBottom = sliderStackView.bottomAnchor.constraint(
+      sliderStackView.bottomAnchor.constraint(
          equalTo: guide.bottomAnchor, constant: -.defaultSpacing
-      )
-      let slidersLeading = sliderStackView.leadingAnchor.constraint(
+      ).isActive = true
+      
+      sliderStackView.leadingAnchor.constraint(
          equalTo: guide.leadingAnchor, constant: .defaultSpacing
-      )
-      let slidersTrailing = sliderStackView.trailingAnchor.constraint(
+      ).isActive = true
+      
+      sliderStackView.trailingAnchor.constraint(
          equalTo: guide.trailingAnchor, constant: -.defaultSpacing
-      )
+      ).isActive = true
       
-      let gap = sliderStackView.topAnchor.constraint(
+      sliderStackView.topAnchor.constraint(
          equalTo: selectionPanel.bottomAnchor, constant: .defaultSpacing
-      )
-      let sizeRatio = selectionPanel.heightAnchor.constraint(
-         equalTo: sliderStackView.heightAnchor, multiplier: 0.4
-      )
+      ).isActive = true
       
-      NSLayoutConstraint.activate([
-         panelTop, panelLeading, panelTrailing,
-         slidersBottom, slidersLeading, slidersTrailing,
-         gap, sizeRatio
-      ])
+      selectionPanel.heightAnchor.constraint(
+         equalTo: sliderStackView.heightAnchor, multiplier: 0.4
+      ).isActive = true
    }
    
    /// Creates a stack view laying out the sliders appropriately.

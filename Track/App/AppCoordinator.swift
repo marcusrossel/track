@@ -32,7 +32,7 @@ final class AppCoordinator: NSObject {
    private let window: UIWindow
    
    /// A manager for accessing and writing to persistent data.
-   private let persistenceManager = PersistenceManager()
+   let persistenceManager = PersistenceManager()
    
    /// A collection of sub-coordinators being managed by the app coordinator.
    private var childCoordinators: [Coordinator]
@@ -47,7 +47,7 @@ final class AppCoordinator: NSObject {
    /// for intermediate updates though).
    ///
    /// The manager is loaded from disk on app launch, or created anew if none was persisted before.
-   private lazy var _categoryManager: Category.Manager = {
+   private lazy var categoryManager: Category.Manager = {
       let categories: [Category]
       
       // Reads the array of categories stored on disk.
@@ -70,16 +70,16 @@ final class AppCoordinator: NSObject {
       return categoryManager
    }()
    
-   #warning("Test code")
-   private lazy var categoryManager: Category.Manager = {
-      let categories: [Category] = (1...20).map {
-         let rgba = (1...3).map { _ in CGFloat.random(in: 0...1)}
-         let color = UIColor(red: rgba[0], green: rgba[1], blue: rgba[2], alpha: 1)
-         return Category(title: String($0), color: color)
-      }
-      
-      return Category.Manager(categories: categories)!
-   }()
+//   #warning("Test code")
+//   private lazy var _categoryManager: Category.Manager = {
+//      let categories: [Category] = (1...20).map {
+//         let rgba = (1...3).map { _ in CGFloat.random(in: 0...1)}
+//         let color = UIColor(red: rgba[0], green: rgba[1], blue: rgba[2], alpha: 1)
+//         return Category(title: "Category Title \($0)", color: color)
+//      }
+//
+//      return Category.Manager(categories: categories)!
+//   }()
    
    #warning("WIP")
    private lazy var trackManager: Track.Manager = Track.Manager()
@@ -155,3 +155,26 @@ extension AppCoordinator: UITabBarControllerDelegate {
       childCoordinators[tabItemTag].run()
    }
 }
+
+// MARK: - Persistence
+
+extension AppCoordinator {
+   
+   func persistAllData() {
+      do { try writeAllData() }
+      catch { retryDataPersistence() }
+   }
+   
+   private func writeAllData() throws {
+      try persistenceManager.write(.categories, value: categoryManager.categories)
+      try persistenceManager.write(.tracks, value: trackManager.tracks)
+   }
+   
+   private func retryDataPersistence() {
+      guard (try? writeAllData()) != nil else {
+         fatalError("Attempt to persist all data failed twice.")
+      }
+   }
+}
+
+
