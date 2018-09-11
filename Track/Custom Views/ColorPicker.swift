@@ -24,20 +24,16 @@ final class ColorPicker: UIView {
          selectionPanel.backgroundColor = selection
          
          let changedComponents = differingComponents(between: selection, and: oldValue)
-         
-         for (component, tint) in makeSliderTints(for: selection, components: changedComponents) {
-            sliders[component]?.value = Float(selection.decomposed[component]!)
-            sliders[component]?.minimumTrackTintColor = tint.track
-            sliders[component]?.thumbTintColor = tint.thumb
-         }
+         setSliderTints(for: changedComponents)
       }
    }
    
    /// Creates a color picker in the state of having selected a given color.
    init(selection: UIColor) {
       // Phase 1.
-      self.selection = .clear
+      self.selection = selection
       selectionPanel = UIView()
+      
       let defaultSliders = UIColor.Component.allCases.map { ($0, UISlider()) }
       sliders = Dictionary(uniqueKeysWithValues: defaultSliders)
       
@@ -45,15 +41,10 @@ final class ColorPicker: UIView {
       super.init(frame: .zero)
       
       // Phase 3.
-      setupSelectionPanel(with: selection)
+      setupSelectionPanel()
       setupSliders()
-      callSelectionSetter(color: selection)
+      setSliderTints()
       setupLayoutConstraints()
-   }
-   
-   /// Makes sure the selection's setter is called. This sets up the sliders properly.
-   private func callSelectionSetter(color: UIColor) {
-      selection = color
    }
    
    /// Sets up fixed properties for the sliders.
@@ -65,10 +56,22 @@ final class ColorPicker: UIView {
    }
    
    /// A convenience method for setting up the selection panel's style properties.
-   private func setupSelectionPanel(with color: UIColor) {
-      selectionPanel.backgroundColor = color
+   private func setupSelectionPanel() {
+      selectionPanel.backgroundColor = selection
       selectionPanel.layer.cornerRadius = 15
       selectionPanel.setShadow()
+   }
+   
+   /// A convenience method for setting the slider tints of given components according to the
+   /// current `selection`.
+   private func setSliderTints(
+      for components: Set<UIColor.Component> = Set(UIColor.Component.allCases)
+   ) {
+      for (component, tint) in makeSliderTints(for: selection, components: components) {
+         sliders[component]?.value = Float(selection.decomposed[component]!)
+         sliders[component]?.minimumTrackTintColor = tint.track
+         sliders[component]?.thumbTintColor = tint.thumb
+      }
    }
    
    /// A convenience method for retrieving the color component associated with a given slider.

@@ -49,9 +49,9 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
    
    /// A categories controller shows a non-large title navigation bar.
    func setupNavigationBar(for controller: CategoriesController) {
-      controller.title = "Categories"
-      navigationController.isNavigationBarHidden = false
-      navigationController.navigationBar.prefersLargeTitles = false
+      controller.navigationItem.title = "Categories"
+      controller.navigationItem.largeTitleDisplayMode = .never
+      navigationController.setNavigationBarHidden(false, animated: true)
    }
    
    /// Handles a new category request, by showing a category creation controller.
@@ -114,12 +114,12 @@ extension CategoriesCoordinator: CategoryCreationControllerDelegate {
    
    /// A category creation controller shows a non-large title navigation bar with save button.
    func setupNavigationBar(for controller: CategoryCreationController) {
-      controller.title = "Create Category"
-      navigationController.isNavigationBarHidden = false
-      navigationController.navigationBar.prefersLargeTitles = false
+      controller.navigationItem.title = "Create Category"
+      controller.navigationItem.largeTitleDisplayMode = .never
+      navigationController.setNavigationBarHidden(false, animated: true)
       
       // Adds the save button to the navigation bar.
-      navigationController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+      controller.navigationItem.rightBarButtonItem = UIBarButtonItem(
          barButtonSystemItem: .save,
          target: self,
          action: #selector(didPressSaveButton(_:))
@@ -130,6 +130,7 @@ extension CategoriesCoordinator: CategoryCreationControllerDelegate {
    @objc private func didPressSaveButton(_ sender: UIBarButtonItem) {
       (navigationController.topViewController as? CategoryCreationController)?
          .saveCategoryIfPossible()
+      navigationController.popViewController(animated: true)
    }
    
    /// Saves the category associated with a category creation controller.

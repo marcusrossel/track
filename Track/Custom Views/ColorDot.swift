@@ -36,7 +36,7 @@ final class ColorDot: UIView {
 
    /// Draws the circle with the specified diameter and color.
    override func draw(_ rect: CGRect) {
-      let path = UIBezierPath(
+      let circlePath = UIBezierPath(
          arcCenter: rect.center,
          radius: diameter / 2,
          startAngle: 0,
@@ -44,8 +44,20 @@ final class ColorDot: UIView {
          clockwise: true
       )
       
+      let ringPath = UIBezierPath(
+         arcCenter: rect.center,
+         radius: 0.85 * (diameter / 2),
+         startAngle: 0,
+         endAngle: 360.degreesAsRadians,
+         clockwise: true
+      )
+      
       color.setFill()
-      path.fill()
+      circlePath.fill()
+      
+      ringPath.lineWidth = diameter / 40
+      UIColor.white.setStroke()
+      ringPath.stroke()
    }
    
    // MARK: - Requirements

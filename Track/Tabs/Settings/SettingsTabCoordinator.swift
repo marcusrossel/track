@@ -37,9 +37,10 @@ final class SettingsTabCoordinator: Coordinator {
 extension SettingsTabCoordinator: SettingsRootControllerDelegate {
    
    func setupNavigationBar(for controller: SettingsRootController) {
-      controller.title = "Settings"
-      navigationController.isNavigationBarHidden = false
+      controller.navigationItem.title = "Settings"
+      controller.navigationItem.largeTitleDisplayMode = .always
       navigationController.navigationBar.prefersLargeTitles = true
+      navigationController.setNavigationBarHidden(false, animated: true)
    }
    
    func didSelectCategories() {

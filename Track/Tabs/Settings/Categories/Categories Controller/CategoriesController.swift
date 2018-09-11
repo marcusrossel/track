@@ -75,7 +75,7 @@ final class CategoriesController: UITableViewController {
       coordinator?.setupNavigationBar(for: self)
       
       // The table view should always reload its data on appearance, as to capture changes that
-      // might have been made to categories or the category manager.
+      // might have been made to categories externally.
       tableView.reloadData()
    }
    
@@ -122,7 +122,7 @@ extension CategoriesController {
    /// Delegates the setup of the cell to a different method according to it section.
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
    -> UITableViewCell {
-      #warning("Not reusing cells.")
+      #warning("Efficiency: Not reusing cells.")
       // Sets up the cell according to its section.
       switch Section(rawValue: indexPath.section) {
       case .categories?:

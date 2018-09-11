@@ -57,14 +57,18 @@ final class ImageLoader {
       let defaultSize: CGSize
       
       // Sets up parameters depending on the image type.
-      if type == Icon.self {
+      switch type {
+         
+      case let t where t == Icon.self:
          imageName += " Icon"
          defaultSize = Icon.defaultSize
-      } else if type == Button.self {
+         
+      case let t where t == Button.self:
          imageName += " Button"
          defaultSize = Button.defaultSize
-      } else {
-         fatalError("Internal inconsistency within image loader.")
+         
+      default:
+         fatalError("Non exhaustive switch over variable domain.")
       }
       
       // Loads the image from the asset catalogue.

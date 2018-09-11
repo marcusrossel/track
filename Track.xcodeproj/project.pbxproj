@@ -36,6 +36,7 @@
 		DDC602B3213F18FA002C7642 /* ViewTextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */; };
 		DDC602B5213F1C95002C7642 /* EditableCategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */; };
 		DDC602B7213F25F2002C7642 /* ButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B6213F25F2002C7642 /* ButtonCell.swift */; };
+		DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEDE72A21481866007FC062 /* CategorySelectionController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +71,7 @@
 		DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewTextFieldCell.swift; sourceTree = "<group>"; };
 		DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableCategoryCell.swift; sourceTree = "<group>"; };
 		DDC602B6213F25F2002C7642 /* ButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonCell.swift; sourceTree = "<group>"; };
+		DDEDE72A21481866007FC062 /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +170,7 @@
 			children = (
 				DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */,
 				DDA5AA4F212AD89C00121EFA /* TimerController.swift */,
+				DDEDE72A21481866007FC062 /* CategorySelectionController.swift */,
 			);
 			path = Timer;
 			sourceTree = "<group>";
@@ -357,6 +360,7 @@
 				DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */,
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,
 				DDBD053721260CA3005DB627 /* AppCoordinator.swift in Sources */,
+				DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */,
 				DDBD055A21270633005DB627 /* Tag.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,
 				DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */,

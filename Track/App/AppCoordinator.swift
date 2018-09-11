@@ -35,75 +35,25 @@ final class AppCoordinator: NSObject {
    let persistenceManager = PersistenceManager()
    
    /// A collection of sub-coordinators being managed by the app coordinator.
-   private var childCoordinators: [Coordinator]
+   private var childCoordinators: [Coordinator] = []
    
    /// The root view controller being managed by the app coordinator; therefore also being the app's
    /// root view controller.
    private let rootViewController: UITabBarController
 
    /// A manager for handeling the collection of existing categories.
-   /// This manager is passed to any coordinators or controllers needing write access to categories.
-   /// For read access only, passing the manager's `categories` is preffered (this might be an issue
-   /// for intermediate updates though).
-   ///
    /// The manager is loaded from disk on app launch, or created anew if none was persisted before.
-   private lazy var categoryManager: Category.Manager = {
-      let categories: [Category]
-      
-      // Reads the array of categories stored on disk.
-      // If no such file is found, the `categories` are set as an empty array.
-      // If there were any other errors, a fatal error occurs.
-      do { categories = try persistenceManager.read(.categories, as: [Category].self) ?? [] }
-      catch { fatalError("Persistence manager was unable to read categories.") }
-      
-      // Tries to initialize a manager from the loaded array of categories.
-      // This can only fail if the loaded categories are in some way invalid. In this case something
-      // internal is wrong, and a fatal error occurs.
-      guard let categoryManager = Category.Manager(categories: categories) else {
-         fatalError("Read invalid categories from disk.")
-      }
-      
-      return categoryManager
-   }()
+   private lazy var categoryManager: Category.Manager = loadCategoryManager()
    
-//   #warning("For test data.")
-//   private lazy var _categoryManager: Category.Manager = {
-//      let categories: [Category] = (1...20).map {
-//         let rgba = (1...3).map { _ in CGFloat.random(in: 0...1)}
-//         let color = UIColor(red: rgba[0], green: rgba[1], blue: rgba[2], alpha: 1)
-//         return Category(title: "Category Title \($0)", color: color)
-//      }
-//
-//      return Category.Manager(categories: categories)!
-//   }()
-   
-   private lazy var trackManager: Track.Manager = {
-      let tracks: Set<Track>
-      
-      // Reads the array of tracks stored on disk.
-      // If no such file is found, the `tracks` are set as an empty array.
-      // If there were any other errors, a fatal error occurs.
-      do { tracks = try persistenceManager.read(.tracks, as: Set<Track>.self) ?? [] }
-      catch {
-         fatalError("Persistence manager was unable to read tracks.")
-      }
-      
-      // Tries to initialize a manager from the loaded array of tracks.
-      // This can only fail if the loaded tracks are in some way invalid. In this case something
-      // internal is wrong, and a fatal error occurs.
-      guard let trackManager = Track.Manager(tracks: tracks) else {
-         fatalError("Read invalid tracks from disk.")
-      }
-      
-      return trackManager
-   }()
+   /// A manager for handeling the collection of existing tracks.
+   /// The manager is loaded from disk on app launch, or created anew if none was persisted before.
+   private lazy var trackManager: Track.Manager = loadTrackManager()
    
    /// Initializes an app coordinator from the window in which it will display its content.
    init(window: UIWindow) {
       // Phase 1.
       self.window = window
       rootViewController = UITabBarController()
-      childCoordinators = []
       
       // Phase 2.
       super.init()
@@ -112,12 +62,7 @@ final class AppCoordinator: NSObject {
       rootViewController.delegate = self
       
       // Sets up all of the coordinators needed for the different tabs and stores them as children.
-      childCoordinators = [
-         TimerTabCoordinator(categoryManager: categoryManager, trackManager: trackManager),
-         TodayTabCoordinator(categoryManager: categoryManager, trackManager: trackManager),
-         RecordTabCoordinator(categoryManager: categoryManager, trackManager: trackManager),
-         SettingsTabCoordinator(categoryManager: categoryManager)
-      ]
+      childCoordinators = makeTabCoordinators()
    }
    
    /// Hands controller over to the app coordinator, which effectively starts the app.
@@ -135,6 +80,16 @@ final class AppCoordinator: NSObject {
       // Sets up and presents the window.
       window.rootViewController = rootViewController
       window.makeKeyAndVisible()
+   }
+   
+   /// Creates the coordinators associated with each tab.
+   private func makeTabCoordinators() -> [Coordinator] {
+      return [
+         TimerTabCoordinator(categoryManager: categoryManager, trackManager: trackManager),
+         TodayTabCoordinator(categoryManager: categoryManager, trackManager: trackManager),
+         RecordTabCoordinator(categoryManager: categoryManager, trackManager: trackManager),
+         SettingsTabCoordinator(categoryManager: categoryManager)
+      ]
    }
    
    /// Creates the root controllers associated with each tab (and therefore coordinator).
@@ -174,21 +129,55 @@ extension AppCoordinator: UITabBarControllerDelegate {
 
 extension AppCoordinator {
    
+   /// A convenience method for creating a category manager from the data stored on disk.
+   private func loadCategoryManager() -> Category.Manager {
+      let categories: [Category]
+      
+      // Reads the array of categories stored on disk.
+      // If no such file is found, the `categories` are set as an empty array.
+      // If there were any other errors, a fatal error occurs.
+      do { categories = try persistenceManager.read(.categories, as: [Category].self) ?? [] }
+      catch { fatalError("Persistence manager was unable to read categories.") }
+      
+      // Tries to initialize a manager from the loaded array of categories.
+      // This can only fail if the loaded categories are in some way invalid. In this case something
+      // internal is wrong, and a fatal error occurs.
+      guard let categoryManager = Category.Manager(categories: categories) else {
+         fatalError("Read invalid categories from disk.")
+      }
+      
+      return categoryManager
+   }
+   
+   /// A convenience method for creating a track manager from the data stored on disk.
+   private func loadTrackManager() -> Track.Manager {
+      let tracks: Set<Track>
+      
+      // Reads the array of tracks stored on disk.
+      // If no such file is found, the `tracks` are set as an empty array.
+      // If there were any other errors, a fatal error occurs.
+      do { tracks = try persistenceManager.read(.tracks, as: Set<Track>.self) ?? [] }
+      catch {
+         fatalError("Persistence manager was unable to read tracks.")
+      }
+      
+      // Tries to initialize a manager from the loaded array of tracks.
+      // This can only fail if the loaded tracks are in some way invalid. In this case something
+      // internal is wrong, and a fatal error occurs.
+      guard let trackManager = Track.Manager(tracks: tracks) else {
+         fatalError("Read invalid tracks from disk.")
+      }
+      
+      return trackManager
+   }
+   
+   /// Persists all data that needs to be persisted by the app.
    func persistAllData() {
-      do { try writeAllData() }
-      catch { retryDataPersistence() }
-   }
-   
-   private func writeAllData() throws {
-      try persistenceManager.write(.categories, value: categoryManager.categories)
-      try persistenceManager.write(.tracks, value: trackManager.tracks)
-   }
-   
-   private func retryDataPersistence() {
-      guard (try? writeAllData()) != nil else {
-         fatalError("Attempt to persist all data failed twice.")
+      do {
+         try persistenceManager.write(.categories, value: categoryManager.categories)
+         try persistenceManager.write(.tracks, value: trackManager.tracks)
+      } catch {
+         fatalError("Attempt to persist data failed.")
       }
    }
 }
-
-

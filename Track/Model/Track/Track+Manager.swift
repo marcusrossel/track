@@ -121,7 +121,7 @@ extension Track {
       }
       
       private func tracksAreSafeToInsert(_ tracks: Set<Track>) -> Bool {
-         var newTracks = tracks
+         var newTracks = self.tracks
          
          let newTracksForDay: (Date) -> [Track] = { day in
             return newTracks.filter { track in

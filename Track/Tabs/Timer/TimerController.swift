@@ -12,6 +12,13 @@ protocol TimerControllerDelegate {
    
    func timerControllerDidStop(_ timerController: TimerController)
    func timerControllerDidSwitch(_ timerController: TimerController)
+   
+   func setupNavigationBar(for controller: TimerController)
+}
+
+extension TimerControllerDelegate {
+   
+   func setupNavigationBar(for controller: TimerController) { }
 }
 
 final class TimerController: UIViewController {
@@ -22,6 +29,7 @@ final class TimerController: UIViewController {
       didSet {
          titleLabel.text = track.category.title
          timeTracker.track = track
+         setState(tracking: track.isTracking)
       }
    }
    
@@ -46,6 +54,7 @@ final class TimerController: UIViewController {
       // Phase 3.
       setupTitleLabel()
       setupButtons()
+      setState(tracking: track.isTracking)
       
       view.backgroundColor = .white
       
@@ -56,7 +65,7 @@ final class TimerController: UIViewController {
       titleLabel.text = track.category.title
       
       titleLabel.textAlignment = .center
-      let font = UIFont.boldSystemFont(ofSize: 200)
+      let font = UIFont.boldSystemFont(ofSize: 100)
       titleLabel.font = font
       titleLabel.adjustsFontSizeToFitWidth = true
    }
@@ -72,17 +81,22 @@ final class TimerController: UIViewController {
       switchButton.addTarget(self, action: #selector(didPressSwitch), for: .touchUpInside)
    }
    
+   private func setState(tracking: Bool) {
+      let imageLoader = ImageLoader()
+      let buttonType: ImageLoader.Button = tracking ? .pause : .play
+      
+      playPauseButton.setImage(imageLoader[button: buttonType], for: .normal)
+   }
+   
+   override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+      coordinator?.setupNavigationBar(for: self)
+   }
+   
    // MARK: - Requirements
    
    /// Do not call this initializer! This view does not support storyboards or XIB.
    required init?(coder aDecoder: NSCoder) { fatalError("View doesn't support storyboard or XIB.") }
-   
-   // the categoryselectioncontroller shows a list of categories with the amount of time associated
-   // with them today.
-   // the categoryselectioncontroller has a delegate method that indicated that a category was
-   // selected.
-   
-   // pressing the switch button causes the categoryselectioncontroller to be shown in a popover.
 }
 
 // MARK: - Button Handling
@@ -126,9 +140,9 @@ extension TimerController {
 extension TimerController {
    
    private func setupLayoutConstraints() {
-      let buttonStackView = UIStackView(arrangedSubviews: [
-         playPauseButton, stopButton, switchButton
-      ])
+      let buttonStackView = UIStackView(
+         arrangedSubviews: [playPauseButton, stopButton, switchButton]
+      )
       buttonStackView.axis = .horizontal
       buttonStackView.alignment = .bottom
       buttonStackView.distribution = .fillEqually
@@ -138,13 +152,13 @@ extension TimerController {
       
       AutoLayoutHelper(rootView: view).setupViewsForAutoLayout(viewsToLayout)
       
-      titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: .defaultSpacing)
-         .isActive = true
+      titleLabel.topAnchor.constraint(equalTo: guide.topAnchor).isActive = true
+      titleLabel.setContentHuggingPriority(.required, for: .vertical)
       
       timeTracker.centerYAnchor.constraint(equalTo: guide.centerYAnchor).isActive = true
       
       buttonStackView.bottomAnchor.constraint(
-         equalTo: guide.bottomAnchor, constant: -.defaultSpacing
+         equalTo: guide.bottomAnchor, constant: 3 * -.defaultSpacing
       ).isActive = true
       
       for viewToLayout in viewsToLayout {

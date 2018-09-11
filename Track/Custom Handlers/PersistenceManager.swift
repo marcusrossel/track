@@ -17,13 +17,6 @@ final class PersistenceManager {
       case tracks
       case categories
       case tags
-      
-      /// The actual type used by the persistence manager to read and write a certain item.
-      enum StorageType {
-         static let tracks = Set<Track>.self
-         static let categories = [Category].self
-         static let tags = [Tag].self
-      }
    }
    
    /// `NSError`-codes used by some of the manager's methods.
