@@ -31,9 +31,16 @@ final class TimerTabCoordinator: NSObject, Coordinator {
       
       let controller: UIViewController
       
-      if let category = trackManager.runningCategory {
+      if let categoryID = trackManager.trackingCategoryID {
+         guard let category = categoryManager.uniqueCategory(with: categoryID) else {
+            fatalError("Expected to find category with given ID.")
+         }
+            
          controller = TimerController(
-            category: category, trackManager: trackManager, delegate: self
+            categoryID: category.id,
+            trackManager: trackManager,
+            categoryManager: categoryManager,
+            delegate: self
          )
       } else {
          controller = CategorySelectionController(
@@ -61,8 +68,8 @@ extension TimerTabCoordinator: CategorySelectionControllerDelegate {
    ) {
       if let timerController = navigationController.viewControllers[0] as? TimerController {
          let trackForCategory =
-            trackManager.todaysTrack(for: category) ??
-            trackManager.createTrack(for: category)!
+            trackManager.todaysTrack(for: category.id) ??
+            trackManager.createTrack(for: category.id)!
          
          // Expecting the previously running track to already be stopped, if there was one!
          trackForCategory.track()
@@ -71,7 +78,10 @@ extension TimerTabCoordinator: CategorySelectionControllerDelegate {
          navigationController.dismiss(animated: true, completion: nil)
       } else {
          let controller = TimerController(
-            category: category, trackManager: trackManager, delegate: self
+            categoryID: category.id,
+            trackManager: trackManager,
+            categoryManager: categoryManager,
+            delegate: self
          )
          
          navigationController.setViewControllers([controller], animated: true)

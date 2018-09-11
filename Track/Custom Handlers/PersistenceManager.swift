@@ -16,7 +16,6 @@ final class PersistenceManager {
    enum Item: String {
       case tracks
       case categories
-      case tags
    }
    
    /// `NSError`-codes used by some of the manager's methods.
@@ -66,6 +65,8 @@ final class PersistenceManager {
    /// All other types of errors will be thrown.
    func read<T: Decodable>(_ item: Item, as type: T.Type) throws -> T? {
       let fileData: Data
+      
+      print(path(for: item))
       
       /// Catches the case of there being no file.
       do { fileData = try Data(contentsOf: path(for: item)) }

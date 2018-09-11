@@ -27,13 +27,21 @@ final class TimerController: UIViewController {
 
    var track: Track {
       didSet {
-         titleLabel.text = track.category.title
+         titleLabel.text = category.title
          timeTracker.track = track
          setState(tracking: track.isTracking)
       }
    }
    
+   private var category: Category {
+      guard let category = categoryManager.uniqueCategory(with: track.categoryID) else {
+         fatalError("Expected to find category with given ID.")
+      }
+      return category
+   }
+   
    private let trackManager: Track.Manager
+   private let categoryManager: Category.Manager
    
    private let titleLabel = UILabel()
    private let timeTracker: TimeTracker
@@ -41,11 +49,20 @@ final class TimerController: UIViewController {
    private let stopButton = UIButton()
    let switchButton = UIButton()
    
-   init(category: Category, trackManager: Track.Manager, delegate: TimerControllerDelegate? = nil) {
+   init(
+      categoryID: Category.ID,
+      trackManager: Track.Manager,
+      categoryManager: Category.Manager,
+      delegate: TimerControllerDelegate? = nil
+   ) {
       // Phase 1.
       coordinator = delegate
       self.trackManager = trackManager
-      track = trackManager.todaysTrack(for: category) ?? trackManager.createTrack(for: category)!
+      self.categoryManager = categoryManager
+      
+      track =
+         trackManager.todaysTrack(for: categoryID) ??
+         trackManager.createTrack(for: categoryID)!
       timeTracker = TimeTracker(track: track)
       
       // Phase 2.
@@ -62,7 +79,7 @@ final class TimerController: UIViewController {
    }
    
    private func setupTitleLabel() {
-      titleLabel.text = track.category.title
+      titleLabel.text = category.title
       
       titleLabel.textAlignment = .center
       let font = UIFont.boldSystemFont(ofSize: 100)

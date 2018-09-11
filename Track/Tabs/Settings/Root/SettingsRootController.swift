@@ -13,7 +13,6 @@ import UIKit
 protocol SettingsRootControllerDelegate {
    
    func didSelectCategories()
-   func didSelectTags()
    
    func setupNavigationBar(for controller: SettingsRootController)
 }
@@ -27,14 +26,19 @@ extension SettingsRootControllerDelegate {
 
 class SettingsRootController: UITableViewController {
    
+   private enum Setting: Int, CaseIterable {
+      case categories
+      
+      var cellPath: KeyPath<SettingsRootController, UITableViewCell> {
+         switch self {
+         case .categories: return \.categoriesCell
+         }
+      }
+   }
+   
    private var coordinator: SettingsRootControllerDelegate?
    
    private var categoriesCell = UITableViewCell(style: .default, reuseIdentifier: nil)
-   private var tagsCell = UITableViewCell(style: .default, reuseIdentifier: nil)
-   
-   private var cells: [UITableViewCell] {
-      return [categoriesCell, tagsCell]
-   }
    
    init(delegate: SettingsRootControllerDelegate? = nil) {
       // Phase 1.
@@ -48,14 +52,11 @@ class SettingsRootController: UITableViewController {
       tableView.rowHeight = .defaultHeight
       
       categoriesCell.textLabel?.text = "Categories"
-      tagsCell.textLabel?.text = "Tags"
       
       categoriesCell.accessoryType = .disclosureIndicator
-      tagsCell.accessoryType = .disclosureIndicator
       
       let imageLoader = ImageLoader()
       categoriesCell.imageView?.image = imageLoader[icon: .books]
-      tagsCell.imageView?.image = imageLoader[icon: .tags]
    }
    
    override func viewWillAppear(_ animated: Bool) {
@@ -73,12 +74,14 @@ class SettingsRootController: UITableViewController {
 extension SettingsRootController {
    
    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-      return cells.count
+      return Setting.allCases.count
    }
    
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-      let index = indexPath.row
-      return cells[index]
+      guard let setting = Setting(rawValue: indexPath.row) else {
+         fatalError("Internal inconsistency between number of settings and number of cells.")
+      }
+      return self[keyPath: setting.cellPath]
    }
 }
 
@@ -87,12 +90,8 @@ extension SettingsRootController {
 extension SettingsRootController {
    
    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-      let index = indexPath.row
-      let selection = cells[index]
-      
-      switch selection {
-      case categoriesCell: coordinator?.didSelectCategories()
-      case tagsCell:       coordinator?.didSelectTags()
+      switch Setting(rawValue: indexPath.row) {
+      case .categories?: coordinator?.didSelectCategories()
       default:             fatalError("Non exhaustive switch over variable domain.")
       }
    }

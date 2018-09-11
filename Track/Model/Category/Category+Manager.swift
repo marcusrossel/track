@@ -17,12 +17,10 @@ final class Category {
    let id: ID
    fileprivate(set) var title: String
    var color: UIColor
-   var tags: [Tag.ID]
    
-   init(title: String, color: UIColor = .black, tags: [Tag.ID] = [], id: ID = ID()) {
+   init(title: String, color: UIColor = .black, id: ID = ID()) {
       self.title = title
       self.color = color
-      self.tags = tags
       self.id = id
    }
 }
@@ -46,7 +44,6 @@ extension Category: Codable {
       case id
       case title
       case rgba
-      case tags
    }
    
    func encode(to encoder: Encoder) throws {
@@ -55,7 +52,6 @@ extension Category: Codable {
       try container.encode(id, forKey: .id)
       try container.encode(title, forKey: .title)
       try container.encode(color.decomposed, forKey: .rgba)
-      try container.encode(tags, forKey: .tags)
    }
    
    convenience init(from decoder: Decoder) throws {
@@ -63,12 +59,11 @@ extension Category: Codable {
       
       let id = try container.decode(ID.self, forKey: .id)
       let title = try container.decode(String.self, forKey: .title)
-      let tags = try container.decode([Tag.ID].self, forKey: .tags)
       
       let rgba = try container.decode([UIColor.Component: CGFloat].self, forKey: .rgba)
       let color = UIColor(components: rgba)
       
-      self.init(title: title, color: color, tags: tags, id: id)
+      self.init(title: title, color: color, id: id)
    }
 }
 
@@ -91,6 +86,10 @@ extension Category {
             
             self.categories.append(category)
          }
+      }
+      
+      func uniqueCategory(with id: Category.ID) -> Category? {
+         return categories.first { $0.id == id }
       }
       
       func uniqueCategory(with title: String) -> Category? {

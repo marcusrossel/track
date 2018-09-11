@@ -14,12 +14,12 @@ final class Track: Codable {
    
    static let calendar = Calendar(identifier: .gregorian)
    
-   let category: Category
+   let categoryID: Category.ID
    private var start: Date
    private var end: Date?
    
-   init(category: Category, day: Date = Date(), interval: TimeInterval = 0) {
-      self.category = category
+   init(categoryID: Category.ID, day: Date = Date(), interval: TimeInterval = 0) {
+      self.categoryID = categoryID
       self.start = day
       self.interval = interval
    }
@@ -78,7 +78,7 @@ final class Track: Codable {
       
       while processedDate < end {
          let trackInterval = min(end.timeIntervalSince(processedDate), dayInterval)
-         let track = Track(category: category, day: day, interval: trackInterval)
+         let track = Track(categoryID: categoryID, day: day, interval: trackInterval)
          
          tracks.insert(track)
          processedDate = processedDate.addingTimeInterval(trackInterval)
@@ -96,11 +96,11 @@ final class Track: Codable {
 extension Track: Equatable, Hashable {
    
    static func ==(lhs: Track, rhs: Track) -> Bool {
-      return lhs.category == rhs.category && lhs.start == rhs.start
+      return lhs.categoryID == rhs.categoryID && lhs.start == rhs.start
    }
    
    func hash(into hasher: inout Hasher) {
-      hasher.combine(category)
+      hasher.combine(categoryID)
       hasher.combine(start)
    }
 }
@@ -111,8 +111,8 @@ extension Track {
       
       private(set) var tracks: Set<Track> = []
       
-      var runningCategory: Category? {
-         return (tracks.first { $0.isTracking })?.category
+      var trackingCategoryID: Category.ID? {
+         return (tracks.first { $0.isTracking })?.categoryID
       }
       
       init?(tracks: Set<Track> = []) {
@@ -130,7 +130,7 @@ extension Track {
          }
          
          for track in newTracks {
-            guard !newTracksForDay(track.day).contains(where: { $0.category == track.category })
+            guard !newTracksForDay(track.day).contains(where: { $0.categoryID == track.categoryID })
             else { return false }
             
             newTracks.insert(track)
@@ -139,11 +139,11 @@ extension Track {
          return true
       }
 
-      func todaysTrack(for category: Category) -> Track? {
+      func todaysTrack(for categoryID: Category.ID) -> Track? {
          let isToday = Calendar(identifier: .gregorian).isDateInToday(_:)
          let todaysTracks = tracks.filter { isToday($0.day) }
          
-         return todaysTracks.first { $0.category == category }
+         return todaysTracks.first { $0.categoryID == categoryID }
       }
       
       func addTracks(_ newTracks: Set<Track>) -> Bool {
@@ -154,10 +154,10 @@ extension Track {
       }
       
       @discardableResult
-      func createTrack(for category: Category) -> Track? {
-         guard todaysTrack(for: category) == nil else { return nil }
+      func createTrack(for categoryID: Category.ID) -> Track? {
+         guard todaysTrack(for: categoryID) == nil else { return nil }
          
-         let track = Track(category: category)
+         let track = Track(categoryID: categoryID)
          
          tracks.insert(track)
          return track

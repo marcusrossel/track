@@ -31,7 +31,6 @@
 		DDBD054F2126D5B7005DB627 /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD054E2126D5B7005DB627 /* CategoryCell.swift */; };
 		DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05542126EAD0005DB627 /* ColorDot.swift */; };
 		DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05572127051D005DB627 /* Category+Manager.swift */; };
-		DDBD055A21270633005DB627 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD055921270633005DB627 /* Tag.swift */; };
 		DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD056121271F9C005DB627 /* PersistenceManager.swift */; };
 		DDC602B3213F18FA002C7642 /* ViewTextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */; };
 		DDC602B5213F1C95002C7642 /* EditableCategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */; };
@@ -66,7 +65,6 @@
 		DDBD054E2126D5B7005DB627 /* CategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
 		DDBD05542126EAD0005DB627 /* ColorDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDot.swift; sourceTree = "<group>"; };
 		DDBD05572127051D005DB627 /* Category+Manager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Category+Manager.swift"; sourceTree = "<group>"; };
-		DDBD055921270633005DB627 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		DDBD056121271F9C005DB627 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
 		DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewTextFieldCell.swift; sourceTree = "<group>"; };
 		DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableCategoryCell.swift; sourceTree = "<group>"; };
@@ -233,7 +231,6 @@
 			children = (
 				DD5B1283214437AF00602791 /* Track */,
 				DDBD056621273227005DB627 /* Category */,
-				DDBD05672127322E005DB627 /* Tag */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -257,14 +254,6 @@
 				DDBD05572127051D005DB627 /* Category+Manager.swift */,
 			);
 			path = Category;
-			sourceTree = "<group>";
-		};
-		DDBD05672127322E005DB627 /* Tag */ = {
-			isa = PBXGroup;
-			children = (
-				DDBD055921270633005DB627 /* Tag.swift */,
-			);
-			path = Tag;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -361,7 +350,6 @@
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,
 				DDBD053721260CA3005DB627 /* AppCoordinator.swift in Sources */,
 				DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */,
-				DDBD055A21270633005DB627 /* Tag.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,
 				DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */,
 				DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */,

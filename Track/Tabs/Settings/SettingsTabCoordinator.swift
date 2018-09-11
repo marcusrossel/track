@@ -51,8 +51,4 @@ extension SettingsTabCoordinator: SettingsRootControllerDelegate {
       childCoordinators.append(categoriesCoordinator)
       categoriesCoordinator.run()
    }
-   
-   func didSelectTags() {
-      
-   }
 }
