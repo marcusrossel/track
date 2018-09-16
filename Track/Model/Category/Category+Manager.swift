@@ -51,7 +51,7 @@ extension Category: Codable {
       
       try container.encode(id, forKey: .id)
       try container.encode(title, forKey: .title)
-      try container.encode(color.decomposed, forKey: .rgba)
+      try container.encode(color.decomposed.dictionary, forKey: .rgba)
    }
    
    convenience init(from decoder: Decoder) throws {

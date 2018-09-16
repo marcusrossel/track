@@ -12,7 +12,7 @@ import UIKit
 final class TabCoordinator: NSObject, RootCoordinator {
    
    /// A mapping of tabs to their corresponding coordinators.
-   private var tabCoordinators: [Tab: Coordinator]
+   private var tabCoordinators: EnumMap<Tab, Coordinator>
    
    /// A tab coordinator's root view controller is its tab bar controller.
    var rootViewController: UIViewController {
@@ -28,12 +28,15 @@ final class TabCoordinator: NSObject, RootCoordinator {
    
    init(categoryManager: Category.Manager, trackManager: Track.Manager) {
       // Phase 1.
-      tabCoordinators = [:]
+      
+      // Fills the tab coordinators with trash values.
+      tabCoordinators = EnumMap { _ in SettingsTabCoordinator(categoryManager: categoryManager) }
       
       // Phase 2.
       super.init()
       
       // Phase 3.
+      tabBarController.delegate = self
       tabCoordinators = makeTabCoordinators(
          categoryManager: categoryManager, trackManager: trackManager
       )
@@ -48,16 +51,16 @@ final class TabCoordinator: NSObject, RootCoordinator {
       // Selects the timer tab as initially selected.
       // The tab bar controller delegate method is called to cause the corresponding coordinator to
       // run.
-      let initialController = tabCoordinators[.timer]!.navigationController
+      let initialController = tabCoordinators[.timer].navigationController
       tabBarController.selectedViewController = initialController
       tabBarController(tabBarController, didSelect: initialController)
    }
    
    /// Creates the coordinators associated with each tab.
    private func makeTabCoordinators(categoryManager: Category.Manager, trackManager: Track.Manager)
-   -> [Tab: Coordinator] {
+   -> EnumMap<Tab, Coordinator> {
       
-      return [
+      return EnumMap(dictionary: [
          .timer: TimerTabCoordinator(
             categoryManager: categoryManager, trackManager: trackManager, delegate: self
          ),
@@ -70,7 +73,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
          .settings: SettingsTabCoordinator(
             categoryManager: categoryManager
          )
-      ]
+      ])!
    }
    
    /// Creates the root controllers associated with each tab. The controllers' tab bar items are
@@ -79,7 +82,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
       // Performs the setup of the navigation controller for each tab and returns the resulting
       // collection.
       return Tab.allCases.map { tab in
-         let controller = tabCoordinators[tab]!.navigationController
+         let controller = tabCoordinators[tab].navigationController
          
          // Populates each tab controller with its title, icon and tag.
          let item = UITabBarItem(title: tab.title, image: tab.icon, tag: tab.rawValue)
@@ -128,7 +131,7 @@ extension TabCoordinator: UITabBarControllerDelegate {
       guard let tab = Tab(rawValue: selection) else { fatalError("Received invalid tab tag.") }
       
       // Hands over control to the selected tab's coordinator.
-      tabCoordinators[tab]?.run()
+      tabCoordinators[tab].run()
    }
 }
 

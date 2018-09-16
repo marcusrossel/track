@@ -12,7 +12,7 @@ import UIKit
 final class ColorPicker: UIView {
 
    /// The sliders for changing the values of the color components.
-   private var sliders: [UIColor.Component: UISlider]
+   private var sliders: EnumMap<UIColor.Component, UISlider>
    
    /// The view showing the currently selected color.
    private let selectionPanel: UIView
@@ -33,9 +33,7 @@ final class ColorPicker: UIView {
       // Phase 1.
       self.selection = selection
       selectionPanel = UIView()
-      
-      let defaultSliders = UIColor.Component.allCases.map { ($0, UISlider()) }
-      sliders = Dictionary(uniqueKeysWithValues: defaultSliders)
+      sliders = EnumMap { _ in UISlider() }
       
       // Phase 2.
       super.init(frame: .zero)
@@ -49,7 +47,7 @@ final class ColorPicker: UIView {
    
    /// Sets up fixed properties for the sliders.
    private func setupSliders() {
-      for (_, slider) in sliders {
+      for (_, slider) in sliders.dictionary {
          slider.setShadow(radius: 3, opacity: 0.25, offset: CGSize(width: 0, height: 1))
          slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
       }
@@ -68,15 +66,15 @@ final class ColorPicker: UIView {
       for components: Set<UIColor.Component> = Set(UIColor.Component.allCases)
    ) {
       for (component, tint) in makeSliderTints(for: selection, components: components) {
-         sliders[component]?.value = Float(selection.decomposed[component]!)
-         sliders[component]?.minimumTrackTintColor = tint.track
-         sliders[component]?.thumbTintColor = tint.thumb
+         sliders[component].value = Float(selection.decomposed[component])
+         sliders[component].minimumTrackTintColor = tint.track
+         sliders[component].thumbTintColor = tint.thumb
       }
    }
    
    /// A convenience method for retrieving the color component associated with a given slider.
    private func colorComponent(for target: UISlider) -> UIColor.Component {
-      for (component, slider) in sliders {
+      for (component, slider) in sliders.dictionary {
          if slider === target { return component }
       }
       fatalError("Expected never to reach this point.")
@@ -85,7 +83,8 @@ final class ColorPicker: UIView {
    /// A convenience method for determining which color components differ between given colors.
    private func differingComponents(between color1: UIColor, and color2: UIColor)
    -> Set<UIColor.Component> {
-      let differingComponents: [UIColor.Component] = color1.decomposed.compactMap { pair in
+      let differingComponents: [UIColor.Component] = color1.decomposed.dictionary.compactMap {
+         pair in
          let (component, value) = pair
          return (value != color2.decomposed[component]) ? component : nil
       }
@@ -129,13 +128,13 @@ extension ColorPicker {
          
          // Fills the above dictionaries with the desaturation values.
          for tintComponent in [UIColor.Component.red, .green, .blue] {
-            trackComponentValues[tintComponent] = targetComponentValue.map(trackDesaturation)
-            thumbComponentValues[tintComponent] = targetComponentValue.map(thumbDesaturation)
+            trackComponentValues[tintComponent] = trackDesaturation(targetComponentValue)
+            thumbComponentValues[tintComponent] = thumbDesaturation(targetComponentValue)
          }
          
          // Sets the tints' color values to the maximum values for the target component.
          trackComponentValues[targetComponent] = trackMaximum
-         thumbComponentValues[targetComponent] = targetComponentValue.map(thumbMaximum)
+         thumbComponentValues[targetComponent] = thumbMaximum(targetComponentValue)
          
          // Makes sure the alpha is always set to 1.
          trackComponentValues[.alpha] = 1
@@ -158,12 +157,12 @@ extension ColorPicker {
    
    /// Shows the slider for a given color component. If it was not hidden before, nothing changes.
    func show(_ component: UIColor.Component) {
-      sliders[component]?.isHidden = false
+      sliders[component].isHidden = false
    }
    
    /// Hides the slider for a given color component. If it was not showing before, nothing changes.
    func hide(_ component: UIColor.Component) {
-      sliders[component]?.isHidden = true
+      sliders[component].isHidden = true
    }
 }
 
@@ -179,7 +178,7 @@ extension ColorPicker {
       var colorComponents = selection.decomposed
       colorComponents[affectedComponent] = sliderValue
       
-      selection = UIColor(components: colorComponents)
+      selection = UIColor(components: colorComponents.dictionary)
    }
 }
 
@@ -229,7 +228,7 @@ extension ColorPicker {
    
    /// Creates a stack view laying out the sliders appropriately.
    private func makeSliderStackView() -> UIStackView {
-      let sortedSliders = sliders
+      let sortedSliders = sliders.dictionary
          .sorted { $0.key.rawValue < $1.key.rawValue }
          .map { $0.value }
       

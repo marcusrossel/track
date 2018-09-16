@@ -79,7 +79,7 @@ extension UIColor {
       case alpha
    }
    
-   var decomposed: [Component: CGFloat] {
+   var decomposed: EnumMap<Component, CGFloat> {
       var red: CGFloat = .nan
       var green: CGFloat = .nan
       var blue: CGFloat = .nan
@@ -87,7 +87,7 @@ extension UIColor {
       
       getRed(&red, green: &green, blue: &blue, alpha: &alpha)
       
-      return [.red: red, .green: green, .blue: blue, .alpha: alpha]
+      return EnumMap(dictionary: [.red: red, .green: green, .blue: blue, .alpha: alpha])!
    }
    
    convenience init(components: [UIColor.Component: CGFloat]) {
@@ -101,7 +101,7 @@ extension UIColor {
 
    var luminosity: CGFloat {
       return [(Component.red, 0.2126), (.green, 0.7152), (.blue, 0.0722)]
-         .reduce(0) { result, item in result + item.1 * pow(decomposed[item.0]!, 2.2) }
+         .reduce(0) { result, item in result + item.1 * pow(decomposed[item.0], 2.2) }
    }
    
    static var systemBlue: UIColor {
@@ -132,6 +132,32 @@ extension UIImage {
          width: size.width / resizeFactor, height: size.height / resizeFactor
       )
       return self.resized(forSize: newSizeKeepingAspect)
+   }
+}
+
+// MARK: - Enum Map
+
+struct EnumMap<Enum, Value> where Enum: CaseIterable & Hashable {
+   
+   private(set) var dictionary: [Enum: Value]
+   
+   init?(dictionary: [Enum: Value]) {
+      let cases = Set(dictionary.keys)
+      let allCases = Set(Enum.allCases)
+      
+      guard cases == allCases else { return nil }
+      
+      self.dictionary = dictionary
+   }
+   
+   init(valueMap: (Enum) -> Value) {
+      let pairs = Enum.allCases.map { `case` in (`case`, valueMap(`case`)) }
+      dictionary = Dictionary(uniqueKeysWithValues: pairs)
+   }
+   
+   subscript(case: Enum) -> Value {
+      get { return dictionary[`case`]! }
+      set { dictionary[`case`] = newValue }
    }
 }
 
