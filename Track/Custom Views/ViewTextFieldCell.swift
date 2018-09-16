@@ -53,15 +53,18 @@ class ViewTextFieldCell: UITableViewCell {
       AutoLayoutHelper(rootView: contentView).setupViewsForAutoLayout([view])
       
       view.centerYAnchor.constraint(equalTo: layoutGuide.centerYAnchor).isActive = true
-      
-      if view === leadingView { constrainLeadingView() }
-      else if view === textField { constrainTextField() }
-      else { fatalError("Expected one of the previous if-statements to match.") }
+
+      switch view {
+      case _ where view === leadingView: constrainLeadingView()
+      case _ where view === textField: constrainTextField()
+      default: fatalError("Non exhaustive switch over variable domain.")
+      }
    }
    
    /// A convenience method for setting up the leading view's auto layout constraints.
    private func constrainLeadingView() {
       leadingView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+      leadingView.setContentCompressionResistancePriority(.required, for: .horizontal)
       
       leadingView.leadingAnchor.constraint(
          equalTo: layoutGuide.leadingAnchor, constant: .defaultSpacing
@@ -73,13 +76,13 @@ class ViewTextFieldCell: UITableViewCell {
    }
    
    /// A convenience method for setting up the text field's auto layout constraints.
-   private func constrainTextField() {
+   private func constrainTextField() {      
       textField.leadingAnchor.constraint(
          equalTo: leadingView.trailingAnchor, constant: .defaultSpacing
       ).isActive = true
       
       textField.trailingAnchor.constraint(
-         lessThanOrEqualTo: layoutGuide.trailingAnchor, constant: -.defaultSpacing
+         equalTo: layoutGuide.trailingAnchor, constant: -.defaultSpacing
       ).isActive = true
    }
    

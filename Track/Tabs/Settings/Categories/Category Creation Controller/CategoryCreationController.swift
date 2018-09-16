@@ -6,25 +6,19 @@
 //  Copyright © 2018 Marcus Rossel. All rights reserved.
 //
 
-#warning("Incomplete.")
-
 import UIKit
 
 // MARK: - Category Creation Controller Delegate
 
 protocol CategoryCreationControllerDelegate {
    
-   func categoryCreationControllerCanSaveCategory(
+   func categoryCreationControllerDidCancel(
       _ categoryCreationController: CategoryCreationController
    )
    
-   func categoryCreationControllerCanNotSaveCategory(
-      _ categoryCreationController: CategoryCreationController
-   )
-   
-   func categoryCreationControllerDidRequestSave(
+   func categoryCreationController(
       _ categoryCreationController: CategoryCreationController,
-      forCategory category: Category
+      didRequestSaveForCategory category: Category
    )
    
    func setupNavigationBar(for controller: CategoryCreationController)
@@ -42,16 +36,16 @@ final class CategoryCreationController: UIViewController {
    private var coordinator: CategoryCreationControllerDelegate?
    private let categoryManager: Category.Manager
    
-   let titleTextField: UITextField
+   let titleTextField = UITextField()
    let colorPicker: ColorPicker
-   
-   private(set) var category: Category?
+   let saveButton = UIButton()
+   let cancelButton = UIButton()
    
    init(categoryManager: Category.Manager, delegate: CategoryCreationControllerDelegate? = nil) {
       // Phase 1.
       coordinator = delegate
       self.categoryManager = categoryManager
-      titleTextField = UITextField()
+      
       colorPicker = ColorPicker(selection: .gray)
       colorPicker.hide(.alpha)
       
@@ -61,20 +55,51 @@ final class CategoryCreationController: UIViewController {
       // Phase 3.
       view.backgroundColor = .white
       
-      titleTextField.placeholder = "Category Title"
-      titleTextField.delegate = self
-      
+      setupTextField()
+      setupButtons()
       setupLayoutConstraints()
    }
    
-   private func setupLayoutConstraints() {
-      let stackView = UIStackView(arrangedSubviews: [titleTextField, colorPicker])
-      stackView.axis = .vertical
-      stackView.alignment = .fill
-      stackView.distribution = .fillProportionally
+   private func setupTextField() {
+      titleTextField.delegate = self
+      titleTextField.placeholder = "Category Title"
+      titleTextField.borderStyle = .roundedRect
+   }
+   
+   private func setupButtons() {
+      let imageLoader = ImageLoader()
       
-      AutoLayoutHelper(rootView: view , viewToConstrain: stackView)
+      saveButton.isEnabled = false
+      
+      saveButton.setImage(imageLoader[button: .accept], for: .normal)
+      cancelButton.setImage(imageLoader[button: .cancel], for: .normal)
+      
+      saveButton.addTarget(self, action: #selector(didPressSaveButton), for: .touchUpInside)
+      cancelButton.addTarget(self, action: #selector(didPressCancelButton), for: .touchUpInside)
+   }
+   
+   private func setupLayoutConstraints() {
+      let buttonStackView = UIStackView(arrangedSubviews: [saveButton, cancelButton])
+      buttonStackView.axis = .horizontal
+      buttonStackView.alignment = .center
+      buttonStackView.distribution = .fillEqually
+      
+      let enclosingStackView = UIStackView(
+         arrangedSubviews: [titleTextField, colorPicker, buttonStackView]
+      )
+      enclosingStackView.axis = .vertical
+      enclosingStackView.alignment = .fill
+      enclosingStackView.distribution = .fillProportionally
+      
+      AutoLayoutHelper(rootView: view , viewToConstrain: enclosingStackView)
          .constrainView(generalInset: .defaultSpacing)
+      
+      colorPicker.heightAnchor.constraint(
+         lessThanOrEqualTo: view.safeAreaLayoutGuide.heightAnchor, multiplier: 0.35
+      ).isActive = true
+      
+      titleTextField.setContentHuggingPriority(.defaultHigh, for: .vertical)
+      buttonStackView.setContentHuggingPriority(.defaultHigh, for: .vertical)
    }
    
    override func viewWillAppear(_ animated: Bool) {
@@ -82,19 +107,26 @@ final class CategoryCreationController: UIViewController {
       coordinator?.setupNavigationBar(for: self)
    }
    
+   @objc private func didPressSaveButton() {
+      #warning("End text field editing properly first.")
+      
+      guard let categoryTitle = titleTextField.text else {
+         fatalError("Expected text field to contain valid category title.")
+      }
+      
+      let category = Category(title: categoryTitle, color: colorPicker.selection)
+      
+      coordinator?.categoryCreationController(self, didRequestSaveForCategory: category)
+   }
+
+   @objc private func didPressCancelButton() {
+      coordinator?.categoryCreationControllerDidCancel(self)
+   }
+   
    // MARK: - Requirements
    
-   required init?(coder aDecoder: NSCoder) { fatalError("App does not use storyboard or XIB.") }
-}
-
-// MARK: - Public API
-
-extension CategoryCreationController {
-   
-   func saveCategoryIfPossible() {
-      guard let category = category else { return }
-      coordinator?.categoryCreationControllerDidRequestSave(self, forCategory: category)
-   }
+   /// Do not call this initializer! This view does not support storyboards or XIB.
+   required init?(coder aDecoder: NSCoder) { fatalError("View doesn't support storyboard or XIB.") }
 }
 
 // MARK: - Text Field Delegate
@@ -118,13 +150,9 @@ extension CategoryCreationController: UITextFieldDelegate {
       
       textField.resignFirstResponder()
       
-      if categoryManager.uniqueCategory(with: trimmedText) != nil || trimmedText.isEmpty {
-         category = nil
-         coordinator?.categoryCreationControllerCanNotSaveCategory(self)
-      } else {
-         category = Category(title: trimmedText, color: colorPicker.selection)
-         coordinator?.categoryCreationControllerCanSaveCategory(self)
-      }
+      saveButton.isEnabled =
+         !(categoryManager.uniqueCategory(with: trimmedText) != nil) &&
+         !trimmedText.isEmpty
       
       return true
    }

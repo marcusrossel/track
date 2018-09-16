@@ -14,13 +14,25 @@ final class ColorDot: UIView {
    /// The diameter of the circle.
    var diameter: CGFloat {
       didSet {
-         // Adjusts the frame to resize the circle to the new diameter.
+         // Resizes the circle to the new diameter.
          frame = CGRect(origin: frame.origin, size: ColorDot.size(for: diameter))
+         setDrawPaths()
       }
    }
    
    /// The color of the circle.
-   var color: UIColor
+   var color: UIColor {
+      didSet { setDrawPaths() }
+   }
+   
+   /// The path of the outer border of the color dot, when being drawn.
+   private(set) var circlePath = UIBezierPath()
+   
+   /// The path of the inner ring of the color dot, when being drawn.
+   private(set) var ringPath = UIBezierPath()
+   
+   /// A property that affects how the color dot is drawn.
+   private var colorIsLight: Bool { return color.luminosity > 0.95 }
    
    init(diameter: CGFloat, color: UIColor) {
       // Phase 1.
@@ -31,33 +43,59 @@ final class ColorDot: UIView {
       super.init(frame: CGRect(origin: .zero, size: ColorDot.size(for: diameter)))
       
       // Phase 3.
+      setDrawPaths()
       backgroundColor = .clear
    }
 
    /// Draws the circle with the specified diameter and color.
+   /// If the color is too light and accent ring is added to the ring.
    override func draw(_ rect: CGRect) {
-      let circlePath = UIBezierPath(
+      let colorIsLight = color.luminosity > 0.95
+      let lineWidth = diameter / 40
+      let drawDiameter = colorIsLight ? (diameter - lineWidth) : diameter
+      
+      // Gets needed paths.
+      let circle = circlePath(diameter: drawDiameter, rect: rect)
+      let ring = circlePath(diameter: 0.85 * drawDiameter, rect: rect)
+      
+      // Fills the circle.
+      color.setFill()
+      circle.fill()
+      
+      // Sets stroke properties.
+      circle.lineWidth = lineWidth
+      ring.lineWidth = lineWidth
+      UIColor.white.setStroke()
+      
+      // Makes adjustments if the color is to light.
+      if colorIsLight {
+         UIColor(white: 0.8, alpha: 1).setStroke()
+         circle.stroke()
+      }
+      
+      ring.stroke()
+   }
+   
+   /// Sets the `circlePath` and `ringPath` that are used to draw the color dot, for the current
+   /// frame and color.
+   private func setDrawPaths() {
+      let colorIsLight = color.luminosity > 0.95
+      let lineWidth = diameter / 40
+      let drawDiameter = colorIsLight ? (diameter - lineWidth) : diameter
+      
+      circlePath = circlePath(diameter: drawDiameter, rect: frame)
+      ringPath = circlePath(diameter: 0.85 * drawDiameter, rect: frame)
+   }
+   
+   /// Creates a circular path at a given diameter in the center of a given rect.
+   private func circlePath(diameter: CGFloat, rect: CGRect) -> UIBezierPath {
+      return UIBezierPath(
          arcCenter: rect.center,
          radius: diameter / 2,
          startAngle: 0,
          endAngle: 360.degreesAsRadians,
          clockwise: true
       )
-      
-      let ringPath = UIBezierPath(
-         arcCenter: rect.center,
-         radius: 0.85 * (diameter / 2),
-         startAngle: 0,
-         endAngle: 360.degreesAsRadians,
-         clockwise: true
-      )
-      
-      color.setFill()
-      circlePath.fill()
-      
-      ringPath.lineWidth = diameter / 40
-      UIColor.white.setStroke()
-      ringPath.stroke()
    }
    
    // MARK: - Requirements

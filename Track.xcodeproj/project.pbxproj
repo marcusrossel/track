@@ -36,6 +36,9 @@
 		DDC602B5213F1C95002C7642 /* EditableCategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */; };
 		DDC602B7213F25F2002C7642 /* ButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B6213F25F2002C7642 /* ButtonCell.swift */; };
 		DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEDE72A21481866007FC062 /* CategorySelectionController.swift */; };
+		DDFBDEDE214E8EBE00BE2073 /* TabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */; };
+		DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE0214E8F3000BE2073 /* Tab.swift */; };
+		DDFBDEE3214E964C00BE2073 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE2214E964C00BE2073 /* Coordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +73,9 @@
 		DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableCategoryCell.swift; sourceTree = "<group>"; };
 		DDC602B6213F25F2002C7642 /* ButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonCell.swift; sourceTree = "<group>"; };
 		DDEDE72A21481866007FC062 /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
+		DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCoordinator.swift; sourceTree = "<group>"; };
+		DDFBDEE0214E8F3000BE2073 /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
+		DDFBDEE2214E964C00BE2073 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +110,7 @@
 		DD35EEF0212DA17C007DED53 /* Tabs */ = {
 			isa = PBXGroup;
 			children = (
+				DDFBDEDF214E8EF800BE2073 /* Root */,
 				DDBD053121260BC0005DB627 /* Timer */,
 				DDBD053221260BC9005DB627 /* Today */,
 				DDBD053321260BCF005DB627 /* Record */,
@@ -204,6 +211,7 @@
 			children = (
 				DDBD0514212602D2005DB627 /* AppDelegate.swift */,
 				DDBD053621260CA3005DB627 /* AppCoordinator.swift */,
+				DDFBDEE2214E964C00BE2073 /* Coordinator.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -254,6 +262,15 @@
 				DDBD05572127051D005DB627 /* Category+Manager.swift */,
 			);
 			path = Category;
+			sourceTree = "<group>";
+		};
+		DDFBDEDF214E8EF800BE2073 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */,
+				DDFBDEE0214E8F3000BE2073 /* Tab.swift */,
+			);
+			path = Root;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -328,6 +345,7 @@
 			files = (
 				DDA5AA482129CB5A00121EFA /* CategoriesCoordinator.swift in Sources */,
 				DDBD0515212602D2005DB627 /* AppDelegate.swift in Sources */,
+				DDFBDEE3214E964C00BE2073 /* Coordinator.swift in Sources */,
 				DDC602B7213F25F2002C7642 /* ButtonCell.swift in Sources */,
 				DD21EFAB2128A85F00C15367 /* TimerTabCoordinator.swift in Sources */,
 				DD21EFB52128CBCC00C15367 /* CategoryCreationController.swift in Sources */,
@@ -342,12 +360,14 @@
 				DDA5AA4C212A0BD300121EFA /* SplitCell.swift in Sources */,
 				DDBD054721262321005DB627 /* CategoriesController.swift in Sources */,
 				DDBD054F2126D5B7005DB627 /* CategoryCell.swift in Sources */,
+				DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */,
 				DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */,
 				DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */,
 				DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */,
 				DD5B1285214437C700602791 /* Track+Manager.swift in Sources */,
 				DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */,
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,
+				DDFBDEDE214E8EBE00BE2073 /* TabCoordinator.swift in Sources */,
 				DDBD053721260CA3005DB627 /* AppCoordinator.swift in Sources */,
 				DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,

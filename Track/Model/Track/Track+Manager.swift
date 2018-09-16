@@ -111,8 +111,8 @@ extension Track {
       
       private(set) var tracks: Set<Track> = []
       
-      var trackingCategoryID: Category.ID? {
-         return (tracks.first { $0.isTracking })?.categoryID
+      var runningTrack: Track? {
+         return (tracks.first { $0.isTracking })
       }
       
       init?(tracks: Set<Track> = []) {

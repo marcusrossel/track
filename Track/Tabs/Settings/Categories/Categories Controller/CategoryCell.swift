@@ -51,8 +51,19 @@ class CategoryCell: ViewTextFieldCell {
       colorDot = ColorDot(diameter: 40, color: .black)
       colorDot.isUserInteractionEnabled = false
       
+      setupTextField()
+   }
+   
+   private func setupTextField() {
       title = ""
       textField.isUserInteractionEnabled = false
+      textField.font = UIFont.preferredFont(forTextStyle: .body)
+      
+      // Sets up layout constraints.
+      let heightRatio = colorDot.ringPath.bounds.height / colorDot.circlePath.bounds.height
+      textField.heightAnchor.constraint(
+         equalTo: colorDot.heightAnchor, multiplier: heightRatio
+      ).isActive = true
    }
    
    // MARK: - Requirements

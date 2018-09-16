@@ -10,6 +10,7 @@ import UIKit
 
 protocol TimerControllerDelegate {
    
+   func timerController(_ timerController: TimerController, changedTrackTo track: Track)
    func timerControllerDidStop(_ timerController: TimerController)
    func timerControllerDidSwitch(_ timerController: TimerController)
    
@@ -27,9 +28,9 @@ final class TimerController: UIViewController {
 
    var track: Track {
       didSet {
-         titleLabel.text = category.title
          timeTracker.track = track
-         setState(tracking: track.isTracking)
+         adjustButtonState(tracking: track.isTracking)
+         coordinator?.timerController(self, changedTrackTo: track)
       }
    }
    
@@ -43,12 +44,11 @@ final class TimerController: UIViewController {
    private let trackManager: Track.Manager
    private let categoryManager: Category.Manager
    
-   private let titleLabel = UILabel()
    private let timeTracker: TimeTracker
    private let playPauseButton = UIButton()
    private let stopButton = UIButton()
    let switchButton = UIButton()
-   
+
    init(
       categoryID: Category.ID,
       trackManager: Track.Manager,
@@ -69,40 +69,41 @@ final class TimerController: UIViewController {
       super.init(nibName: nil, bundle: nil)
       
       // Phase 3.
-      setupTitleLabel()
-      setupButtons()
-      setState(tracking: track.isTracking)
-      
       view.backgroundColor = .white
-      
+      setupButtons()
+      adjustButtonState(tracking: track.isTracking)
+
       setupLayoutConstraints()
-   }
-   
-   private func setupTitleLabel() {
-      titleLabel.text = category.title
       
-      titleLabel.textAlignment = .center
-      let font = UIFont.boldSystemFont(ofSize: 100)
-      titleLabel.font = font
-      titleLabel.adjustsFontSizeToFitWidth = true
+      coordinator?.timerController(self, changedTrackTo: track)
    }
    
    private func setupButtons() {
       let imageLoader = ImageLoader()
-      playPauseButton.setImage(imageLoader[button: .play], for: .normal)
-      stopButton.setImage(imageLoader[button: .stop], for: .normal)
-      switchButton.setImage(imageLoader[button: .switch], for: .normal)
       
-      playPauseButton.addTarget(self, action: #selector(didPressPlayPause(_:)), for: .touchUpInside)
-      stopButton.addTarget(self, action: #selector(didPressStop), for: .touchUpInside)
-      switchButton.addTarget(self, action: #selector(didPressSwitch), for: .touchUpInside)
+      let items: [(UIButton, ImageLoader.Button, Selector)] = [
+         (playPauseButton, .play, #selector(didPressPlayPause)),
+         (stopButton, .stop, #selector(didPressStop)),
+         (switchButton, .switch, #selector(didPressSwitch))
+      ]
+         
+      for item in items {
+         let image = imageLoader[button: item.1]
+         item.0.setImage(image, for: .normal)
+         item.0.addTarget(self, action: item.2, for: .touchUpInside)
+      }
    }
    
-   private func setState(tracking: Bool) {
-      let imageLoader = ImageLoader()
+   private func adjustButtonState(tracking: Bool) {
+      let imageLoader = ImageLoader(useDefaultSizes: false)
       let buttonType: ImageLoader.Button = tracking ? .pause : .play
+      let size = CGSize(
+         width: 2 * ImageLoader.Button.defaultSize.width,
+         height: 2 * ImageLoader.Button.defaultSize.height
+      )
+      let image = imageLoader[button: buttonType].resizedKeepingAspect(forSize: size)
       
-      playPauseButton.setImage(imageLoader[button: buttonType], for: .normal)
+      playPauseButton.setImage(image, for: .normal)
    }
    
    override func viewWillAppear(_ animated: Bool) {
@@ -120,11 +121,11 @@ final class TimerController: UIViewController {
 
 extension TimerController {
    
-   @objc private func didPressPlayPause(_ sender: UIButton) {
-      let imageLoader = ImageLoader()
+   @objc private func didPressPlayPause() {
+      adjustButtonState(tracking: !track.isTracking)
+      
       switch track.isTracking {
       case true:
-         playPauseButton.setImage(imageLoader[button: .play], for: .normal)
          if let trackOverflow = track.stop() {
             guard trackManager.addTracks(trackOverflow) else {
                fatalError("Undescribed error.")
@@ -132,7 +133,6 @@ extension TimerController {
          }
          
       case false:
-         playPauseButton.setImage(imageLoader[button: .pause], for: .normal)
          track.track()
       }
    }
@@ -158,34 +158,33 @@ extension TimerController {
    
    private func setupLayoutConstraints() {
       let buttonStackView = UIStackView(
-         arrangedSubviews: [playPauseButton, stopButton, switchButton]
+         arrangedSubviews: [stopButton, playPauseButton, switchButton]
       )
       buttonStackView.axis = .horizontal
       buttonStackView.alignment = .bottom
-      buttonStackView.distribution = .fillEqually
-      
-      let viewsToLayout = [titleLabel, timeTracker, buttonStackView]
+      buttonStackView.distribution = .fillProportionally
+
+      let viewsToLayout = [timeTracker, buttonStackView]
       let guide = view.safeAreaLayoutGuide
       
       AutoLayoutHelper(rootView: view).setupViewsForAutoLayout(viewsToLayout)
       
-      titleLabel.topAnchor.constraint(equalTo: guide.topAnchor).isActive = true
-      titleLabel.setContentHuggingPriority(.required, for: .vertical)
+      for viewToLayout in viewsToLayout {
+         viewToLayout.leadingAnchor.constraint(
+            equalTo: guide.leadingAnchor, constant: .defaultSpacing
+            ).isActive = true
+         
+         viewToLayout.trailingAnchor.constraint(
+            equalTo: guide.trailingAnchor, constant: -.defaultSpacing
+            ).isActive = true
+      }
       
-      timeTracker.centerYAnchor.constraint(equalTo: guide.centerYAnchor).isActive = true
+      timeTracker.topAnchor.constraint(
+         equalTo: guide.topAnchor, constant: 3 * .defaultSpacing
+      ).isActive = true
       
       buttonStackView.bottomAnchor.constraint(
          equalTo: guide.bottomAnchor, constant: 3 * -.defaultSpacing
       ).isActive = true
-      
-      for viewToLayout in viewsToLayout {
-         viewToLayout.leadingAnchor.constraint(
-            equalTo: guide.leadingAnchor, constant: .defaultSpacing
-         ).isActive = true
-         
-         viewToLayout.trailingAnchor.constraint(
-            equalTo: guide.trailingAnchor, constant: -.defaultSpacing
-         ).isActive = true
-      }
    }
 }

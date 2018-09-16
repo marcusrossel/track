@@ -74,13 +74,8 @@ extension CategorySelectionController {
    
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
    -> UITableViewCell {
-      
-      guard
-         let cell = tableView.dequeueReusableCell(
-            withIdentifier: CategoryCell.identifier, for: indexPath
-         ) as? CategoryCell
-      else { fatalError("Dequeued unexpected type of table view cell.") }
-      
+      #warning("Efficiency: Not reusing cells.")
+      let cell = CategoryCell(style: .default, reuseIdentifier: CategoryCell.identifier)
       let category = categoryManager.categories[indexPath.row]
       
       cell.title = category.title

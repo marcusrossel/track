@@ -40,14 +40,25 @@ final class ButtonCell: ViewTextFieldCell {
       super.init(style: style, reuseIdentifier: reuseIdentifier)
       
       // Phase 3.
-      leadingView = UIImageView()
-      
-      leadingView.isUserInteractionEnabled = false
-      textField.isUserInteractionEnabled = false
+      setupTextField()
+      setupImageView()
       
       contentView.addGestureRecognizer(
          UITapGestureRecognizer(target: self, action: #selector(cellWasTapped))
       )
+   }
+   
+   private func setupTextField() {
+      textField.isUserInteractionEnabled = false
+      
+      let fontDescriptor = UIFont.preferredFont(forTextStyle: .body).fontDescriptor
+      textField.font = UIFont(descriptor: fontDescriptor, size: UIFont.buttonFontSize)
+   }
+   
+   /// Sets up the cell's leading view as an image view.
+   private func setupImageView() {
+      leadingView = UIImageView()
+      leadingView.isUserInteractionEnabled = false
    }
    
    /// An action method, delegating taps of the cell to the handler.

@@ -59,7 +59,7 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
       let categoryCreationController = CategoryCreationController(
          categoryManager: categoryManager, delegate: self
       )
-      navigationController.pushViewController(categoryCreationController, animated: true)
+      navigationController.present(categoryCreationController, animated: true, completion: nil)
    }
    
    /// Handles a category controller's color dot being tapped, by creating a color picker popover
@@ -112,48 +112,19 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
 
 extension CategoriesCoordinator: CategoryCreationControllerDelegate {
    
-   /// A category creation controller shows a non-large title navigation bar with save button.
-   func setupNavigationBar(for controller: CategoryCreationController) {
-      controller.navigationItem.title = "Create Category"
-      controller.navigationItem.largeTitleDisplayMode = .never
-      navigationController.setNavigationBarHidden(false, animated: true)
-      
-      // Adds the save button to the navigation bar.
-      controller.navigationItem.rightBarButtonItem = UIBarButtonItem(
-         barButtonSystemItem: .save,
-         target: self,
-         action: #selector(didPressSaveButton(_:))
-      )
-   }
-   
-   /// The action for category creation controller's save button (in the navigation bar).
-   @objc private func didPressSaveButton(_ sender: UIBarButtonItem) {
-      (navigationController.topViewController as? CategoryCreationController)?
-         .saveCategoryIfPossible()
-      navigationController.popViewController(animated: true)
+   func categoryCreationControllerDidCancel(
+      _ categoryCreationController: CategoryCreationController
+   ) {
+      navigationController.dismiss(animated: true, completion: nil)
    }
    
    /// Saves the category associated with a category creation controller.
-   /// This also causes the controller to be popped.
-   func categoryCreationControllerDidRequestSave(
+   /// This also causes the controller to be dismissed.
+   func categoryCreationController(
       _ categoryCreationController: CategoryCreationController,
-      forCategory category: Category
+      didRequestSaveForCategory category: Category
    ) {
-      let _ = categoryManager.insert(category, atIndex: 0)
-      navigationController.popViewController(animated: true)
-   }
-   
-   /// Enables the save button, as there is a category that can be saved.
-   func categoryCreationControllerCanSaveCategory(
-      _ categoryCreationController: CategoryCreationController
-   ) {
-      navigationController.navigationItem.rightBarButtonItem?.isEnabled = true
-   }
-   
-   /// Disables the save button, as there is no category that can be saved.
-   func categoryCreationControllerCanNotSaveCategory(
-      _ categoryCreationController: CategoryCreationController
-   ) {
-      navigationController.navigationItem.rightBarButtonItem?.isEnabled = false
+      _ = categoryManager.insert(category, atIndex: 0)
+      navigationController.dismiss(animated: true)
    }
 }

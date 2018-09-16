@@ -119,7 +119,7 @@ extension SplitCell: UICollectionViewDataSource {
    /// A convenience method for giving a subcell its default style.
    private func styleSubcell(_ cell: UICollectionViewCell) {
       cell.contentView.layer.cornerRadius = 15
-      cell.contentView.layer.borderColor = UIColor.tableViewBorder.cgColor
+      cell.contentView.layer.borderColor = UIColor(white: 0.9, alpha: 1).cgColor
       cell.contentView.layer.borderWidth = .tableViewBorder
       cell.contentView.backgroundColor = .white
    }

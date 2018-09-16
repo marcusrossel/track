@@ -98,9 +98,14 @@ extension UIColor {
          alpha: components[.alpha] ?? 0
       )
    }
+
+   var luminosity: CGFloat {
+      return [(Component.red, 0.2126), (.green, 0.7152), (.blue, 0.0722)]
+         .reduce(0) { result, item in result + item.1 * pow(decomposed[item.0]!, 2.2) }
+   }
    
-   static var tableViewBorder: UIColor {
-      return UIColor(white: 0.9, alpha: 1)
+   static var systemBlue: UIColor {
+      return UIColor(red: 0, green: 122, blue: 255, alpha: 1)
    }
 }
 
@@ -130,19 +135,12 @@ extension UIImage {
    }
 }
 
-
 // MARK: - Trash
 
 func _textColor(contrasting background: UIColor, whitePreferenceModifier: CGFloat = 10)
 -> UIColor {
-   let luminosity: (UIColor) -> CGFloat = {
-      0.2126 * pow($0.decomposed[.red]!, 2.2) +
-      0.7152 * pow($0.decomposed[.green]!, 2.2) +
-      0.0722 * pow($0.decomposed[.blue]!, 2.2)
-   }
-      
    let luminosityDifference: (UIColor, UIColor) -> CGFloat = {
-      let luminosities = [$0, $1].map(luminosity).sorted()
+      let luminosities = [$0, $1].map { color in color.luminosity }.sorted()
       return (luminosities[1] + 0.05) / (luminosities[0] + 0.05)
    }
       

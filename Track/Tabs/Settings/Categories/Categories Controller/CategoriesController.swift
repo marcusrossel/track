@@ -65,6 +65,7 @@ final class CategoriesController: UITableViewController {
          EditableCategoryCell.self, forCellReuseIdentifier: EditableCategoryCell.identifier
       )
       
+      tableView.allowsSelection = false
       tableView.rowHeight = .defaultHeight
    }
    
@@ -206,7 +207,6 @@ extension CategoriesController {
    private func modifierCellImage(for buttonType: ImageLoader.Button) -> UIImage {
       let imageLoader = ImageLoader(useDefaultSizes: false)
       let image = imageLoader[button: buttonType]
-      
       let imageSize = CGSize(width: 40, height: 40)
       
       return image.resizedKeepingAspect(forSize: imageSize)

@@ -43,8 +43,7 @@ final class TimeTracker: UIView {
    /// A convenience method for styling the time label.
    private func setupTimeLabelFont() {
       timeLabel.textAlignment = .center
-      let font = UIFont.systemFont(ofSize: 100)
-      timeLabel.font = font
+      timeLabel.font = UIFont(name: "HelveticaNeue-Thin", size: 100)
       timeLabel.adjustsFontSizeToFitWidth = true
    }
    

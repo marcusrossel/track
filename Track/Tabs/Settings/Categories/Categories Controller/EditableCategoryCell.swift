@@ -25,7 +25,26 @@ final class EditableCategoryCell: CategoryCell {
       super.init(style: style, reuseIdentifier: reuseIdentifier)
       
       // Phase 3.
+      setupTextField()
+      setupColorDot()
+   }
+   
+   private func setupTextField() {
       textField.isUserInteractionEnabled = true
+      textField.clearButtonMode = .whileEditing
+      
+      textField.placeholder = "Category Title"
+      
+      textField.borderStyle = .roundedRect
+      textField.backgroundColor = UIColor(white: 0.97, alpha: 1)
+   }
+   
+   /// Initializes additional properties on the color dot.
+   private func setupColorDot() {
+      // Sets a shadow for the color dot.
+      colorDot.layer.shadowPath = colorDot.circlePath.cgPath
+      colorDot.layer.shadowOpacity = 0.3
+      colorDot.layer.shadowOffset = CGSize(width: 0, height: 2)
       
       colorDot.addGestureRecognizer(
          UITapGestureRecognizer(target: self, action: #selector(colorDotWasTapped))
