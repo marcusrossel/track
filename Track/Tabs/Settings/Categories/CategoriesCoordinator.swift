@@ -21,11 +21,11 @@ final class CategoriesCoordinator: Coordinator {
    private var popoverHandler: PopoverHandler?
    
    /// A reference to the category manager that can be passed to any controllers in need of it.
-   private let categoryManager: Category.Manager
+   private let categoryManager: CategoryManager
    
    /// Creates a categories coordinator with given controllers and managers.
    init(
-      categoryManager: Category.Manager = Category.Manager(),
+      categoryManager: CategoryManager = CategoryManager(),
       navigationController: UINavigationController = UINavigationController()
    ) {
       self.categoryManager = categoryManager

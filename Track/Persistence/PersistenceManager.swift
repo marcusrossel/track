@@ -6,16 +6,18 @@
 //  Copyright © 2018 Marcus Rossel. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 /// A manager for reading and writing to and from disk.
 final class PersistenceManager {
    
    /// An item that can be persisted by the manager.
-   /// Every item has an associated storage type, used by the manager.
    enum Item: String {
-      case tracks
-      case categories
+      case categoryManager
+   }
+   
+   enum ModelledItem: String {
+      case trackManager
    }
    
    /// `NSError`-codes used by some of the manager's methods.
@@ -51,12 +53,25 @@ final class PersistenceManager {
          .appendingPathExtension(fileType)
    }
    
-   /// Persists a given value for a given item.
-   /// If the type of the given value does not match the expected type for the persistence item,
-   /// writing that item will fail.
+   private func path(for item: ModelledItem) -> URL {
+      return storageDirectory
+         .appendingPathComponent(item.rawValue)
+         .appendingPathExtension(fileType)
+   }
+   
+   /// Persists a given encodable value for a given item.
    func write<T: Encodable>(_ item: Item, value: T) throws {
       try JSONEncoder()
          .encode(value)
+         .write(to: path(for: item))
+   }
+   
+   /// Persists a given persistable value for a given item.
+   func write<T: Persistable>(_ item: ModelledItem, asEntityFor value: T) throws {
+      let entity = T.Entity(modelledType: value)
+      
+      try JSONEncoder()
+         .encode(entity)
          .write(to: path(for: item))
    }
    
@@ -73,5 +88,17 @@ final class PersistenceManager {
       catch let error as NSError where error.code == ErrorCode.readNonExistentFile { return nil }
       
       return try JSONDecoder().decode(type, from: fileData)
+   }
+   
+   func read<T: Persistable>(_ item: ModelledItem, asEntityFor type: T.Type) throws -> T.Entity? {
+      let fileData: Data
+      
+      print(path(for: item))
+      
+      /// Catches the case of there being no file.
+      do { fileData = try Data(contentsOf: path(for: item)) }
+      catch let error as NSError where error.code == ErrorCode.readNonExistentFile { return nil }
+      
+      return try JSONDecoder().decode(type.Entity.self, from: fileData)
    }
 }

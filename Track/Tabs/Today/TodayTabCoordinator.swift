@@ -12,7 +12,7 @@ final class TodayTabCoordinator: NSObject, Coordinator {
    
    let navigationController = UINavigationController()
    
-   init(categoryManager: Category.Manager, trackManager: Track.Manager) { }
+   init(trackManager: TrackManager) { }
    
    func run() { }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD14745D21565D08007BB1CD /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD14745C21565D08007BB1CD /* StorageManager.swift */; };
 		DD21EFAB2128A85F00C15367 /* TimerTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */; };
 		DD21EFAD2128A88400C15367 /* TodayTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAC2128A88400C15367 /* TodayTabCoordinator.swift */; };
 		DD21EFAF2128A8A800C15367 /* RecordTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAE2128A8A800C15367 /* RecordTabCoordinator.swift */; };
@@ -14,7 +15,7 @@
 		DD21EFB52128CBCC00C15367 /* CategoryCreationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFB42128CBCC00C15367 /* CategoryCreationController.swift */; };
 		DD35EEF3212DAB1B007DED53 /* AutoLayoutHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */; };
 		DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD433B55212E00E0006D0DC2 /* Code Dump.swift */; };
-		DD5B1285214437C700602791 /* Track+Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5B1284214437C700602791 /* Track+Manager.swift */; };
+		DD5B1285214437C700602791 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5B1284214437C700602791 /* Category.swift */; };
 		DDA5AA482129CB5A00121EFA /* CategoriesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA472129CB5A00121EFA /* CategoriesCoordinator.swift */; };
 		DDA5AA4C212A0BD300121EFA /* SplitCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4B212A0BD300121EFA /* SplitCell.swift */; };
 		DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4F212AD89C00121EFA /* TimerController.swift */; };
@@ -30,18 +31,25 @@
 		DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05492126267B005DB627 /* ColorPicker.swift */; };
 		DDBD054F2126D5B7005DB627 /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD054E2126D5B7005DB627 /* CategoryCell.swift */; };
 		DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05542126EAD0005DB627 /* ColorDot.swift */; };
-		DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD05572127051D005DB627 /* Category+Manager.swift */; };
 		DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD056121271F9C005DB627 /* PersistenceManager.swift */; };
 		DDC602B3213F18FA002C7642 /* ViewTextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */; };
 		DDC602B5213F1C95002C7642 /* EditableCategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */; };
 		DDC602B7213F25F2002C7642 /* ButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B6213F25F2002C7642 /* ButtonCell.swift */; };
+		DDCB8F26215139F1002F2DAF /* CategoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCB8F25215139F1002F2DAF /* CategoryManager.swift */; };
+		DDCB8F28215144DD002F2DAF /* TrackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCB8F27215144DD002F2DAF /* TrackManager.swift */; };
 		DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEDE72A21481866007FC062 /* CategorySelectionController.swift */; };
 		DDFBDEDE214E8EBE00BE2073 /* TabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */; };
 		DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE0214E8F3000BE2073 /* Tab.swift */; };
 		DDFBDEE3214E964C00BE2073 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE2214E964C00BE2073 /* Coordinator.swift */; };
+		DDFBDEEA214FBD1B00BE2073 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE9214FBD1B00BE2073 /* Track.swift */; };
+		DDFBDEEE214FBF5F00BE2073 /* Persistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEED214FBF5F00BE2073 /* Persistable.swift */; };
+		DDFBDEF0214FE33500BE2073 /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEEF214FE33500BE2073 /* Entities.swift */; };
+		DDFBDEF3215127C600BE2073 /* EnumMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEF2215127C600BE2073 /* EnumMap.swift */; };
+		DDFBDEF5215127CF00BE2073 /* BiMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEF4215127CF00BE2073 /* BiMap.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DD14745C21565D08007BB1CD /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
 		DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerTabCoordinator.swift; sourceTree = "<group>"; };
 		DD21EFAC2128A88400C15367 /* TodayTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTabCoordinator.swift; sourceTree = "<group>"; };
 		DD21EFAE2128A8A800C15367 /* RecordTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordTabCoordinator.swift; sourceTree = "<group>"; };
@@ -49,7 +57,7 @@
 		DD21EFB42128CBCC00C15367 /* CategoryCreationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCreationController.swift; sourceTree = "<group>"; };
 		DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLayoutHelper.swift; sourceTree = "<group>"; };
 		DD433B55212E00E0006D0DC2 /* Code Dump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Code Dump.swift"; sourceTree = "<group>"; };
-		DD5B1284214437C700602791 /* Track+Manager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Track+Manager.swift"; sourceTree = "<group>"; };
+		DD5B1284214437C700602791 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		DDA5AA472129CB5A00121EFA /* CategoriesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesCoordinator.swift; sourceTree = "<group>"; };
 		DDA5AA4B212A0BD300121EFA /* SplitCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitCell.swift; sourceTree = "<group>"; };
 		DDA5AA4F212AD89C00121EFA /* TimerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerController.swift; sourceTree = "<group>"; };
@@ -67,15 +75,21 @@
 		DDBD05492126267B005DB627 /* ColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPicker.swift; sourceTree = "<group>"; };
 		DDBD054E2126D5B7005DB627 /* CategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
 		DDBD05542126EAD0005DB627 /* ColorDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDot.swift; sourceTree = "<group>"; };
-		DDBD05572127051D005DB627 /* Category+Manager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Category+Manager.swift"; sourceTree = "<group>"; };
 		DDBD056121271F9C005DB627 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
 		DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewTextFieldCell.swift; sourceTree = "<group>"; };
 		DDC602B4213F1C95002C7642 /* EditableCategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableCategoryCell.swift; sourceTree = "<group>"; };
 		DDC602B6213F25F2002C7642 /* ButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonCell.swift; sourceTree = "<group>"; };
+		DDCB8F25215139F1002F2DAF /* CategoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManager.swift; sourceTree = "<group>"; };
+		DDCB8F27215144DD002F2DAF /* TrackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackManager.swift; sourceTree = "<group>"; };
 		DDEDE72A21481866007FC062 /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
 		DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCoordinator.swift; sourceTree = "<group>"; };
 		DDFBDEE0214E8F3000BE2073 /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
 		DDFBDEE2214E964C00BE2073 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
+		DDFBDEE9214FBD1B00BE2073 /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		DDFBDEED214FBF5F00BE2073 /* Persistable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistable.swift; sourceTree = "<group>"; };
+		DDFBDEEF214FE33500BE2073 /* Entities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entities.swift; sourceTree = "<group>"; };
+		DDFBDEF2215127C600BE2073 /* EnumMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumMap.swift; sourceTree = "<group>"; };
+		DDFBDEF4215127CF00BE2073 /* BiMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiMap.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,21 +133,12 @@
 			path = Tabs;
 			sourceTree = "<group>";
 		};
-		DD5B1283214437AF00602791 /* Track */ = {
-			isa = PBXGroup;
-			children = (
-				DD5B1284214437C700602791 /* Track+Manager.swift */,
-			);
-			path = Track;
-			sourceTree = "<group>";
-		};
 		DDB291A721306A5800DC7659 /* Custom Handlers */ = {
 			isa = PBXGroup;
 			children = (
 				DDB291A821306AA600DC7659 /* PopoverHandler.swift */,
 				DD35EEF2212DAB1B007DED53 /* AutoLayoutHelper.swift */,
 				DDB291A321300D8A00DC7659 /* ImageLoader.swift */,
-				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
 			);
 			path = "Custom Handlers";
 			sourceTree = "<group>";
@@ -160,8 +165,10 @@
 				DDBD053521260C73005DB627 /* App */,
 				DD35EEF0212DA17C007DED53 /* Tabs */,
 				DDBD055621270509005DB627 /* Model */,
+				DDFBDEE8214FB5EB00BE2073 /* Persistence */,
 				DDBD055B21270707005DB627 /* Custom Views */,
 				DDB291A721306A5800DC7659 /* Custom Handlers */,
+				DDFBDEF1215127AF00BE2073 /* Primitive Data Types */,
 				DD433B55212E00E0006D0DC2 /* Code Dump.swift */,
 				DDBD051B212602D3005DB627 /* Assets.xcassets */,
 				DDBD051D212602D3005DB627 /* LaunchScreen.storyboard */,
@@ -237,8 +244,10 @@
 		DDBD055621270509005DB627 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				DD5B1283214437AF00602791 /* Track */,
-				DDBD056621273227005DB627 /* Category */,
+				DD5B1284214437C700602791 /* Category.swift */,
+				DDCB8F25215139F1002F2DAF /* CategoryManager.swift */,
+				DDFBDEE9214FBD1B00BE2073 /* Track.swift */,
+				DDCB8F27215144DD002F2DAF /* TrackManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -256,14 +265,6 @@
 			path = "Custom Views";
 			sourceTree = "<group>";
 		};
-		DDBD056621273227005DB627 /* Category */ = {
-			isa = PBXGroup;
-			children = (
-				DDBD05572127051D005DB627 /* Category+Manager.swift */,
-			);
-			path = Category;
-			sourceTree = "<group>";
-		};
 		DDFBDEDF214E8EF800BE2073 /* Root */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,6 +272,26 @@
 				DDFBDEE0214E8F3000BE2073 /* Tab.swift */,
 			);
 			path = Root;
+			sourceTree = "<group>";
+		};
+		DDFBDEE8214FB5EB00BE2073 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
+				DDFBDEED214FBF5F00BE2073 /* Persistable.swift */,
+				DDFBDEEF214FE33500BE2073 /* Entities.swift */,
+				DD14745C21565D08007BB1CD /* StorageManager.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		DDFBDEF1215127AF00BE2073 /* Primitive Data Types */ = {
+			isa = PBXGroup;
+			children = (
+				DDFBDEF2215127C600BE2073 /* EnumMap.swift */,
+				DDFBDEF4215127CF00BE2073 /* BiMap.swift */,
+			);
+			path = "Primitive Data Types";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -348,7 +369,9 @@
 				DDFBDEE3214E964C00BE2073 /* Coordinator.swift in Sources */,
 				DDC602B7213F25F2002C7642 /* ButtonCell.swift in Sources */,
 				DD21EFAB2128A85F00C15367 /* TimerTabCoordinator.swift in Sources */,
+				DDFBDEEA214FBD1B00BE2073 /* Track.swift in Sources */,
 				DD21EFB52128CBCC00C15367 /* CategoryCreationController.swift in Sources */,
+				DD14745D21565D08007BB1CD /* StorageManager.swift in Sources */,
 				DDC602B5213F1C95002C7642 /* EditableCategoryCell.swift in Sources */,
 				DD21EFAD2128A88400C15367 /* TodayTabCoordinator.swift in Sources */,
 				DDC602B3213F18FA002C7642 /* ViewTextFieldCell.swift in Sources */,
@@ -360,18 +383,23 @@
 				DDA5AA4C212A0BD300121EFA /* SplitCell.swift in Sources */,
 				DDBD054721262321005DB627 /* CategoriesController.swift in Sources */,
 				DDBD054F2126D5B7005DB627 /* CategoryCell.swift in Sources */,
+				DDFBDEF0214FE33500BE2073 /* Entities.swift in Sources */,
 				DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */,
 				DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */,
 				DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */,
 				DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */,
-				DD5B1285214437C700602791 /* Track+Manager.swift in Sources */,
+				DD5B1285214437C700602791 /* Category.swift in Sources */,
 				DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */,
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,
 				DDFBDEDE214E8EBE00BE2073 /* TabCoordinator.swift in Sources */,
+				DDFBDEF5215127CF00BE2073 /* BiMap.swift in Sources */,
+				DDCB8F26215139F1002F2DAF /* CategoryManager.swift in Sources */,
 				DDBD053721260CA3005DB627 /* AppCoordinator.swift in Sources */,
+				DDFBDEF3215127C600BE2073 /* EnumMap.swift in Sources */,
+				DDFBDEEE214FBF5F00BE2073 /* Persistable.swift in Sources */,
+				DDCB8F28215144DD002F2DAF /* TrackManager.swift in Sources */,
 				DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,
-				DDBD05582127051D005DB627 /* Category+Manager.swift in Sources */,
 				DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

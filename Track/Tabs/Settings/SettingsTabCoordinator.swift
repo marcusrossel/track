@@ -17,9 +17,9 @@ final class SettingsTabCoordinator: Coordinator {
    private var childCoordinators: [Coordinator] = []
    let navigationController = UINavigationController()
    
-   let categoryManager: Category.Manager
+   let categoryManager: CategoryManager
    
-   init(categoryManager: Category.Manager) {
+   init(categoryManager: CategoryManager) {
       self.categoryManager = categoryManager
    }
    

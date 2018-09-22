@@ -66,7 +66,7 @@ final class TimeTracker: UIView {
    
    /// The method for updating the time label.
    @objc private func updateLabel() {
-      timeLabel.text = textRepresentation(forInterval: track.interval)
+      timeLabel.text = textRepresentation(forInterval: track.duration)
    }
 
    // MARK: - Requirements

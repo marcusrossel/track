@@ -135,32 +135,6 @@ extension UIImage {
    }
 }
 
-// MARK: - Enum Map
-
-struct EnumMap<Enum, Value> where Enum: CaseIterable & Hashable {
-   
-   private(set) var dictionary: [Enum: Value]
-   
-   init?(dictionary: [Enum: Value]) {
-      let cases = Set(dictionary.keys)
-      let allCases = Set(Enum.allCases)
-      
-      guard cases == allCases else { return nil }
-      
-      self.dictionary = dictionary
-   }
-   
-   init(valueMap: (Enum) -> Value) {
-      let pairs = Enum.allCases.map { `case` in (`case`, valueMap(`case`)) }
-      dictionary = Dictionary(uniqueKeysWithValues: pairs)
-   }
-   
-   subscript(case: Enum) -> Value {
-      get { return dictionary[`case`]! }
-      set { dictionary[`case`] = newValue }
-   }
-}
-
 // MARK: - Trash
 
 func _textColor(contrasting background: UIColor, whitePreferenceModifier: CGFloat = 10)

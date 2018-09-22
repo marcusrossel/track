@@ -35,18 +35,18 @@ final class TimerTabCoordinator: NSObject, Coordinator {
    var delegate: TimerTabDelegate?
    
    /// A reference to the category manager that can be passed to any controllers in need of it.
-   private let categoryManager: Category.Manager
+   private let categoryManager: CategoryManager
    
    /// A reference to the track manager that can be passed to any controllers in need of it.
-   private let trackManager: Track.Manager
+   private let trackManager: TrackManager
    
    #warning("Unfitting domain.")
    /// A means of retaining a timer controllers current track, when transitioning to a new one.
    private var trackInTransition: Track?
    
    init(
-      categoryManager: Category.Manager,
-      trackManager: Track.Manager,
+      categoryManager: CategoryManager,
+      trackManager: TrackManager,
       delegate: TimerTabDelegate? = nil
    ) {
       self.delegate = delegate
@@ -67,7 +67,7 @@ final class TimerTabCoordinator: NSObject, Coordinator {
       // Sets up the `controller` differently depending on whether there is a running track.
       if let runningTrack = trackManager.runningTrack {
          controller = TimerController(
-            categoryID: runningTrack.categoryID,
+            category: runningTrack.category,
             trackManager: trackManager,
             categoryManager: categoryManager,
             delegate: self
@@ -110,10 +110,8 @@ extension TimerTabCoordinator: CategorySelectionControllerDelegate {
             fatalError("Internal inconsistency when changing category in timer controller.")
          }
          
-         // Gets the track belonging to the selected category (creating a new one if necessary).
-         let trackForCategory =
-            trackManager.todaysTrack(for: category.id) ??
-            trackManager.createTrack(for: category.id)!
+         // Gets the track belonging to the selected category.
+         let trackForCategory = trackManager.currentTrack(for: category)
          
          transferRunningState(from: previousTrack, to: trackForCategory)
          timerController.track = trackForCategory
@@ -122,7 +120,7 @@ extension TimerTabCoordinator: CategorySelectionControllerDelegate {
       } else {
          // Creates a new timer controller from the selected category.
          let timerController = TimerController(
-            categoryID: category.id,
+            category: category,
             trackManager: trackManager,
             categoryManager: categoryManager,
             delegate: self
@@ -135,10 +133,10 @@ extension TimerTabCoordinator: CategorySelectionControllerDelegate {
    /// Stops the `previous` track from running and transfers its previous running state to the
    /// `current` track.
    private func transferRunningState(from previous: Track, to current: Track) {
-      let previousWasTracking = previous.isTracking
-      _ = previous.stop()
+      let previousWasRunning = trackManager.isRunning(previous.category)
+      trackManager.stopRunning()
       
-      if previousWasTracking { current.track() }
+      if previousWasRunning { trackManager.setRunning(current.category) }
    }
 }
 
@@ -151,28 +149,25 @@ extension TimerTabCoordinator: TimerControllerDelegate {
    }
    
    func setupNavigationBar(for controller: TimerController) {
-      let category = categoryManager.uniqueCategory(with: controller.track.categoryID)!
-      
-      controller.navigationItem.title = category.title
+      controller.navigationItem.title = controller.track.category.title
       controller.navigationItem.largeTitleDisplayMode = .always
       navigationController.setNavigationBarHidden(false, animated: true)
       navigationController.navigationBar.prefersLargeTitles = true
    }
    
    func timerController(_ timerController: TimerController, changedTrackTo track: Track) {
-      let category = categoryManager.uniqueCategory(with: timerController.track.categoryID)!
-      
-      navigationController.navigationBar.barTintColor = category.color
+      let categoryColor = timerController.track.category.color
+      navigationController.navigationBar.barTintColor = categoryColor
       navigationController.navigationBar.isTranslucent = false
       
-      delegate?.colorTabBar(with: category.color)
+      delegate?.colorTabBar(with: categoryColor)
    }
    
    func timerControllerDidStop(_ timerController: TimerController) {
-      _ = timerController.track.stop()
+      trackManager.stopRunning()
       
       #warning("Not enough.")
-      delegate?.colorTabBar(with: .white)
+      delegate?.colorTabBar(with: .clear)
       
       let controller = CategorySelectionController(
          categoryManager: categoryManager, trackManager: trackManager, delegate: self

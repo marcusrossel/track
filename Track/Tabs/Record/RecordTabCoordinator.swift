@@ -12,7 +12,7 @@ final class RecordTabCoordinator: Coordinator {
    
    let navigationController = UINavigationController()
    
-   init(categoryManager: Category.Manager, trackManager: Track.Manager) {
+   init(categoryManager: CategoryManager, trackManager: TrackManager) {
       
    }
    

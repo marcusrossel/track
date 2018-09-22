@@ -29,20 +29,13 @@ final class TimerController: UIViewController {
    var track: Track {
       didSet {
          timeTracker.track = track
-         adjustButtonState(tracking: track.isTracking)
+         adjustButtonState(tracking: trackManager.isRunning(track.category))
          coordinator?.timerController(self, changedTrackTo: track)
       }
    }
    
-   private var category: Category {
-      guard let category = categoryManager.uniqueCategory(with: track.categoryID) else {
-         fatalError("Expected to find category with given ID.")
-      }
-      return category
-   }
-   
-   private let trackManager: Track.Manager
-   private let categoryManager: Category.Manager
+   private let trackManager: TrackManager
+   private let categoryManager: CategoryManager
    
    private let timeTracker: TimeTracker
    private let playPauseButton = UIButton()
@@ -50,9 +43,9 @@ final class TimerController: UIViewController {
    let switchButton = UIButton()
 
    init(
-      categoryID: Category.ID,
-      trackManager: Track.Manager,
-      categoryManager: Category.Manager,
+      category: Category,
+      trackManager: TrackManager,
+      categoryManager: CategoryManager,
       delegate: TimerControllerDelegate? = nil
    ) {
       // Phase 1.
@@ -60,9 +53,7 @@ final class TimerController: UIViewController {
       self.trackManager = trackManager
       self.categoryManager = categoryManager
       
-      track =
-         trackManager.todaysTrack(for: categoryID) ??
-         trackManager.createTrack(for: categoryID)!
+      track = trackManager.currentTrack(for: category)
       timeTracker = TimeTracker(track: track)
       
       // Phase 2.
@@ -71,7 +62,7 @@ final class TimerController: UIViewController {
       // Phase 3.
       view.backgroundColor = .white
       setupButtons()
-      adjustButtonState(tracking: track.isTracking)
+      adjustButtonState(tracking: trackManager.isRunning(track.category))
 
       setupLayoutConstraints()
       
@@ -122,28 +113,17 @@ final class TimerController: UIViewController {
 extension TimerController {
    
    @objc private func didPressPlayPause() {
-      adjustButtonState(tracking: !track.isTracking)
+      adjustButtonState(tracking: !trackManager.isRunning(track.category))
       
-      switch track.isTracking {
-      case true:
-         if let trackOverflow = track.stop() {
-            guard trackManager.addTracks(trackOverflow) else {
-               fatalError("Undescribed error.")
-            }
-         }
-         
-      case false:
-         track.track()
+      if trackManager.isRunning(track.category) {
+         trackManager.stopRunning()
+      } else {
+         trackManager.setRunning(track.category)
       }
    }
    
    @objc private func didPressStop() {
-      if let trackOverflow = track.stop() {
-         guard trackManager.addTracks(trackOverflow) else {
-            fatalError("Undescribed error.")
-         }
-      }
-      
+      trackManager.stopRunning()
       coordinator?.timerControllerDidStop(self)
    }
    

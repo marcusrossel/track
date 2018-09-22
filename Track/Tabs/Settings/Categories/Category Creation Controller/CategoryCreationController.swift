@@ -34,14 +34,14 @@ extension CategoryCreationControllerDelegate {
 final class CategoryCreationController: UIViewController {
 
    private var coordinator: CategoryCreationControllerDelegate?
-   private let categoryManager: Category.Manager
+   private let categoryManager: CategoryManager
    
    let titleTextField = UITextField()
    let colorPicker: ColorPicker
    let saveButton = UIButton()
    let cancelButton = UIButton()
    
-   init(categoryManager: Category.Manager, delegate: CategoryCreationControllerDelegate? = nil) {
+   init(categoryManager: CategoryManager, delegate: CategoryCreationControllerDelegate? = nil) {
       // Phase 1.
       coordinator = delegate
       self.categoryManager = categoryManager
@@ -114,7 +114,7 @@ final class CategoryCreationController: UIViewController {
          fatalError("Expected text field to contain valid category title.")
       }
       
-      let category = Category(title: categoryTitle, color: colorPicker.selection)
+      let category = Category(title: categoryTitle, color: colorPicker.selection)!
       
       coordinator?.categoryCreationController(self, didRequestSaveForCategory: category)
    }

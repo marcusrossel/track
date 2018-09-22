@@ -29,12 +29,12 @@ extension CategorySelectionControllerDelegate {
 final class CategorySelectionController: UITableViewController {
 
    var coordinator: CategorySelectionControllerDelegate?
-   private let categoryManager: Category.Manager
-   private let trackManager: Track.Manager
+   private let categoryManager: CategoryManager
+   private let trackManager: TrackManager
    
    init(
-      categoryManager: Category.Manager,
-      trackManager: Track.Manager,
+      categoryManager: CategoryManager,
+      trackManager: TrackManager,
       delegate: CategorySelectionControllerDelegate? = nil
    ) {
       // Phase 1.

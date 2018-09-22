@@ -26,7 +26,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
    /// The tab coordinators navigation controller is redundant.
    let navigationController = UINavigationController()
    
-   init(categoryManager: Category.Manager, trackManager: Track.Manager) {
+   init(categoryManager: CategoryManager, trackManager: TrackManager) {
       // Phase 1.
       
       // Fills the tab coordinators with trash values.
@@ -57,7 +57,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
    }
    
    /// Creates the coordinators associated with each tab.
-   private func makeTabCoordinators(categoryManager: Category.Manager, trackManager: Track.Manager)
+   private func makeTabCoordinators(categoryManager: CategoryManager, trackManager: TrackManager)
    -> EnumMap<Tab, Coordinator> {
       
       return EnumMap(dictionary: [
@@ -65,7 +65,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
             categoryManager: categoryManager, trackManager: trackManager, delegate: self
          ),
          .today: TodayTabCoordinator(
-            categoryManager: categoryManager, trackManager: trackManager
+            trackManager: trackManager
          ),
          .record: RecordTabCoordinator(
             categoryManager: categoryManager, trackManager: trackManager

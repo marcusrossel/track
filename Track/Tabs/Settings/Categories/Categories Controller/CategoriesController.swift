@@ -40,11 +40,11 @@ final class CategoriesController: UITableViewController {
    private var coordinator: CategoriesControllerDelegate?
    
    /// A category manager giving the controller access to all categories.
-   private let categoryManager: Category.Manager
+   private let categoryManager: CategoryManager
    
    /// Creates a new categories controller from a category manager.
    /// Optionally a delegate can be provided to add external functionality.
-   init(categoryManager: Category.Manager, delegate: CategoriesControllerDelegate? = nil) {
+   init(categoryManager: CategoryManager, delegate: CategoriesControllerDelegate? = nil) {
       // Phase 1.
       self.categoryManager = categoryManager
       coordinator = delegate
@@ -346,7 +346,7 @@ extension CategoriesController: UITextFieldDelegate {
          fatalError("Expected to find a category associated with the text field.")
       }
       
-      guard categoryManager.rename(category: category, to: trimmedText) else {
+      guard category.rename(to: trimmedText) else {
          textField.resignFirstResponder()
          
          let explainationController = UIAlertController(
