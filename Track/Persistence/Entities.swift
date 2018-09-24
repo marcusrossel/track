@@ -58,7 +58,7 @@ extension TrackManager: Persistable {
          
          if let runningCategoryTitle = try container.decode(
             String?.self, forKey: .runningCategoryTitle
-         ) {
+            ) {
             let runningStartDate = try container.decode(Date?.self, forKey: .runningStartDate)
             running = (categoryTitle: runningCategoryTitle, startDate: runningStartDate!)
          } else {
