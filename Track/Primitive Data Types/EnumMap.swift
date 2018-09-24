@@ -31,3 +31,11 @@ struct EnumMap<Enum, Value> where Enum: CaseIterable & Hashable {
 }
 
 extension EnumMap: Codable where Enum: Codable, Value: Codable { }
+
+extension EnumMap: ExpressibleByDictionaryLiteral {
+   
+   init(dictionaryLiteral elements: (Enum, Value)...) {
+      let dictionary = Dictionary(uniqueKeysWithValues: elements)
+      self.init(dictionary: dictionary)!
+   }
+}

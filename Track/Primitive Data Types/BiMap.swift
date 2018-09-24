@@ -138,7 +138,7 @@ extension BiMap: Codable where Key: Codable, Value: Codable {
    }
 }
 
-// MARK: - ExpressibleByDictionaryLiteral
+// MARK: - Expressible By Dictionary Literal
 
 extension BiMap: ExpressibleByDictionaryLiteral {
    

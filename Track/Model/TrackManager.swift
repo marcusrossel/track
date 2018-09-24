@@ -13,7 +13,15 @@ import UIKit
 final class TrackManager {
    
    private var idleTracks: Set<Track> = []
+   
    private var running: (category: Category, startDate: Date)?
+   
+   /// A container keeping track of which categories have been updated on a specific day.
+   /// This is used as an indicator to determine which categories need a "full update", and which
+   /// only require an update to their running track, when calling `updateRunning`.
+   /// The `updated.day` needs to be kept track of, as every category's update status should be
+   /// invalidated when a new day begins.
+   private var updated: (day: Date, categories: Set<Category>) = (Date(), [])
    
    var tracks: Set<Track> {
       guard let newRunning = updateRunning() else { return idleTracks }
@@ -33,18 +41,37 @@ final class TrackManager {
       guard let running = running else { return nil }
       let now = Date()
       
+      // If the `updated` list refers to an outdated date, invalidate all categories' update status.
+      if !Track.calendar.isDate(updated.day, inSameDayAs: now) { updated = (now, []) }
+      
+      // Shortcuts if the category has already been updated today.
+      // In this case only a new running track needs to be created.
+      guard !updated.categories.contains(running.category) else {
+         let updatedDuration = now.timeIntervalSince(running.startDate)
+         let updatedTrack = Track(category: running.category, date: now, duration: updatedDuration)!
+         return (track: updatedTrack, startDate: running.startDate)
+      }
+      
+      // Marks the category as updated for the current day.
+      updated.categories.insert(running.category)
+      
+      // Creates all of the tracks that are needed to cover the time interval from the running start
+      // date until now.
       let newTracks = TrackManager.tracks(
          for: running.category,
          from: running.startDate,
          until: now
       )
       
+      // Splits the new tracks into those that are in the past and the one that is running.
       let newRunningTrack = newTracks.last!
       let newIdles = newTracks.dropLast()
-      let newStartDate = now.addingTimeInterval(-newRunningTrack.duration)
       
+      // The past tracks are now idle and therefore added to the `idleTracks`.
       idleTracks.formUnion(newIdles)
       
+      // The running track is used to calculate the new running start date and is returned.
+      let newStartDate = now.addingTimeInterval(-newRunningTrack.duration)
       return (track: newRunningTrack, startDate: newStartDate)
    }
    
@@ -101,15 +128,7 @@ final class TrackManager {
       if let running = running {
          return tracks.allSatisfy { track in
             guard track.category != running.category else { return false }
-            
-            let dateComponents = DateComponents(
-               year: track.timeStamp.year,
-               month: track.timeStamp.month,
-               day: track.timeStamp.day
-            )
-            let dateForTrackTimeStamp = Track.calendar.date(from: dateComponents)!
-            
-            return dateForTrackTimeStamp < running.startDate
+            return self.track(track, liesBefore: running.startDate)
          }
       } else {
          return tracks.allSatisfy { track in
@@ -118,6 +137,19 @@ final class TrackManager {
             }
          }
       }
+   }
+   
+   private func track(_ track: Track, liesBefore deadline: Date) -> Bool {
+      let dateComponents = DateComponents(
+         year: track.timeStamp.year,
+         month: track.timeStamp.month,
+         day: track.timeStamp.day
+      )
+      
+      let dateForTrackTimeStamp = Track.calendar.date(from: dateComponents)!
+      let dateForDeadline = Track.calendar.startOfDay(for: deadline)
+      
+      return dateForTrackTimeStamp < dateForDeadline
    }
    
    func currentTrack(for category: Category) -> Track {
@@ -158,7 +190,7 @@ final class TrackManager {
 extension TrackManager: CategoryManagerObserver {
    
    func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
-      idleTracks = idleTracks.filter { track in track.category != category }
-      if running?.category == category { running = nil }
+      self.idleTracks = self.idleTracks.filter { track in track.category != category }
+      if self.running?.category == category { self.running = nil }
    }
 }

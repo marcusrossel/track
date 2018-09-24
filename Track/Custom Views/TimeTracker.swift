@@ -8,6 +8,8 @@
 
 import UIKit
 
+#warning("Broken.")
+
 /// A view keeping track of and displaying time.
 final class TimeTracker: UIView {
 

@@ -11,7 +11,7 @@ import UIKit
 // MARK: - App Coordinator
 
 /// The coordinator sitting at the root of the entire app.
-/// This coordinator does not confrom to the `Coordinator` protocol, as it behaves slightly
+/// This coordinator does not conform to the `Coordinator` protocol, as it behaves slightly
 /// differently from "ordinary" coordinators.
 final class AppCoordinator {
    
@@ -21,7 +21,7 @@ final class AppCoordinator {
    /// A collection of sub-coordinators being managed by the app coordinator.
    private var childCoordinators: [RootCoordinator] = []
    
-   /// A manager for accessing and writing data instances that are or need to be stored on disk.
+   /// A manager for reading and writing data instances that are or need to be stored on disk.
    private let storageManager = StorageManager()
    
    /// A manager for handeling the collection of existing categories.

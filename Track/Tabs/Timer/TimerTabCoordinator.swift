@@ -8,31 +8,14 @@
 
 import UIKit
 
-// MARK: - Timer Tab Delegate
-
-/// A delegate providing functionality external to a timer tab coordinator.
-protocol TimerTabDelegate {
-   
-   func colorTabBar(with color: UIColor)
-}
-
-// MARK: - Timer Tab Coordinator
-
 /// The coordinator managing everything inside the timer tab.
 final class TimerTabCoordinator: NSObject, Coordinator {
    
-   /// Keeps track of whether the coordinator has run before.
-   /// This property's value changes exactly once.
-   private var hasRunBefore = false
-   
-   /// The navigation controller managing the coordinators controllers.
+   /// The navigation controller managing the coordinator's controllers.
    let navigationController = UINavigationController()
    
    /// A means of retaining a popover handler when in use.
    private var popoverHandler: PopoverHandler?
-   
-   /// A delegate for providing the coordinator with functionality external to itself.
-   var delegate: TimerTabDelegate?
    
    /// A reference to the category manager that can be passed to any controllers in need of it.
    private let categoryManager: CategoryManager
@@ -44,12 +27,7 @@ final class TimerTabCoordinator: NSObject, Coordinator {
    /// A means of retaining a timer controllers current track, when transitioning to a new one.
    private var trackInTransition: Track?
    
-   init(
-      categoryManager: CategoryManager,
-      trackManager: TrackManager,
-      delegate: TimerTabDelegate? = nil
-   ) {
-      self.delegate = delegate
+   init(categoryManager: CategoryManager, trackManager: TrackManager) {
       self.categoryManager = categoryManager
       self.trackManager = trackManager
    }
@@ -58,10 +36,6 @@ final class TimerTabCoordinator: NSObject, Coordinator {
    /// If there is a track that is currently running, an appropriate timer controller will be shown.
    /// Otherwise a category selection controller is shown.
    func run() {
-      // Makes sure this method only runs once per app lifetime.
-      defer { hasRunBefore = true }
-      guard !hasRunBefore else { return }
-      
       let controller: UIViewController
       
       // Sets up the `controller` differently depending on whether there is a running track.
@@ -159,15 +133,10 @@ extension TimerTabCoordinator: TimerControllerDelegate {
       let categoryColor = timerController.track.category.color
       navigationController.navigationBar.barTintColor = categoryColor
       navigationController.navigationBar.isTranslucent = false
-      
-      delegate?.colorTabBar(with: categoryColor)
    }
    
    func timerControllerDidStop(_ timerController: TimerController) {
       trackManager.stopRunning()
-      
-      #warning("Not enough.")
-      delegate?.colorTabBar(with: .clear)
       
       let controller = CategorySelectionController(
          categoryManager: categoryManager, trackManager: trackManager, delegate: self

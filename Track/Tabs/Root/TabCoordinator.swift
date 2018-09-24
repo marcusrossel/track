@@ -8,11 +8,16 @@
 
 import UIKit
 
+// MARK: - Tab Coordinator
+
 /// The coordinator managing the app's tabbed design.
-final class TabCoordinator: NSObject, RootCoordinator {
+final class TabCoordinator: NSObject, RootCoordinator, Broadcaster {
    
    /// A mapping of tabs to their corresponding coordinators.
-   private var tabCoordinators: EnumMap<Tab, Coordinator>
+   private var tabCoordinators: EnumMap<Tab, Coordinator>!
+   
+   /// A mapping of tabs to a boolean, indicating whether or not the tab's coordinator has run yet.
+   private var runHistory = EnumMap<Tab, Bool> { _ in false }
    
    /// A tab coordinator's root view controller is its tab bar controller.
    var rootViewController: UIViewController {
@@ -22,16 +27,14 @@ final class TabCoordinator: NSObject, RootCoordinator {
    /// The tab bar controller displaying the coordinators content.
    private let tabBarController = UITabBarController()
    
-   #warning("Redundancy.")
+   /// The container storing the instances observing the coordinator.
+   var observers: [ObjectIdentifier: Weak<AnyTabCoordinatorObserver>] = [:]
+   
+   #warning("Redundant.")
    /// The tab coordinators navigation controller is redundant.
    let navigationController = UINavigationController()
    
    init(categoryManager: CategoryManager, trackManager: TrackManager) {
-      // Phase 1.
-      
-      // Fills the tab coordinators with trash values.
-      tabCoordinators = EnumMap { _ in SettingsTabCoordinator(categoryManager: categoryManager) }
-      
       // Phase 2.
       super.init()
       
@@ -60,9 +63,9 @@ final class TabCoordinator: NSObject, RootCoordinator {
    private func makeTabCoordinators(categoryManager: CategoryManager, trackManager: TrackManager)
    -> EnumMap<Tab, Coordinator> {
       
-      return EnumMap(dictionary: [
+      return [
          .timer: TimerTabCoordinator(
-            categoryManager: categoryManager, trackManager: trackManager, delegate: self
+            categoryManager: categoryManager, trackManager: trackManager
          ),
          .today: TodayTabCoordinator(
             trackManager: trackManager
@@ -73,7 +76,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
          .settings: SettingsTabCoordinator(
             categoryManager: categoryManager
          )
-      ])!
+      ]
    }
    
    /// Creates the root controllers associated with each tab. The controllers' tab bar items are
@@ -115,9 +118,7 @@ extension TabCoordinator: UITabBarControllerDelegate {
          fatalError("Received invalid tab tag.")
       }
       
-      #warning("Incomplete.")
-      // Do something useful with the information about the current and next tab.
-      
+      notifyObservers { $0.selectedTabWillChange(from: currentTab, to: nextTab) }
       return true
    }
    
@@ -125,27 +126,41 @@ extension TabCoordinator: UITabBarControllerDelegate {
    func tabBarController(
       _ tabBarController: UITabBarController, didSelect viewController: UIViewController
    ) {
-      
       // Gets the selected tab.
       let selection = viewController.tabBarItem.tag
       guard let tab = Tab(rawValue: selection) else { fatalError("Received invalid tab tag.") }
       
-      // Hands over control to the selected tab's coordinator.
-      tabCoordinators[tab].run()
-   }
-}
-
-// MARK: - Timer Tab Delegate
-
-extension TabCoordinator: TimerTabDelegate {
-   
-   func colorTabBar(with color: UIColor) {
-      tabBarController.tabBar.barTintColor = color
-      tabBarController.tabBar.isTranslucent = false
+      // Runs the selected tab's coordinator, if it has not run before.
+      guard runHistory[tab] == false else { return }
       
-      #warning("Incomplete.")
-      // Adjust icon color accordingly.
+      tabCoordinators[tab].run()
+      runHistory[tab] = true
    }
 }
 
+// MARK: - Tab Coordinator Observer
 
+#warning("Unused.")
+protocol TabCoordinatorObserver: ObserverType {
+   
+   func selectedTabWillChange(from origin: Tab, to destination: Tab)
+}
+
+extension TabCoordinatorObserver {
+   
+   func selectedTabWillChange(from origin: Tab, to destination: Tab) { }
+}
+
+/// A workaround for the missing ability of protocol existentials to conform to protocols.
+final class AnyTabCoordinatorObserver: TabCoordinatorObserver {
+   
+   private let observer: TabCoordinatorObserver
+   
+   init(_ observer: TabCoordinatorObserver) {
+      self.observer = observer
+   }
+   
+   func selectedTabWillChange(from origin: Tab, to destination: Tab) {
+      observer.selectedTabWillChange(from: origin, to: destination)
+   }
+}

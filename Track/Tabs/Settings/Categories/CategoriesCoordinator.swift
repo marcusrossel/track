@@ -13,7 +13,7 @@ import UIKit
 /// The coordinator to handle everything inside the "Categories" settings-area.
 final class CategoriesCoordinator: Coordinator {
    
-   /// The navigation controller managing the coordinators controllers.
+   /// The navigation controller managing the coordinator's controllers.
    let navigationController: UINavigationController
    
    /// A handler for popover-presentation of controllers.

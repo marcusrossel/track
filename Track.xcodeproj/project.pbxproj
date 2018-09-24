@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		DD14745D21565D08007BB1CD /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD14745C21565D08007BB1CD /* StorageManager.swift */; };
+		DD14745F21566C1C007BB1CD /* Persistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD14745E21566C1C007BB1CD /* Persistable.swift */; };
+		DD1474612156841F007BB1CD /* Observation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1474602156841F007BB1CD /* Observation.swift */; };
+		DD147463215686F9007BB1CD /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD147462215686F9007BB1CD /* Weak.swift */; };
 		DD21EFAB2128A85F00C15367 /* TimerTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */; };
 		DD21EFAD2128A88400C15367 /* TodayTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAC2128A88400C15367 /* TodayTabCoordinator.swift */; };
 		DD21EFAF2128A8A800C15367 /* RecordTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAE2128A8A800C15367 /* RecordTabCoordinator.swift */; };
@@ -42,7 +45,6 @@
 		DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE0214E8F3000BE2073 /* Tab.swift */; };
 		DDFBDEE3214E964C00BE2073 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE2214E964C00BE2073 /* Coordinator.swift */; };
 		DDFBDEEA214FBD1B00BE2073 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE9214FBD1B00BE2073 /* Track.swift */; };
-		DDFBDEEE214FBF5F00BE2073 /* Persistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEED214FBF5F00BE2073 /* Persistable.swift */; };
 		DDFBDEF0214FE33500BE2073 /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEEF214FE33500BE2073 /* Entities.swift */; };
 		DDFBDEF3215127C600BE2073 /* EnumMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEF2215127C600BE2073 /* EnumMap.swift */; };
 		DDFBDEF5215127CF00BE2073 /* BiMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEF4215127CF00BE2073 /* BiMap.swift */; };
@@ -50,6 +52,9 @@
 
 /* Begin PBXFileReference section */
 		DD14745C21565D08007BB1CD /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		DD14745E21566C1C007BB1CD /* Persistable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistable.swift; sourceTree = "<group>"; };
+		DD1474602156841F007BB1CD /* Observation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observation.swift; sourceTree = "<group>"; };
+		DD147462215686F9007BB1CD /* Weak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weak.swift; sourceTree = "<group>"; };
 		DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerTabCoordinator.swift; sourceTree = "<group>"; };
 		DD21EFAC2128A88400C15367 /* TodayTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTabCoordinator.swift; sourceTree = "<group>"; };
 		DD21EFAE2128A8A800C15367 /* RecordTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordTabCoordinator.swift; sourceTree = "<group>"; };
@@ -86,7 +91,6 @@
 		DDFBDEE0214E8F3000BE2073 /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
 		DDFBDEE2214E964C00BE2073 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		DDFBDEE9214FBD1B00BE2073 /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
-		DDFBDEED214FBF5F00BE2073 /* Persistable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistable.swift; sourceTree = "<group>"; };
 		DDFBDEEF214FE33500BE2073 /* Entities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entities.swift; sourceTree = "<group>"; };
 		DDFBDEF2215127C600BE2073 /* EnumMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumMap.swift; sourceTree = "<group>"; };
 		DDFBDEF4215127CF00BE2073 /* BiMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiMap.swift; sourceTree = "<group>"; };
@@ -248,6 +252,7 @@
 				DDCB8F25215139F1002F2DAF /* CategoryManager.swift */,
 				DDFBDEE9214FBD1B00BE2073 /* Track.swift */,
 				DDCB8F27215144DD002F2DAF /* TrackManager.swift */,
+				DD1474602156841F007BB1CD /* Observation.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -278,7 +283,7 @@
 			isa = PBXGroup;
 			children = (
 				DDBD056121271F9C005DB627 /* PersistenceManager.swift */,
-				DDFBDEED214FBF5F00BE2073 /* Persistable.swift */,
+				DD14745E21566C1C007BB1CD /* Persistable.swift */,
 				DDFBDEEF214FE33500BE2073 /* Entities.swift */,
 				DD14745C21565D08007BB1CD /* StorageManager.swift */,
 			);
@@ -290,6 +295,7 @@
 			children = (
 				DDFBDEF2215127C600BE2073 /* EnumMap.swift */,
 				DDFBDEF4215127CF00BE2073 /* BiMap.swift */,
+				DD147462215686F9007BB1CD /* Weak.swift */,
 			);
 			path = "Primitive Data Types";
 			sourceTree = "<group>";
@@ -387,17 +393,19 @@
 				DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */,
 				DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */,
 				DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */,
+				DD14745F21566C1C007BB1CD /* Persistable.swift in Sources */,
 				DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */,
 				DD5B1285214437C700602791 /* Category.swift in Sources */,
 				DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */,
 				DDBD05552126EAD0005DB627 /* ColorDot.swift in Sources */,
 				DDFBDEDE214E8EBE00BE2073 /* TabCoordinator.swift in Sources */,
+				DD147463215686F9007BB1CD /* Weak.swift in Sources */,
 				DDFBDEF5215127CF00BE2073 /* BiMap.swift in Sources */,
 				DDCB8F26215139F1002F2DAF /* CategoryManager.swift in Sources */,
 				DDBD053721260CA3005DB627 /* AppCoordinator.swift in Sources */,
 				DDFBDEF3215127C600BE2073 /* EnumMap.swift in Sources */,
-				DDFBDEEE214FBF5F00BE2073 /* Persistable.swift in Sources */,
 				DDCB8F28215144DD002F2DAF /* TrackManager.swift in Sources */,
+				DD1474612156841F007BB1CD /* Observation.swift in Sources */,
 				DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,
 				DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */,

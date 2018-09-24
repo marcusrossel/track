@@ -10,6 +10,7 @@ import UIKit
 
 final class TodayTabCoordinator: NSObject, Coordinator {
    
+   /// The navigation controller managing the coordinator's controllers.
    let navigationController = UINavigationController()
    
    init(trackManager: TrackManager) { }

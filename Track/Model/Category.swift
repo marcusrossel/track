@@ -8,8 +8,10 @@
 
 import UIKit
 
-final class Category {
-   
+// MARK: - Category
+
+final class Category: Broadcaster {
+
    /// All instantiated instances of categories at the current point in time.
    private static var allInstances: Set<Category> = []
    
@@ -19,11 +21,18 @@ final class Category {
    }
    
    /// A non-empty title that uniquely identifies a category.
-   private(set) var title: String
+   private(set) var title: String {
+      didSet { notifyObservers { $0.category(self, didChangeTitleFrom: oldValue) } }
+   }
    
    /// A color associated with a category, used when representing the category visually.
-   var color: UIColor
+   var color: UIColor {
+      didSet { notifyObservers { $0.categoryDidChangeColor(self) } }
+   }
    
+   /// The container storing the instances observing the category.
+   var observers: [ObjectIdentifier: Weak<AnyCategoryObserver>] = [:]
+
    init?(title: String, color: UIColor) {
       guard Category.titleAllowsInstantiation(title) else { return nil }
       defer { Category.allInstances.insert(self) }
@@ -80,5 +89,37 @@ extension Category: Codable {
       let color = UIColor(components: colorComponents.dictionary)
       
       self.init(title: title, color: color)!
+   }
+}
+
+// MARK: - Category Observer
+
+protocol CategoryObserver: ObserverType {
+   
+   func category(_ category: Category, didChangeTitleFrom oldTitle: String)
+   func categoryDidChangeColor(_ category: Category)
+}
+
+extension CategoryObserver {
+   
+   func category(_ category: Category, didChangeTitleFrom oldTitle: String) { }
+   func categoryDidChangeColor(_ category: Category) { }
+}
+
+/// A workaround for the missing ability of protocol existentials to conform to protocols.
+final class AnyCategoryObserver: CategoryObserver {
+   
+   private let observer: CategoryObserver
+   
+   init(_ observer: CategoryObserver) {
+      self.observer = observer
+   }
+   
+   func category(_ category: Category, didChangeTitleFrom oldTitle: String) {
+      observer.category(category, didChangeTitleFrom: oldTitle)
+   }
+   
+   func categoryDidChangeColor(_ category: Category) {
+      observer.categoryDidChangeColor(category)
    }
 }

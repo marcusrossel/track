@@ -87,7 +87,7 @@ extension UIColor {
       
       getRed(&red, green: &green, blue: &blue, alpha: &alpha)
       
-      return EnumMap(dictionary: [.red: red, .green: green, .blue: blue, .alpha: alpha])!
+      return [.red: red, .green: green, .blue: blue, .alpha: alpha]
    }
    
    convenience init(components: [UIColor.Component: CGFloat]) {
@@ -102,6 +102,10 @@ extension UIColor {
    var luminosity: CGFloat {
       return [(Component.red, 0.2126), (.green, 0.7152), (.blue, 0.0722)]
          .reduce(0) { result, item in result + item.1 * pow(decomposed[item.0], 2.2) }
+   }
+   
+   static func hightlightColor(contrasting color: UIColor) -> UIColor {
+      return (color.luminosity > 0.9) ? .black : .white
    }
    
    static var systemBlue: UIColor {
@@ -133,19 +137,4 @@ extension UIImage {
       )
       return self.resized(forSize: newSizeKeepingAspect)
    }
-}
-
-// MARK: - Trash
-
-func _textColor(contrasting background: UIColor, whitePreferenceModifier: CGFloat = 10)
--> UIColor {
-   let luminosityDifference: (UIColor, UIColor) -> CGFloat = {
-      let luminosities = [$0, $1].map { color in color.luminosity }.sorted()
-      return (luminosities[1] + 0.05) / (luminosities[0] + 0.05)
-   }
-      
-   let deltaBlack = luminosityDifference(background, .black)
-   let deltaWhite = luminosityDifference(background, .white) + whitePreferenceModifier
-      
-   return (deltaBlack > deltaWhite) ? .black : .white
 }

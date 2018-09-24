@@ -6,25 +6,21 @@
 //  Copyright © 2018 Marcus Rossel. All rights reserved.
 //
 
-// MARK: - Category Manager Observer
-
-protocol CategoryManagerObserver: AnyObject {
-   
-   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory: Category)
-}
-
 // MARK: - Category Manager
 
-final class CategoryManager {
+final class CategoryManager: Broadcaster {
    
-   private(set) var categories: [Category] = []
-   private var observers: [ObjectIdentifier: CategoryManagerObserver] = [:]
+   private(set) var categories: [Category] = [] {
+      didSet { notifyObservers { $0.categoryManagerDidChange(self) } }
+   }
+   
+   var observers: [ObjectIdentifier: Weak<AnyCategoryManagerObserver>] = [:]
    
    init() { }
    
    init?(categories: [Category]) {
       for category in categories {
-         guard !categories.contains(category) else { return nil }
+         guard !self.categories.contains(category) else { return nil }
          self.categories.append(category)
       }
    }
@@ -65,17 +61,11 @@ final class CategoryManager {
    
    func remove(atIndex index: Int) {
       let category = categories.remove(at: index)
-      observers.values.forEach { $0.categoryManager(self, didRemoveCategory: category) }
-   }
-   
-   func addObserver(_ observer: CategoryManagerObserver) {
-      observers[ObjectIdentifier(observer)] = observer
-   }
-   
-   func removeObserver(_ observer: CategoryManagerObserver) {
-      observers[ObjectIdentifier(observer)] = nil
+      notifyObservers { $0.categoryManager(self, didRemoveCategory: category) }
    }
 }
+
+// MARK: - Codable
 
 extension CategoryManager: Codable {
    
@@ -88,5 +78,37 @@ extension CategoryManager: Codable {
       let container = try decoder.singleValueContainer()
       let categories = try container.decode([Category].self)
       self.init(categories: categories)!
+   }
+}
+
+// MARK: - Category Manager Observer
+
+protocol CategoryManagerObserver: ObserverType {
+   
+   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category)
+   func categoryManagerDidChange(_ categoryManager: CategoryManager)
+}
+
+extension CategoryManagerObserver {
+   
+   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) { }
+   func categoryManagerDidChange(_ categoryManager: CategoryManager) { }
+}
+
+/// A workaround for the missing ability of protocol existentials to conform to protocols.
+final class AnyCategoryManagerObserver: CategoryManagerObserver {
+   
+   private let observer: CategoryManagerObserver
+   
+   init(_ observer: CategoryManagerObserver) {
+      self.observer = observer
+   }
+   
+   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
+      observer.categoryManager(categoryManager, didRemoveCategory: category)
+   }
+   
+   func categoryManagerDidChange(_ categoryManager: CategoryManager) {
+      observer.categoryManagerDidChange(categoryManager)
    }
 }

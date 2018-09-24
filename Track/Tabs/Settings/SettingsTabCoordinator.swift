@@ -12,9 +12,9 @@ import UIKit
 
 final class SettingsTabCoordinator: Coordinator {
    
-   private var hasRunBefore = false
-   
    private var childCoordinators: [Coordinator] = []
+   
+   /// The navigation controller managing the coordinator's controllers.
    let navigationController = UINavigationController()
    
    let categoryManager: CategoryManager
@@ -24,9 +24,6 @@ final class SettingsTabCoordinator: Coordinator {
    }
    
    func run() {
-      defer { hasRunBefore = true }
-      guard !hasRunBefore else { return }
-      
       let settingsRootController = SettingsRootController(delegate: self)
       navigationController.pushViewController(settingsRootController, animated: true)
    }
