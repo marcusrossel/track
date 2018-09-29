@@ -31,7 +31,7 @@ final class Category: Broadcaster {
    }
    
    /// The container storing the instances observing the category.
-   var observers: [ObjectIdentifier: Weak<AnyCategoryObserver>] = [:]
+   var observers: [ObjectIdentifier: AnyCategoryObserver] = [:]
 
    init?(title: String, color: UIColor) {
       guard Category.titleAllowsInstantiation(title) else { return nil }
@@ -97,13 +97,16 @@ extension Category: Codable {
 protocol CategoryObserver: ObserverType {
    
    func category(_ category: Category, didChangeTitleFrom oldTitle: String)
+   
    func categoryDidChangeColor(_ category: Category)
 }
 
+/// Default implementations making the observer methods optional.
 extension CategoryObserver {
    
-   func category(_ category: Category, didChangeTitleFrom oldTitle: String) { }
-   func categoryDidChangeColor(_ category: Category) { }
+//   func category(_ category: Category, didChangeTitleFrom oldTitle: String) { }
+//   
+//   func categoryDidChangeColor(_ category: Category) { }
 }
 
 /// A workaround for the missing ability of protocol existentials to conform to protocols.

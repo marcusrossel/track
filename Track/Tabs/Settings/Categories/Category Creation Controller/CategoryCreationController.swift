@@ -8,32 +8,11 @@
 
 import UIKit
 
-// MARK: - Category Creation Controller Delegate
-
-protocol CategoryCreationControllerDelegate {
-   
-   func categoryCreationControllerDidCancel(
-      _ categoryCreationController: CategoryCreationController
-   )
-   
-   func categoryCreationController(
-      _ categoryCreationController: CategoryCreationController,
-      didRequestSaveForCategory category: Category
-   )
-   
-   func setupNavigationBar(for controller: CategoryCreationController)
-}
-
-extension CategoryCreationControllerDelegate {
-   
-   func setupNavigationBar(for controller: CategoryCreationController) { }
-}
-
 // MARK: - Category Creation Controller
 
 final class CategoryCreationController: UIViewController {
 
-   private var coordinator: CategoryCreationControllerDelegate?
+   private var delegate: CategoryCreationControllerDelegate?
    private let categoryManager: CategoryManager
    
    let titleTextField = UITextField()
@@ -43,7 +22,7 @@ final class CategoryCreationController: UIViewController {
    
    init(categoryManager: CategoryManager, delegate: CategoryCreationControllerDelegate? = nil) {
       // Phase 1.
-      coordinator = delegate
+      self.delegate = delegate
       self.categoryManager = categoryManager
       
       colorPicker = ColorPicker(selection: .gray)
@@ -104,7 +83,7 @@ final class CategoryCreationController: UIViewController {
    
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
-      coordinator?.setupNavigationBar(for: self)
+      delegate?.setupNavigationBar(for: self)
    }
    
    @objc private func didPressSaveButton() {
@@ -116,11 +95,11 @@ final class CategoryCreationController: UIViewController {
       
       let category = Category(title: categoryTitle, color: colorPicker.selection)!
       
-      coordinator?.categoryCreationController(self, didRequestSaveForCategory: category)
+      delegate?.categoryCreationController(self, didRequestSaveForCategory: category)
    }
 
    @objc private func didPressCancelButton() {
-      coordinator?.categoryCreationControllerDidCancel(self)
+      delegate?.categoryCreationControllerDidCancel(self)
    }
    
    // MARK: - Requirements
@@ -169,3 +148,34 @@ extension CategoryCreationController: UITextFieldDelegate {
    }
 }
 
+// MARK: - Category Creation Controller Delegate
+
+/// A delegate providing functionality external to a category creation controller.
+protocol CategoryCreationControllerDelegate {
+   
+   func categoryCreationControllerDidCancel(
+      _ categoryCreationController: CategoryCreationController
+   )
+   
+   func categoryCreationController(
+      _ categoryCreationController: CategoryCreationController,
+      didRequestSaveForCategory category: Category
+   )
+   
+   func setupNavigationBar(for controller: CategoryCreationController)
+}
+
+/// Default implementations making the delegate methods optional.
+extension CategoryCreationControllerDelegate {
+   
+//   func categoryCreationControllerDidCancel(
+//      _ categoryCreationController: CategoryCreationController
+//   ) { }
+//
+//   func categoryCreationController(
+//      _ categoryCreationController: CategoryCreationController,
+//      didRequestSaveForCategory category: Category
+//   ) { }
+//
+//   func setupNavigationBar(for controller: CategoryCreationController) { }
+}

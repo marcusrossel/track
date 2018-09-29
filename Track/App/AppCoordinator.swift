@@ -11,15 +11,20 @@ import UIKit
 // MARK: - App Coordinator
 
 /// The coordinator sitting at the root of the entire app.
-/// This coordinator does not conform to the `Coordinator` protocol, as it behaves slightly
-/// differently from "ordinary" coordinators.
-final class AppCoordinator {
+final class AppCoordinator: RootCoordinator {
    
    /// The window in which the coordinator will manage content.
    private let window: UIWindow
    
-   /// A collection of sub-coordinators being managed by the app coordinator.
-   private var childCoordinators: [RootCoordinator] = []
+   /// The root coordinator managing the app's controllers.
+   private lazy var tabCoordinator: TabCoordinator = {
+      return TabCoordinator(categoryManager: categoryManager, trackManager: trackManager)
+   }()
+   
+   /// The view controller assigned as the window's root view controller.
+   private(set) lazy var rootViewController: UIViewController = {
+      return tabCoordinator.rootViewController
+   }()
    
    /// A manager for reading and writing data instances that are or need to be stored on disk.
    private let storageManager = StorageManager()
@@ -39,19 +44,14 @@ final class AppCoordinator {
    
    /// Hands controller over to the app coordinator, which effectively starts the app.
    func start() {
-      // Sets up the tab coordinator.
-      let tabCoordinator = TabCoordinator(
-         categoryManager: categoryManager, trackManager: trackManager
-      )
-      childCoordinators.append(tabCoordinator)
-      
       // Sets up and presents the window.
-      window.rootViewController = tabCoordinator.rootViewController
+      window.rootViewController = rootViewController
       window.makeKeyAndVisible()
       
-      tabCoordinator.run()
+      tabCoordinator.start()
    }
    
+   /// Persists all user-defined data used by the app.
    func persistAllData() {
       storageManager.persist(categoryManager)
       storageManager.persist(trackManager)

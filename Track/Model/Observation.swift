@@ -18,7 +18,8 @@ protocol Broadcaster: AnyObject {
    
    associatedtype Observer: ObserverType
    
-   var observers: [ObjectIdentifier: Weak<Observer>] { get set }
+   #warning("Potential reference cylce.")
+   var observers: [ObjectIdentifier: Observer] { get set }
    
    func addObserver(_ observer: Observer)
    func removeObserver(_ observer: Observer)
@@ -27,7 +28,7 @@ protocol Broadcaster: AnyObject {
 extension Broadcaster {
    
    func addObserver(_ observer: Observer) {
-      observers[ObjectIdentifier(observer)] = Weak(observer)
+      observers[ObjectIdentifier(observer)] = observer
    }
    
    func removeObserver(_ observer: Observer) {
@@ -35,13 +36,6 @@ extension Broadcaster {
    }
    
    func notifyObservers(with closure: (Observer) -> ()) {
-      for (id, weakObserver) in observers {
-         if let observer = weakObserver.object {
-            closure(observer)
-         } else {
-            // Removes those weak observers whose object has already been deinitialized.
-            observers[id] = nil
-         }
-      }
+      observers.values.forEach(closure)
    }
 }

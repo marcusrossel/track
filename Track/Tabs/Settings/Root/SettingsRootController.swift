@@ -8,20 +8,6 @@
 
 import UIKit
 
-// MARK: - Settings Root Controller Delegate
-
-protocol SettingsRootControllerDelegate {
-   
-   func didSelectCategories()
-   
-   func setupNavigationBar(for controller: SettingsRootController)
-}
-
-extension SettingsRootControllerDelegate {
-   
-   func setupNavigationBar(for controller: SettingsRootController) { }
-}
-
 // MARK: - Settings Root Controller
 
 class SettingsRootController: UITableViewController {
@@ -36,13 +22,13 @@ class SettingsRootController: UITableViewController {
       }
    }
    
-   private var coordinator: SettingsRootControllerDelegate?
+   private var delegate: SettingsRootControllerDelegate?
    
    private var categoriesCell = UITableViewCell(style: .default, reuseIdentifier: nil)
    
    init(delegate: SettingsRootControllerDelegate? = nil) {
       // Phase 1.
-      coordinator = delegate
+      self.delegate = delegate
       
       // Phase 2.
       super.init(style: .grouped)
@@ -61,7 +47,7 @@ class SettingsRootController: UITableViewController {
    
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
-      coordinator?.setupNavigationBar(for: self)
+      delegate?.setupNavigationBar(for: self)
    }
    
    // MARK: - Requirements
@@ -91,8 +77,25 @@ extension SettingsRootController {
    
    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
       switch Setting(rawValue: indexPath.row) {
-      case .categories?: coordinator?.didSelectCategories()
+      case .categories?: delegate?.didSelectCategories()
       default:             fatalError("Non exhaustive switch over variable domain.")
       }
    }
+}
+
+// MARK: - Settings Root Controller Delegate
+
+protocol SettingsRootControllerDelegate {
+   
+   func didSelectCategories()
+   
+   func setupNavigationBar(for controller: SettingsRootController)
+}
+
+/// Default implementations making the delegate methods optional.
+extension SettingsRootControllerDelegate {
+   
+//   func didSelectCategories() { }
+//   
+//   func setupNavigationBar(for controller: SettingsRootController) { }
 }

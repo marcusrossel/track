@@ -25,7 +25,13 @@ protocol Coordinator {
 
 /// A type of coordinator that can provide a view controller that serves as the app's root view
 /// controller.
-protocol RootCoordinator: Coordinator {
+protocol RootCoordinator {
    
+   /// The view controller used by the coordinator to manage the displaying of content.
+   /// The controller should be suitable to be an app's root view controller.
    var rootViewController: UIViewController { get }
+   
+   /// Causes control to be handed over to the coordinator.
+   /// Usually this should cause the coordinator to push a basal view controller.
+   func start()
 }

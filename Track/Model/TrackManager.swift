@@ -12,7 +12,7 @@ import UIKit
 
 final class TrackManager {
    
-   private var idleTracks: Set<Track> = []
+   private(set) var idleTracks: Set<Track> = []
    
    private var running: (category: Category, startDate: Date)?
    
@@ -162,6 +162,29 @@ final class TrackManager {
       return fittingTrack ?? Track(category: category, date: now)
    }
    
+   #warning("Currently only works on idle tracks.")
+   @discardableResult
+   func setDurationOfTrack(
+      forCategory category: Category,
+      onDate date: Date = Date(),
+      to duration: TimeInterval
+   ) -> Bool {
+      guard duration < Track.maximumDuration else { return false }
+      
+      let dateStamp = Track.timeStamp(for: date)
+      let trackPredicate: (Track) -> Bool = { track in
+         track.timeStamp == dateStamp && track.category == category
+      }
+      let newTrack = Track(category: category, date: date, duration: duration)!
+      
+      if let fittingTrack = tracks.first(where: trackPredicate) {
+         idleTracks.remove(fittingTrack)
+      }
+      
+      idleTracks.insert(newTrack)
+      return true
+   }
+   
    static func tracks(for category: Category, from startDate: Date, until endDate: Date)
    -> [Track] {
       var tracks: [Track] = []
@@ -193,4 +216,8 @@ extension TrackManager: CategoryManagerObserver {
       self.idleTracks = self.idleTracks.filter { track in track.category != category }
       if self.running?.category == category { self.running = nil }
    }
+   
+   #warning("Delete us!")
+   func categoryManagerDidChange(_ categoryManager: CategoryManager) {}
+   func categoryManager(_ categoryManager: CategoryManager, observedChangeInCategory category: Category) { }
 }

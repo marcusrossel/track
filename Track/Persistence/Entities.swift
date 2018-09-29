@@ -34,11 +34,11 @@ extension TrackManager: Persistable {
    
    struct Entity: EntityType {
       
-      let trackEntities: Set<Track.Entity>
+      let idleTrackEntities: Set<Track.Entity>
       let running: (categoryTitle: String, startDate: Date)?
       
       enum CodingKeys: CodingKey {
-         case trackEntities
+         case idleTrackEntities
          case runningCategoryTitle
          case runningStartDate
       }
@@ -46,7 +46,7 @@ extension TrackManager: Persistable {
       func encode(to encoder: Encoder) throws {
          var container = encoder.container(keyedBy: CodingKeys.self)
          
-         try container.encode(trackEntities, forKey: .trackEntities)
+         try container.encode(idleTrackEntities, forKey: .idleTrackEntities)
          try container.encode(running?.categoryTitle, forKey: .runningCategoryTitle)
          try container.encode(running?.startDate, forKey: .runningStartDate)
       }
@@ -54,11 +54,13 @@ extension TrackManager: Persistable {
       init(from decoder: Decoder) throws {
          let container = try decoder.container(keyedBy: CodingKeys.self)
          
-         trackEntities = try container.decode(Set<Track.Entity>.self, forKey: .trackEntities)
+         idleTrackEntities = try container.decode(
+            Set<Track.Entity>.self, forKey: .idleTrackEntities
+         )
          
          if let runningCategoryTitle = try container.decode(
             String?.self, forKey: .runningCategoryTitle
-            ) {
+         ) {
             let runningStartDate = try container.decode(Date?.self, forKey: .runningStartDate)
             running = (categoryTitle: runningCategoryTitle, startDate: runningStartDate!)
          } else {
@@ -67,7 +69,7 @@ extension TrackManager: Persistable {
       }
       
       init(modelledType trackManager: TrackManager) {
-         trackEntities = Set(trackManager.tracks.map(Track.Entity.init(modelledType:)))
+         idleTrackEntities = Set(trackManager.idleTracks.map(Track.Entity.init(modelledType:)))
          
          if let runningTrack = trackManager.runningTrack {
             let startDate = Date().addingTimeInterval(-runningTrack.duration)

@@ -12,6 +12,7 @@
 		DD1474612156841F007BB1CD /* Observation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1474602156841F007BB1CD /* Observation.swift */; };
 		DD147463215686F9007BB1CD /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD147462215686F9007BB1CD /* Weak.swift */; };
 		DD1474652159855F007BB1CD /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1474642159855F007BB1CD /* Entities.swift */; };
+		DD147467215AD78C007BB1CD /* TimerTabControllerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD147466215AD78C007BB1CD /* TimerTabControllerFactory.swift */; };
 		DD21EFAB2128A85F00C15367 /* TimerTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */; };
 		DD21EFAD2128A88400C15367 /* TodayTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAC2128A88400C15367 /* TodayTabCoordinator.swift */; };
 		DD21EFAF2128A8A800C15367 /* RecordTabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21EFAE2128A8A800C15367 /* RecordTabCoordinator.swift */; };
@@ -23,7 +24,6 @@
 		DDA5AA482129CB5A00121EFA /* CategoriesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA472129CB5A00121EFA /* CategoriesCoordinator.swift */; };
 		DDA5AA4C212A0BD300121EFA /* SplitCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4B212A0BD300121EFA /* SplitCell.swift */; };
 		DDA5AA50212AD89C00121EFA /* TimerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA4F212AD89C00121EFA /* TimerController.swift */; };
-		DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA5AA52212AD96700121EFA /* TimeTracker.swift */; };
 		DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB291A321300D8A00DC7659 /* ImageLoader.swift */; };
 		DDB291A921306AA600DC7659 /* PopoverHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB291A821306AA600DC7659 /* PopoverHandler.swift */; };
 		DDBD0515212602D2005DB627 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD0514212602D2005DB627 /* AppDelegate.swift */; };
@@ -41,6 +41,7 @@
 		DDC602B7213F25F2002C7642 /* ButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC602B6213F25F2002C7642 /* ButtonCell.swift */; };
 		DDCB8F26215139F1002F2DAF /* CategoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCB8F25215139F1002F2DAF /* CategoryManager.swift */; };
 		DDCB8F28215144DD002F2DAF /* TrackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCB8F27215144DD002F2DAF /* TrackManager.swift */; };
+		DDCBD6A8215EAB0F00C35087 /* TimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCBD6A7215EAB0F00C35087 /* TimePicker.swift */; };
 		DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEDE72A21481866007FC062 /* CategorySelectionController.swift */; };
 		DDFBDEDE214E8EBE00BE2073 /* TabCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */; };
 		DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFBDEE0214E8F3000BE2073 /* Tab.swift */; };
@@ -56,6 +57,7 @@
 		DD1474602156841F007BB1CD /* Observation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observation.swift; sourceTree = "<group>"; };
 		DD147462215686F9007BB1CD /* Weak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weak.swift; sourceTree = "<group>"; };
 		DD1474642159855F007BB1CD /* Entities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entities.swift; sourceTree = "<group>"; };
+		DD147466215AD78C007BB1CD /* TimerTabControllerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerTabControllerFactory.swift; sourceTree = "<group>"; };
 		DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerTabCoordinator.swift; sourceTree = "<group>"; };
 		DD21EFAC2128A88400C15367 /* TodayTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTabCoordinator.swift; sourceTree = "<group>"; };
 		DD21EFAE2128A8A800C15367 /* RecordTabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordTabCoordinator.swift; sourceTree = "<group>"; };
@@ -67,7 +69,6 @@
 		DDA5AA472129CB5A00121EFA /* CategoriesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesCoordinator.swift; sourceTree = "<group>"; };
 		DDA5AA4B212A0BD300121EFA /* SplitCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitCell.swift; sourceTree = "<group>"; };
 		DDA5AA4F212AD89C00121EFA /* TimerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerController.swift; sourceTree = "<group>"; };
-		DDA5AA52212AD96700121EFA /* TimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeTracker.swift; sourceTree = "<group>"; };
 		DDB291A321300D8A00DC7659 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		DDB291A821306AA600DC7659 /* PopoverHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverHandler.swift; sourceTree = "<group>"; };
 		DDBD0511212602D2005DB627 /* Track.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Track.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,6 +88,7 @@
 		DDC602B6213F25F2002C7642 /* ButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonCell.swift; sourceTree = "<group>"; };
 		DDCB8F25215139F1002F2DAF /* CategoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManager.swift; sourceTree = "<group>"; };
 		DDCB8F27215144DD002F2DAF /* TrackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackManager.swift; sourceTree = "<group>"; };
+		DDCBD6A7215EAB0F00C35087 /* TimePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePicker.swift; sourceTree = "<group>"; };
 		DDEDE72A21481866007FC062 /* CategorySelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionController.swift; sourceTree = "<group>"; };
 		DDFBDEDD214E8EBE00BE2073 /* TabCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCoordinator.swift; sourceTree = "<group>"; };
 		DDFBDEE0214E8F3000BE2073 /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				DD21EFAA2128A85F00C15367 /* TimerTabCoordinator.swift */,
+				DD147466215AD78C007BB1CD /* TimerTabControllerFactory.swift */,
 				DDA5AA4F212AD89C00121EFA /* TimerController.swift */,
 				DDEDE72A21481866007FC062 /* CategorySelectionController.swift */,
 			);
@@ -260,9 +263,9 @@
 		DDBD055B21270707005DB627 /* Custom Views */ = {
 			isa = PBXGroup;
 			children = (
-				DDA5AA52212AD96700121EFA /* TimeTracker.swift */,
 				DDBD05492126267B005DB627 /* ColorPicker.swift */,
 				DDBD05542126EAD0005DB627 /* ColorDot.swift */,
+				DDCBD6A7215EAB0F00C35087 /* TimePicker.swift */,
 				DDA5AA4B212A0BD300121EFA /* SplitCell.swift */,
 				DDC602B2213F18FA002C7642 /* ViewTextFieldCell.swift */,
 				DDC602B6213F25F2002C7642 /* ButtonCell.swift */,
@@ -384,6 +387,7 @@
 				DDB291A921306AA600DC7659 /* PopoverHandler.swift in Sources */,
 				DD21EFB12128A8C200C15367 /* SettingsTabCoordinator.swift in Sources */,
 				DDBD053921261182005DB627 /* SettingsRootController.swift in Sources */,
+				DD147467215AD78C007BB1CD /* TimerTabControllerFactory.swift in Sources */,
 				DD35EEF3212DAB1B007DED53 /* AutoLayoutHelper.swift in Sources */,
 				DD21EFAF2128A8A800C15367 /* RecordTabCoordinator.swift in Sources */,
 				DDA5AA4C212A0BD300121EFA /* SplitCell.swift in Sources */,
@@ -393,6 +397,7 @@
 				DDFBDEE1214E8F3000BE2073 /* Tab.swift in Sources */,
 				DD433B56212E00E0006D0DC2 /* Code Dump.swift in Sources */,
 				DDB291A421300D8A00DC7659 /* ImageLoader.swift in Sources */,
+				DDCBD6A8215EAB0F00C35087 /* TimePicker.swift in Sources */,
 				DD14745F21566C1C007BB1CD /* Persistable.swift in Sources */,
 				DDBD054A2126267B005DB627 /* ColorPicker.swift in Sources */,
 				DD5B1285214437C700602791 /* Category.swift in Sources */,
@@ -408,7 +413,6 @@
 				DD1474612156841F007BB1CD /* Observation.swift in Sources */,
 				DDEDE72B21481866007FC062 /* CategorySelectionController.swift in Sources */,
 				DDBD056221271F9C005DB627 /* PersistenceManager.swift in Sources */,
-				DDA5AA53212AD96700121EFA /* TimeTracker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

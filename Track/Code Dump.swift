@@ -29,6 +29,34 @@ extension TimeInterval {
       
       return (hours, minutes, seconds, remainder)
    }
+   
+   init(hours: Int, minutes: Int, seconds: Int) {
+      let totalMinutes = 60 * hours + minutes
+      let totalSeconds = 60 * totalMinutes + seconds
+      self.init(totalSeconds)
+   }
+   
+   static func passedOfDay(atDate date: Date, accordingTo calendar: Calendar) -> TimeInterval {
+      let (hours, minutes, seconds) = date.decomposed(accordingTo: calendar)
+      return TimeInterval(hours: hours, minutes: minutes, seconds: seconds)
+   }
+}
+
+extension Date {
+
+   func decomposed(accordingTo calendar: Calendar) -> (hours: Int, minutes: Int, seconds: Int) {
+      let components = Track.calendar.dateComponents([.hour, .minute, .second], from: self)
+      
+      guard
+         let hours = components.hour,
+         let minutes = components.minute,
+         let seconds = components.second
+      else {
+         fatalError("Expected to be able to access given date components.")
+      }
+      
+      return (hours, minutes, seconds)
+   }
 }
 
 extension CGFloat {
@@ -43,6 +71,13 @@ extension CGFloat {
    
    static var tableViewBorder: CGFloat {
       return 1.5
+   }
+}
+
+extension CGSize {
+   
+   static func square(of length: CGFloat) -> CGSize {
+      return CGSize(width: length, height: length)
    }
 }
 
@@ -104,8 +139,8 @@ extension UIColor {
          .reduce(0) { result, item in result + item.1 * pow(decomposed[item.0], 2.2) }
    }
    
-   static func hightlightColor(contrasting color: UIColor) -> UIColor {
-      return (color.luminosity > 0.9) ? .black : .white
+   static func highlightColor(contrasting color: UIColor) -> UIColor {
+      return (color.luminosity > 0.5) ? .black : .white
    }
    
    static var systemBlue: UIColor {
@@ -137,4 +172,21 @@ extension UIImage {
       )
       return self.resized(forSize: newSizeKeepingAspect)
    }
+}
+
+extension UINavigationBar {
+   
+   func setColorsToDefault() {
+      isTranslucent = true
+      barTintColor = nil
+      tintColor = nil
+      largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+      titleTextAttributes = [.foregroundColor: UIColor.black]
+   }
+}
+
+// MARK: - Operators
+
+func *(scalar: Int, size: CGSize) -> CGSize {
+   return CGSize(width: CGFloat(scalar) * size.width, height: CGFloat(scalar) * size.height)
 }

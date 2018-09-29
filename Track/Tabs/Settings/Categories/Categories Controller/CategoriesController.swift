@@ -8,27 +8,6 @@
 
 import UIKit
 
-// MARK: - Categoties Controller Delegate
-
-/// A delegate providing functionality external to a categories controller.
-protocol CategoriesControllerDelegate {
-   
-   func categoriesController(
-      _ controller: CategoriesController, didTapColorDotForCell cell: EditableCategoryCell
-   )
-   
-   func categoriesControllerDidRequestNewCategory(_ controller: CategoriesController)
-   
-   func setupNavigationBar(for controller: CategoriesController)
-}
-
-extension CategoriesControllerDelegate {
-   
-   /// A default implementation for the `setupNavigationBar(for:)`-method, to make its
-   /// implementation effectively optional.
-   func setupNavigationBar(for controller: CategoriesController) { }
-}
-
 // MARK: - Categories Controller
 
 /// A view controller that displays a list of all categories and allows editing of their title and
@@ -37,7 +16,7 @@ extension CategoriesControllerDelegate {
 final class CategoriesController: UITableViewController {
 
    /// A coordinator that provides external (delegate) functionality.
-   private var coordinator: CategoriesControllerDelegate?
+   private var delegate: CategoriesControllerDelegate?
    
    /// A category manager giving the controller access to all categories.
    private let categoryManager: CategoryManager
@@ -47,7 +26,7 @@ final class CategoriesController: UITableViewController {
    init(categoryManager: CategoryManager, delegate: CategoriesControllerDelegate? = nil) {
       // Phase 1.
       self.categoryManager = categoryManager
-      coordinator = delegate
+      self.delegate = delegate
       
       // Phase 2.
       super.init(style: .grouped)
@@ -73,7 +52,7 @@ final class CategoriesController: UITableViewController {
       super.viewWillAppear(animated)
       
       // A navigation bar has the chance to be updated on appearance of the controller.
-      coordinator?.setupNavigationBar(for: self)
+      delegate?.setupNavigationBar(for: self)
       
       // The table view should always reload its data on appearance, as to capture changes that
       // might have been made to categories externally.
@@ -123,20 +102,29 @@ extension CategoriesController {
    /// Delegates the setup of the cell to a different method according to it section.
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
    -> UITableViewCell {
-      #warning("Efficiency: Not reusing cells.")
       // Sets up the cell according to its section.
       switch Section(rawValue: indexPath.section) {
       case .categories?:
-         let cell = EditableCategoryCell(
-            style: .default, reuseIdentifier: EditableCategoryCell.identifier
-         )
+         guard
+            let cell = tableView.dequeueReusableCell(
+               withIdentifier: EditableCategoryCell.identifier, for: indexPath
+            ) as? EditableCategoryCell
+         else {
+            fatalError("Dequeued unexpected type of table view cell.")
+         }
          
          // Sets up and returns the cell.
          setupCategoriesCell(cell, forRow: indexPath.row)
          return cell
          
       case .modifiers?:
-         let cell = ButtonCell(style: .default, reuseIdentifier: ButtonCell.identifier)
+         guard
+            let cell = tableView.dequeueReusableCell(
+               withIdentifier: ButtonCell.identifier, for: indexPath
+            ) as? ButtonCell
+         else {
+            fatalError("Dequeued unexpected type of table view cell.")
+         }
          
          // Sets up and returns the cell.
          setupModifierCell(cell, forRow: indexPath.row)
@@ -160,7 +148,7 @@ extension CategoriesController {
       cell.color = category.color
       cell.textField.delegate = self
       cell.colorTapHandler = {
-         self.coordinator?.categoriesController(self, didTapColorDotForCell: $0)
+         self.delegate?.categoriesController(self, didTapColorDotForCell: $0)
       }
    }
    
@@ -173,7 +161,7 @@ extension CategoriesController {
          cell.title = "Add"
          cell.buttonImage = modifierCellImage(for: .add)
          cell.tapHandler = { _ in
-            self.coordinator?.categoriesControllerDidRequestNewCategory(self)
+            self.delegate?.categoriesControllerDidRequestNewCategory(self)
          }
          
       case .edit?:
@@ -393,4 +381,30 @@ extension CategoriesController: UITextFieldDelegate {
       
       return newText.count <= 30
    }
+}
+
+// MARK: - Categories Controller Delegate
+
+/// A delegate providing functionality external to a categories controller.
+protocol CategoriesControllerDelegate {
+   
+   func categoriesController(
+      _ controller: CategoriesController, didTapColorDotForCell cell: EditableCategoryCell
+   )
+   
+   func categoriesControllerDidRequestNewCategory(_ controller: CategoriesController)
+   
+   func setupNavigationBar(for controller: CategoriesController)
+}
+
+/// Default implementations making the delegate methods optional.
+extension CategoriesControllerDelegate {
+   
+//   func categoriesController(
+//      _ controller: CategoriesController, didTapColorDotForCell cell: EditableCategoryCell
+//   ) { }
+//   
+//   func categoriesControllerDidRequestNewCategory(_ controller: CategoriesController) { }
+//   
+//   func setupNavigationBar(for controller: CategoriesController) { }
 }

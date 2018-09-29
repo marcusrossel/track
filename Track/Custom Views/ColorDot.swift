@@ -17,12 +17,16 @@ final class ColorDot: UIView {
          // Resizes the circle to the new diameter.
          frame = CGRect(origin: frame.origin, size: ColorDot.size(for: diameter))
          setDrawPaths()
+         setNeedsDisplay()
       }
    }
    
    /// The color of the circle.
    var color: UIColor {
-      didSet { setDrawPaths() }
+      didSet {
+         setDrawPaths()
+         setNeedsDisplay()
+      }
    }
    
    /// The path of the outer border of the color dot, when being drawn.

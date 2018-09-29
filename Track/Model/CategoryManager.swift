@@ -14,13 +14,14 @@ final class CategoryManager: Broadcaster {
       didSet { notifyObservers { $0.categoryManagerDidChange(self) } }
    }
    
-   var observers: [ObjectIdentifier: Weak<AnyCategoryManagerObserver>] = [:]
+   var observers: [ObjectIdentifier: AnyCategoryManagerObserver] = [:]
    
    init() { }
    
    init?(categories: [Category]) {
       for category in categories {
          guard !self.categories.contains(category) else { return nil }
+         category.addObserver(AnyCategoryObserver(self))
          self.categories.append(category)
       }
    }
@@ -34,6 +35,7 @@ final class CategoryManager: Broadcaster {
    func insert(_ newCategory: Category, atIndex index: Int) -> Bool {
       guard !categories.contains(newCategory) else { return false }
       
+      newCategory.addObserver(AnyCategoryObserver(self))
       categories.insert(newCategory, at: index)
       return true
    }
@@ -47,6 +49,8 @@ final class CategoryManager: Broadcaster {
       } else {
          categories.insert(category, at: destination)
       }
+      
+      notifyObservers { $0.categoryManagerDidChange(self) }
    }
    
    @discardableResult
@@ -54,13 +58,15 @@ final class CategoryManager: Broadcaster {
       let hasTitle: (Category) -> Bool = { $0.title == title }
       guard let index = categories.firstIndex(where: hasTitle) else { return false }
       
-      // Observer broadcast is delegated to `remove(atIndex:)`.
+      // Observer broadcast and category observation removal, is delegated to `remove(atIndex:)`.
       remove(atIndex: index)
       return true
    }
    
    func remove(atIndex index: Int) {
       let category = categories.remove(at: index)
+      
+      category.removeObserver(AnyCategoryObserver(self))
       notifyObservers { $0.categoryManager(self, didRemoveCategory: category) }
    }
 }
@@ -81,18 +87,46 @@ extension CategoryManager: Codable {
    }
 }
 
+// MARK: - Category Observer
+
+extension CategoryManager: CategoryObserver {
+   
+   /// Notifies the observers that the given category changed.
+   func category(_ category: Category, didChangeTitleFrom oldTitle: String) {
+      notifyObservers { $0.categoryManager(self, observedChangeInCategory: category) }
+   }
+   
+   /// Notifies the observers that the given category changed.
+   func categoryDidChangeColor(_ category: Category) {
+      notifyObservers { $0.categoryManager(self, observedChangeInCategory: category) }
+   }
+}
+
 // MARK: - Category Manager Observer
 
 protocol CategoryManagerObserver: ObserverType {
    
    func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category)
+   
+   func categoryManager(
+      _ categoryManager: CategoryManager, observedChangeInCategory category: Category
+   )
+   
    func categoryManagerDidChange(_ categoryManager: CategoryManager)
 }
 
+/// Default implementations making the observer methods optional.
 extension CategoryManagerObserver {
    
-   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) { }
-   func categoryManagerDidChange(_ categoryManager: CategoryManager) { }
+//   func categoryManager(
+//      _ categoryManager: CategoryManager, didRemoveCategory category: Category
+//   ) { }
+//
+//   func categoryManager(
+//      _ categoryManager: CategoryManager, observedChangeInCategory category: Category
+//   ) { }
+//
+//   func categoryManagerDidChange(_ categoryManager: CategoryManager) { }
 }
 
 /// A workaround for the missing ability of protocol existentials to conform to protocols.
@@ -106,6 +140,12 @@ final class AnyCategoryManagerObserver: CategoryManagerObserver {
    
    func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
       observer.categoryManager(categoryManager, didRemoveCategory: category)
+   }
+   
+   func categoryManager(
+      _ categoryManager: CategoryManager, observedChangeInCategory category: Category
+   ) {
+      observer.categoryManager(categoryManager, observedChangeInCategory: category)
    }
    
    func categoryManagerDidChange(_ categoryManager: CategoryManager) {

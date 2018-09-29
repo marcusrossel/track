@@ -8,39 +8,20 @@
 
 import UIKit
 
-// MARK: - Category Selection Controller Delegate
-
-protocol CategorySelectionControllerDelegate {
-   
-   func categorySelectionController(
-      _ controller: CategorySelectionController, didSelect category: Category
-   )
-   
-   func setupNavigationBar(for controller: CategorySelectionController)
-}
-
-extension CategorySelectionControllerDelegate {
-   
-   func setupNavigationBar(for controller: CategorySelectionController) { }
-}
-
 // MARK: - Category Selection Controller
 
 final class CategorySelectionController: UITableViewController {
 
-   var coordinator: CategorySelectionControllerDelegate?
-   private let categoryManager: CategoryManager
-   private let trackManager: TrackManager
+   var delegate: CategorySelectionControllerDelegate?
    
-   init(
-      categoryManager: CategoryManager,
-      trackManager: TrackManager,
-      delegate: CategorySelectionControllerDelegate? = nil
-   ) {
+   var categories: [Category] {
+      didSet { tableView.reloadData() }
+   }
+   
+   init(categories: [Category], delegate: CategorySelectionControllerDelegate? = nil) {
       // Phase 1.
-      self.categoryManager = categoryManager
-      self.trackManager = trackManager
-      coordinator = delegate
+      self.categories = categories
+      self.delegate = delegate
       
       // Phase 2.
       super.init(style: .plain)
@@ -53,11 +34,7 @@ final class CategorySelectionController: UITableViewController {
    override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
       
-      coordinator?.setupNavigationBar(for: self)
-      
-      // The table view should always reload its data on appearance, as to capture changes that
-      // might have been made to categories externally.
-      tableView.reloadData()
+      delegate?.setupNavigationBar(for: self)
    }
    
    // MARK: - Requirements
@@ -69,14 +46,20 @@ final class CategorySelectionController: UITableViewController {
 extension CategorySelectionController {
    
    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-      return categoryManager.categories.count
+      return categories.count
    }
    
    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
    -> UITableViewCell {
-      #warning("Efficiency: Not reusing cells.")
-      let cell = CategoryCell(style: .default, reuseIdentifier: CategoryCell.identifier)
-      let category = categoryManager.categories[indexPath.row]
+      guard
+         let cell = tableView.dequeueReusableCell(
+            withIdentifier: CategoryCell.identifier, for: indexPath
+         ) as? CategoryCell
+      else {
+         fatalError("Dequeued unexpected type of table view cell.")
+      }
+      
+      let category = categories[indexPath.row]
       
       cell.title = category.title
       cell.color = category.color
@@ -89,10 +72,28 @@ extension CategorySelectionController {
          fatalError("Expected table view to contain requested cell.")
       }
       
-      guard let category = categoryManager.uniqueCategory(with: cell.title) else {
-         fatalError("Expected to find unique category with given title.")
-      }
-      
-      coordinator?.categorySelectionController(self, didSelect: category)
+      delegate?.categorySelectionController(self, didSelectCategoryWithTitle: cell.title)
    }
+}
+
+// MARK: - Category Selection Controller Delegate
+
+/// A delegate providing functionality external to a category selection controller.
+protocol CategorySelectionControllerDelegate {
+   
+   func categorySelectionController(
+      _ controller: CategorySelectionController, didSelectCategoryWithTitle title: String
+   )
+   
+   func setupNavigationBar(for controller: CategorySelectionController)
+}
+
+/// Default implementations making the delegate methods optional.
+extension CategorySelectionControllerDelegate {
+   
+//   func categorySelectionController(
+//      _ controller: CategorySelectionController, didSelectCategoryWithTitle title: String
+//   ) { }
+//   
+//   func setupNavigationBar(for controller: CategorySelectionController) { }
 }

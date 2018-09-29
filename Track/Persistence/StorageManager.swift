@@ -44,7 +44,7 @@ final class StorageManager {
       guard let managerEntity = loadTrackManagerEntity() else { return TrackManager() }
       
       let categoryManager = loadCategoryManager()
-      let idleTracks = self.tracks(for: managerEntity.trackEntities)
+      let idleTracks = self.tracks(for: managerEntity.idleTrackEntities)
       
       guard let running = managerEntity.running else {
          let trackManager = TrackManager(tracks: idleTracks)!

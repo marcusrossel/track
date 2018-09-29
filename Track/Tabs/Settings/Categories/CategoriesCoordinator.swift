@@ -112,6 +112,9 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
 
 extension CategoriesCoordinator: CategoryCreationControllerDelegate {
    
+   #warning("Delete me.")
+   func setupNavigationBar(for controller: CategoryCreationController) { }
+   
    func categoryCreationControllerDidCancel(
       _ categoryCreationController: CategoryCreationController
    ) {

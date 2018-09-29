@@ -28,11 +28,7 @@ final class TabCoordinator: NSObject, RootCoordinator, Broadcaster {
    private let tabBarController = UITabBarController()
    
    /// The container storing the instances observing the coordinator.
-   var observers: [ObjectIdentifier: Weak<AnyTabCoordinatorObserver>] = [:]
-   
-   #warning("Redundant.")
-   /// The tab coordinators navigation controller is redundant.
-   let navigationController = UINavigationController()
+   var observers: [ObjectIdentifier: AnyTabCoordinatorObserver] = [:]
    
    init(categoryManager: CategoryManager, trackManager: TrackManager) {
       // Phase 2.
@@ -47,7 +43,7 @@ final class TabCoordinator: NSObject, RootCoordinator, Broadcaster {
    
    /// Hands over control to the tab coordinator, which causes its tab bar controller's first tab
    /// to be shown.
-   func run() {
+   func start() {
       // Sets up the tab bar controller's tab view controllers.
       tabBarController.viewControllers = makeTabControllers()
       
