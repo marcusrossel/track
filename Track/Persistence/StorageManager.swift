@@ -48,7 +48,7 @@ final class StorageManager {
       
       guard let running = managerEntity.running else {
          let trackManager = TrackManager(tracks: idleTracks)!
-         categoryManager.addObserver(AnyCategoryManagerObserver(trackManager))
+         categoryManager.addObserver(trackManager)
          return trackManager
       }
       
@@ -62,7 +62,7 @@ final class StorageManager {
       let allTracks = idleTracks.union(tracksFromRunning)
       let trackManager = TrackManager(tracks: allTracks)!
       trackManager.setRunning(runningCategory)
-      categoryManager.addObserver(AnyCategoryManagerObserver(trackManager))
+      categoryManager.addObserver(trackManager)
       
       return trackManager
    }

@@ -10,22 +10,24 @@ import UIKit
 
 // MARK: - Settings Root Controller
 
-class SettingsRootController: UITableViewController {
+final class SettingsRootController: UITableViewController {
    
-   private enum Setting: Int, CaseIterable {
-      case categories
+   /// A delegate providing functionality external to a settings root controller.
+   weak var delegate: SettingsRootControllerDelegate?
+   
+   /// The table view cell associated with the categories setting.
+   private var categoriesCell: UITableViewCell = {
+      let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
       
-      var cellPath: KeyPath<SettingsRootController, UITableViewCell> {
-         switch self {
-         case .categories: return \.categoriesCell
-         }
-      }
-   }
+      // Sets up the table view cell.
+      cell.textLabel?.text = "Categories"
+      cell.imageView?.image = ImageLoader()[icon: .books]
+      cell.accessoryType = .disclosureIndicator
+      
+      return cell
+   }()
    
-   private var delegate: SettingsRootControllerDelegate?
-   
-   private var categoriesCell = UITableViewCell(style: .default, reuseIdentifier: nil)
-   
+   /// Creates a settings root controller.
    init(delegate: SettingsRootControllerDelegate? = nil) {
       // Phase 1.
       self.delegate = delegate
@@ -36,37 +38,45 @@ class SettingsRootController: UITableViewController {
       // Phase 3.
       tableView.isScrollEnabled = false
       tableView.rowHeight = .defaultHeight
-      
-      categoriesCell.textLabel?.text = "Categories"
-      
-      categoriesCell.accessoryType = .disclosureIndicator
-      
-      let imageLoader = ImageLoader()
-      categoriesCell.imageView?.image = imageLoader[icon: .books]
-   }
-   
-   override func viewWillAppear(_ animated: Bool) {
-      super.viewWillAppear(animated)
-      delegate?.setupNavigationBar(for: self)
    }
    
    // MARK: - Requirements
    
-   required init?(coder aDecoder: NSCoder) { fatalError("App does not use storyboard or XIB.") }
+   /// Do not call this initializer! This view does not support storyboards or XIB.
+   required init?(coder aDecoder: NSCoder) { fatalError("View doesn't support storyboard or XIB.") }
 }
 
-// MARK: - Layout
+// MARK: - Table View Handeling
 
 extension SettingsRootController {
    
+   /// A type representing each setting shown by the settings root controller.
+   private enum Setting: Int, CaseIterable {
+      case categories
+      
+      /// Returns a key path to the the table view cell associated with the setting.
+      var cellPath: KeyPath<SettingsRootController, UITableViewCell> {
+         switch self {
+         case .categories: return \.categoriesCell
+         }
+      }
+   }
+   
+   /// A settings root controller has as many table view rows as `Setting`s.
    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
       return Setting.allCases.count
    }
    
-   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+   /// Gets the table view cell at a given index path.
+   override func tableView(
+      _ tableView: UITableView, cellForRowAt indexPath: IndexPath
+   ) -> UITableViewCell {
+      // Converts the index path into a `Setting`.
       guard let setting = Setting(rawValue: indexPath.row) else {
-         fatalError("Internal inconsistency between number of settings and number of cells.")
+         fatalError("Internal inconsistency in settings root controller.")
       }
+      
+      // Returns the table view cell associated with the requested setting.
       return self[keyPath: setting.cellPath]
    }
 }
@@ -76,26 +86,22 @@ extension SettingsRootController {
 extension SettingsRootController {
    
    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-      switch Setting(rawValue: indexPath.row) {
-      case .categories?: delegate?.didSelectCategories()
-      default:             fatalError("Non exhaustive switch over variable domain.")
+      // Converts the index path into a `Setting`.
+      guard let setting = Setting(rawValue: indexPath.row) else {
+         fatalError("Internal inconsistency in settings root controller.")
+      }
+      
+      // Calls the delegate method appropriate for the setting.
+      switch setting {
+      case .categories: delegate?.settingsRootControllerDidSelectCategories(self)
       }
    }
 }
 
 // MARK: - Settings Root Controller Delegate
 
-protocol SettingsRootControllerDelegate {
+/// A delegate providing functionality external to a settings root controller.
+protocol SettingsRootControllerDelegate: AnyObject {
    
-   func didSelectCategories()
-   
-   func setupNavigationBar(for controller: SettingsRootController)
-}
-
-/// Default implementations making the delegate methods optional.
-extension SettingsRootControllerDelegate {
-   
-//   func didSelectCategories() { }
-//   
-//   func setupNavigationBar(for controller: SettingsRootController) { }
+   func settingsRootControllerDidSelectCategories(_ settingsRootController: SettingsRootController)
 }

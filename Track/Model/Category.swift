@@ -10,7 +10,7 @@ import UIKit
 
 // MARK: - Category
 
-final class Category: Broadcaster {
+final class Category {
 
    /// All instantiated instances of categories at the current point in time.
    private static var allInstances: Set<Category> = []
@@ -31,7 +31,7 @@ final class Category: Broadcaster {
    }
    
    /// The container storing the instances observing the category.
-   var observers: [ObjectIdentifier: AnyCategoryObserver] = [:]
+   private var observers: [ObjectIdentifier: AnyCategoryObserver] = [:]
 
    init?(title: String, color: UIColor) {
       guard Category.titleAllowsInstantiation(title) else { return nil }
@@ -40,6 +40,11 @@ final class Category: Broadcaster {
       // Sets the category's properties.
       self.title = title
       self.color = color
+   }
+   
+   /// Makes sure the category is removed from the ones in use, when it is deinitialized.
+   deinit {
+      Category.allInstances.remove(self)
    }
    
    /// Changes the category's title to the given one, if no other category (in `allInstances`) has
@@ -92,37 +97,41 @@ extension Category: Codable {
    }
 }
 
+// MARK: - Observation
+
+extension Category {
+   
+   func addObserver(_ observer: CategoryObserver) {
+      observers[ObjectIdentifier(observer)] = AnyCategoryObserver(observer)
+   }
+   
+   func removeObserver(_ observer: CategoryObserver) {
+      observers[ObjectIdentifier(observer)] = nil
+   }
+   
+   private func notifyObservers(with closure: (CategoryObserver) -> ()) {
+      for (id, typeErasedWrapper) in observers {
+         if let observer = typeErasedWrapper.observer {
+            closure(observer)
+         } else {
+            observers[id] = nil
+         }
+      }
+   }
+   
+}
+
 // MARK: - Category Observer
 
-protocol CategoryObserver: ObserverType {
+protocol CategoryObserver: AnyObject {
    
    func category(_ category: Category, didChangeTitleFrom oldTitle: String)
    
    func categoryDidChangeColor(_ category: Category)
 }
 
-/// Default implementations making the observer methods optional.
-extension CategoryObserver {
-   
-//   func category(_ category: Category, didChangeTitleFrom oldTitle: String) { }
-//   
-//   func categoryDidChangeColor(_ category: Category) { }
-}
-
 /// A workaround for the missing ability of protocol existentials to conform to protocols.
-final class AnyCategoryObserver: CategoryObserver {
-   
-   private let observer: CategoryObserver
-   
-   init(_ observer: CategoryObserver) {
-      self.observer = observer
-   }
-   
-   func category(_ category: Category, didChangeTitleFrom oldTitle: String) {
-      observer.category(category, didChangeTitleFrom: oldTitle)
-   }
-   
-   func categoryDidChangeColor(_ category: Category) {
-      observer.categoryDidChangeColor(category)
-   }
+final class AnyCategoryObserver {
+   private(set) weak var observer: CategoryObserver?
+   init(_ observer: CategoryObserver) { self.observer = observer }
 }

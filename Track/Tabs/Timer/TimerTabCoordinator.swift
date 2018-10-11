@@ -14,12 +14,11 @@ import UIKit
 final class TimerTabCoordinator: NSObject, Coordinator {
    
    /// The navigation controller managing the coordinator's controllers.
-   let navigationController = UINavigationController()
+   let navigationController: UINavigationController
    
    /// A means of retaining a popover handler when in use.
    private var popoverHandler: PopoverHandler?
    
-   #warning("Potential reference cylce.")
    /// A factory used for creating the controllers used in the timer tab.
    private var controllerFactory: TimerTabControllerFactory!
    
@@ -32,32 +31,54 @@ final class TimerTabCoordinator: NSObject, Coordinator {
    /// A property for accessing the timer controller sitting at the top of the navigation stack, if
    /// that is the case.
    private var timerController: TimerController? {
-      return navigationController.viewControllers.last as? TimerController
+      return navigationController.topViewController as? TimerController
    }
    
    /// A property for accessing the selection controller sitting at the top of the navigation stack,
    /// if that is the case.
    private var categorySelectionController: CategorySelectionController? {
-      return navigationController.viewControllers.last as? CategorySelectionController
+      return navigationController.topViewController as? CategorySelectionController
    }
    
-   #warning("Bad place to put this button.")
-   private var timerEditButton: UIBarButtonItem!
-   
+   /// Creates a timer tab coordinator.
    init(categoryManager: CategoryManager, trackManager: TrackManager) {
       // Phase 1.
       self.categoryManager = categoryManager
       self.trackManager = trackManager
       
+      let navigationController = NavigationController()
+      self.navigationController = navigationController
+      
       // Phase 2.
       super.init()
       
       // Phase 3.
-      controllerFactory = TimerTabControllerFactory(user: self, categoryManager: categoryManager)
-      categoryManager.addObserver(AnyCategoryManagerObserver(self))
-      timerEditButton = UIBarButtonItem(
-         image: nil, style: .plain, target: self, action: #selector(toggleTimerControllerEditing)
+      controllerFactory = TimerTabControllerFactory(
+         owner: self,
+         categoryManager: categoryManager,
+         editButtonClosure: toggleTimerControllerEditing
       )
+      
+      categoryManager.addObserver(self)
+      navigationController.addObserver(self)
+   }
+   
+   /// The method called when the timer edit button is pressed.
+   private func toggleTimerControllerEditing() {
+      // Makes sure a timer controller is being shown.
+      guard let timerController = timerController else {
+         fatalError("Internal inconsistency in timer controller.")
+      }
+      
+      // Toggles the duration edit state.
+      if timerController.isEditingDuration {
+         timerController.endDurationEditing()
+      } else {
+         timerController.beginDurationEditing()
+      }
+      
+      // Updates the timer edit button to match the timer controller's new state.
+      updateTimerEditButton(for: timerController)
    }
    
    /// Hands over control to the timer tab coordinator.
@@ -81,36 +102,117 @@ final class TimerTabCoordinator: NSObject, Coordinator {
 
 extension TimerTabCoordinator: CategoryManagerObserver {
 
-   /// Stops the current timer controller if necessary.
+   /// Removes all tracks associated with the given category and stops the current timer controller
+   /// if necessary.
    func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
       // Makes sure the currently shown view controller is a timer controller managing a track for
       // the given category.
-      guard timerController?.category == category else { return }
+      if timerController?.category == category {
+         // Shows a category selection controller.
+         let selectionController = controllerFactory.makeCategorySelectionController()
+         navigationController.setViewControllers([selectionController], animated: true)
+      }
       
-      let selectionController = controllerFactory.makeCategorySelectionController()
-      navigationController.setViewControllers([selectionController], animated: true)
+      // Removes all of the tracks associated with the category.
+      trackManager.removeAllTracks(for: category)
    }
    
    /// Updates the timer controllers navigation bar if necessary.
    func categoryManager(
       _ categoryManager: CategoryManager, observedChangeInCategory category: Category
    ) {
-      // Handles the case of the currently shown view controller being a timer controller managing a
-      // track for the given category.
-      if let timerController = timerController, timerController.category == category {
-         // Pretends that the timer controller is tracking a new category, to cause all related
-         // updates to happen.
-         self.timerController(timerController, isTrackingCategory: category)
+      // Makes sure the currently shown view controller being a timer controller managing a track
+      // for the given category.
+      guard let timerController = timerController, timerController.category == category else {
+         return
       }
-      // Handles the case of the currently shown view controller being a selection controller.
-      else if let selectionController = categorySelectionController {
-         selectionController.tableView.reloadData()
-      }
+      
+      // Pretends that the timer controller is tracking a new category, to cause all related updates
+      // to occur.
+      self.timerController(timerController, switchedToCategory: category)
    }
    
    /// Updates a selection controllers categories if necessary.
    func categoryManagerDidChange(_ categoryManager: CategoryManager) {
+      // This code doesn't handle the case of the selection controller being shown as a popover,
+      // which doesn't matter as no changes to categories can occur while being "trapped" in a
+      // popover.
       categorySelectionController?.categories = categoryManager.categories
+      categorySelectionController?.tableView.reloadData()
+   }
+}
+
+// MARK: - Navigation Controller Observer
+
+extension TimerTabCoordinator: NavigationControllerObserver {
+   
+   /// Makes sure that the navigation bar is behaving correctly, before any controller is shown.
+   func navigationController(
+      _ navigationController: NavigationController, willShow controller: UIViewController
+   ) {
+      // Sets up the navigation bar differently for timer controllers and category selection
+      // controllers.
+      if let timerController = controller as? TimerController {
+         setupNavigationBar(for: timerController)
+      } else if let selectionController = controller as? CategorySelectionController {
+         setupNavigationBar(for: selectionController)
+      }
+   }
+   
+   /// Sets up navigation bar properties which are not tied to a controller's navigation item.
+   private func setupNavigationBar(for timerController: TimerController) {
+      navigationController.setNavigationBarHidden(false, animated: true)
+      navigationController.navigationBar.prefersLargeTitles = true
+      updateNavigationBar(for: timerController)
+   }
+   
+   /// Sets navigation bar properties that need to be updated when a timer controller's properties
+   /// change, but the shown controller remains a timer controller.
+   private func updateNavigationBar(for timerController: TimerController) {
+      let category = timerController.category
+      
+      // Sets the title text.
+      timerController.navigationItem.title = category.title
+      
+      // Sets the background color.
+      navigationController.navigationBar.barTintColor = category.color
+      navigationController.navigationBar.isTranslucent = false
+      
+      // Sets the title text color.
+      let textColor = UIColor.highlightColor(contrasting: category.color)
+      navigationController.navigationBar.largeTitleTextAttributes = [.foregroundColor: textColor]
+      
+      // Sets the timer edit button's image and color.
+      updateTimerEditButton(for: timerController)
+   }
+   
+   /// Sets the timer edit button's image and color to match the state of a given timer controller.
+   private func updateTimerEditButton(for timerController: TimerController) {
+      let imageLoader = ImageLoader(useDefaultSizes: false)
+      let timerEditButton = controllerFactory.timerEditButton
+      
+      // Gets the timer edit button's image.
+      let type: ImageLoader.Button = timerController.isEditingDuration ? .confirmEdit : .editTime
+      let image = imageLoader[button: type]
+         .resizedKeepingAspect(forSize: .square(of: 30))
+         .withRenderingMode(.alwaysTemplate)
+      
+      // Sets the timer edit button's image and color.
+      timerEditButton.image = image
+      timerEditButton.tintColor = .highlightColor(contrasting: timerController.category.color)
+   }
+   
+   /// Sets up navigation bar properties which are not tied to a controller's navigation item.
+   func setupNavigationBar(for selectionController: CategorySelectionController) {
+      // A category selection controller shows a navigation bar only if it is shown as stand-alone.
+      guard categorySelectionController === selectionController else { return }
+      
+      navigationController.navigationBar.prefersLargeTitles = true
+      navigationController.setNavigationBarHidden(false, animated: true)
+      
+      // Sets all colors related to the navigation bar to default values, as they might have been
+      // changed by previous showing of a timer controller.
+      navigationController.navigationBar.setColorsToDefault()
    }
 }
 
@@ -127,62 +229,25 @@ extension TimerTabCoordinator: TimerControllerDataSource, TimerControllerDelegat
    func categoryIsRunning(_ category: Category) -> Bool {
       return trackManager.isRunning(category)
    }
-
-   /// Sets up the navigation bar with a large display mode.
-   func setupNavigationBar(for controller: TimerController) {
-      controller.navigationItem.largeTitleDisplayMode = .always
-      navigationController.setNavigationBarHidden(false, animated: true)
-      navigationController.navigationBar.prefersLargeTitles = true
-      
-      adaptTimerEditButton(to: controller)
-      controller.navigationItem.setRightBarButtonItems([timerEditButton], animated: true)
-   }
-   
-   private func adaptTimerEditButton(to timerController: TimerController) {
-      let imageLoader = ImageLoader(useDefaultSizes: false)
-      let image: UIImage
-      
-      if timerController.isEditingDuration {
-         image = imageLoader[button: .confirmEdit]
-      } else {
-         image = imageLoader[button: .editTime]
-      }
-      
-      timerEditButton.image = image
-         .resizedKeepingAspect(forSize: .square(of: 30))
-         .withRenderingMode(.alwaysTemplate)
-      timerEditButton.tintColor = .highlightColor(contrasting: timerController.category.color)
-   }
-   
-   @objc private func toggleTimerControllerEditing() {
-      guard let timerController = timerController else {
-         fatalError("Expected to find a timer controller at the top of the navigation stack.")
-      }
-      
-      if timerController.isEditingDuration {
-         timerController.endDurationEditing()
-      } else {
-         timerController.beginDurationEditing()
-      }
-      
-      adaptTimerEditButton(to: timerController)
-   }
    
    /// Updates the navigation bar to match the given category.
-   func timerController(_ timerController: TimerController, isTrackingCategory category: Category) {
-      timerController.navigationItem.title = category.title
-      navigationController.navigationBar.barTintColor = category.color
-      navigationController.navigationBar.isTranslucent = false
-      
-      let textColor = UIColor.highlightColor(contrasting: category.color)
-      navigationController.navigationBar.largeTitleTextAttributes = [.foregroundColor: textColor]
-      adaptTimerEditButton(to: timerController)
+   func timerController(_ timerController: TimerController, switchedToCategory category: Category) {
+      updateNavigationBar(for: timerController)
    }
    
+   /// Tells the track manager to set the given category's track to the given duration.
    func timerController(
-      _ timerController: TimerController, needsUpdatedDuration duration: TimeInterval
+      _ timerController: TimerController,
+      updatedDuration duration: TimeInterval,
+      forCategory category: Category
    ) {
-      trackManager.setDurationOfTrack(forCategory: timerController.category, to: duration)
+      // Tries to set the duration.
+      let success = trackManager.setDurationOfTrack(forCategory: category, to: duration)
+      
+      // Makes sure the track manager was able to set the new duration.
+      guard success else {
+         fatalError("Internal inconsistency between timer controller and track manager.")
+      }
    }
    
    /// Tells the track manager to set the given category as running.
@@ -197,7 +262,8 @@ extension TimerTabCoordinator: TimerControllerDataSource, TimerControllerDelegat
       trackManager.stopRunning()
    }
    
-   /// Stops the currently running category, and pushes a category selection controller.
+   /// Tells the track manager to stop the currently running category, and pushes a category
+   /// selection controller.
    func timerControllerNeedsStop(_ timerController: TimerController) {
       trackManager.stopRunning()
       
@@ -209,6 +275,8 @@ extension TimerTabCoordinator: TimerControllerDataSource, TimerControllerDelegat
    func timerControllerNeedsSwitch(_ timerController: TimerController) {
       let selectionController = controllerFactory.makeCategorySelectionController(forPopover: true)
       
+      // Creates a popover handler, anchoring the popover in the center of the timer controller's
+      // switch button.
       popoverHandler = PopoverHandler(
          presentedController: selectionController, sourceView: timerController.switchButton
       )
@@ -221,31 +289,14 @@ extension TimerTabCoordinator: TimerControllerDataSource, TimerControllerDelegat
 
 extension TimerTabCoordinator: CategorySelectionControllerDelegate {
    
-   /// A category selection controller shows a navigation bar only if it is shown as stand-alone.
-   func setupNavigationBar(for controller: CategorySelectionController) {
-      /// Makes sure the controller is shown as stand-alone.
-      guard categorySelectionController === controller else { return }
-      
-      /// Shows a large navigation bar with the title "Track...".
-      controller.navigationItem.title = "Track..."
-      controller.navigationItem.largeTitleDisplayMode = .always
-      navigationController.navigationBar.prefersLargeTitles = true
-      navigationController.setNavigationBarHidden(false, animated: true)
-      navigationController.navigationBar.setColorsToDefault()
-   }
-   
-   /// The method called once a category was selected in the category selection controller.
+   /// The method called, once a category was selected in the category selection controller.
    func categorySelectionController(
-      _ controller: CategorySelectionController, didSelectCategoryWithTitle title: String
+      _ controller: CategorySelectionController, didSelectCategory category: Category
    ) {
-      guard let category = categoryManager.uniqueCategory(with: title) else {
-         fatalError("Internal inconsistency when selecting category from selection controller.")
-      }
-      
-      // Performs diffent actions depending on whether a timer controller is already being shown,
-      // or the category selection controller was a stand-alone.
+      // Shortcuts if there is no timer controller being shown.
       guard let timerController = timerController else {
-         // Creates a timer controller for the selected category.
+         // Handles the case of the category selection controller being a stand-alone, by creating a
+         // timer controller for the selected category.
          let timerController = controllerFactory.makeTimerController(for: category)
          navigationController.setViewControllers([timerController], animated: true)
          return
@@ -256,11 +307,15 @@ extension TimerTabCoordinator: CategorySelectionControllerDelegate {
       
       // Stops the timer controller's running category if there was one, and transfers that state
       // to the new category.
-      trackManager.stopRunning()
-      if previousWasRunning { trackManager.setRunning(category) }
+      if previousWasRunning {
+         trackManager.stopRunning()
+         trackManager.setRunning(category)
+      }
       
+      // Updates the timer controller's category to the given one.
       timerController.category = category
       
+      // Dismisses the category selection controller popover.
       navigationController.dismiss(animated: true, completion: nil)
    }
 }

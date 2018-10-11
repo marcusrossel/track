@@ -12,14 +12,14 @@ import UIKit
 final class TimerTabControllerFactory {
    
    /// A type able to use the factory.
-   typealias User = AnyObject &
+   typealias Owner = AnyObject &
       TimerControllerDataSource &
       TimerControllerDelegate &
       CategorySelectionControllerDelegate
    
-   /// The instance using the factory.
+   /// The instance using and owning the factory.
    /// Using the factory from any other instance can cause crashes!
-   private unowned var user: User
+   private unowned var owner: Owner
    
    /// The category manager used to initialize
    private let categoryManager: CategoryManager
@@ -30,33 +30,52 @@ final class TimerTabControllerFactory {
    /// A cache property for created selection controllers, in order to reduce allocation overhead.
    private var cachedSelectionController: CategorySelectionController?
    
-   init(user: User, categoryManager: CategoryManager) {
-      self.user = user
+   /// The navigation bar button used to toggle duration edit mode for timer controllers.
+   lazy var timerEditButton: UIBarButtonItem = {
+      return UIBarButtonItem(
+         image: nil, style: .plain, target: self, action: #selector(timerEditButtonAction)
+      )
+   }()
+   
+   /// The closure called when the timer edit button is pressed.
+   private var editButtonClosure: () -> ()
+   
+   /// The action method called when the timer edit button is pressed.
+   @objc private func timerEditButtonAction() {
+      editButtonClosure()
+   }
+   
+   /// Creates a timer tab controller factory.
+   init(owner: Owner, categoryManager: CategoryManager, editButtonClosure: @escaping () -> ()) {
+      self.owner = owner
       self.categoryManager = categoryManager
+      self.editButtonClosure = editButtonClosure
    }
    
    /// Returns a timer controller for the specified category.
    func makeTimerController(for category: Category) -> TimerController {
-      // Creates a new timer controller if necessary.
-      let controller = cachedTimerController ??
-         TimerController(category: category, dataSource: user, delegate: user)
-
-      // Either sets the controllers properties or the cache depending on whether the controller was
-      // reused.
-      if cachedTimerController != nil {
-         controller.category = category
+      // Either updates a reused controller or creates a new one and caches it.
+      if let reusedController = cachedTimerController {
+         // Updates the reused controller.
+         reusedController.category = category
+         return reusedController
       } else {
-         cachedTimerController = controller
+         // Sets up a new controller.
+         let newController = TimerController(category: category, dataSource: owner, delegate: owner)
+         newController.navigationItem.largeTitleDisplayMode = .always
+         newController.navigationItem.setRightBarButtonItems([timerEditButton], animated: true)
+         
+         // Caches and returns the new controller.
+         cachedTimerController = newController
+         return newController
       }
-      
-      return controller
    }
    
    /// Returns a category selection controller, adjusted for use in a popover if declared.
    func makeCategorySelectionController(forPopover: Bool = false) -> CategorySelectionController {
       // Creates a new selection controller if necessary.
       let controller = cachedSelectionController ??
-         CategorySelectionController(categories: categoryManager.categories, delegate: user)
+         CategorySelectionController(categories: categoryManager.categories, delegate: owner)
       
       // Sets the controller's preferred content size if it's meant to be used in a popover.
       if forPopover {
@@ -72,6 +91,8 @@ final class TimerTabControllerFactory {
       if cachedSelectionController != nil {
          controller.categories = categoryManager.categories
       } else {
+         controller.navigationItem.title = "Track..."
+         controller.navigationItem.largeTitleDisplayMode = .always
          cachedSelectionController = controller
       }
       

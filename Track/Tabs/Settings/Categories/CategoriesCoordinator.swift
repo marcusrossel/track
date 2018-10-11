@@ -26,20 +26,42 @@ final class CategoriesCoordinator: Coordinator {
    /// Creates a categories coordinator with given controllers and managers.
    init(
       categoryManager: CategoryManager = CategoryManager(),
-      navigationController: UINavigationController = UINavigationController()
+      navigationController: NavigationController = NavigationController()
    ) {
       self.categoryManager = categoryManager
       self.navigationController = navigationController
+      
+      navigationController.addObserver(self)
+      navigationController.navigationBar.prefersLargeTitles = false
    }
    
    /// Causes controll to be handed over to the coordinator.
    /// This causes a categories controller to be shown.
    func run() {
       let categoriesController = CategoriesController(
-         categoryManager: categoryManager, delegate: self
+         categories: categoryManager.categories, delegate: self
       )
+      categoriesController.navigationItem.title = "Categories"
       
       navigationController.pushViewController(categoriesController, animated: true)
+   }
+}
+
+// MARK: - Navigation Controller Observer
+
+extension CategoriesCoordinator: NavigationControllerObserver {
+   
+   /// Makes sure that the navigation bar is behaving correctly, before a categories controller is
+   /// shown.
+   func navigationController(
+      _ navigationController: NavigationController, willShow controller: UIViewController
+   ) {
+      // Only acts if the controller to be shown is a settings root controller.
+      guard controller is CategoriesController else { return }
+      
+      // Makes sure the navigation bar is still shown and setup correctly.
+      navigationController.setNavigationBarHidden(false, animated: true)
+      navigationController.navigationBar.prefersLargeTitles = false
    }
 }
 
@@ -47,19 +69,18 @@ final class CategoriesCoordinator: Coordinator {
 
 extension CategoriesCoordinator: CategoriesControllerDelegate {
    
-   /// A categories controller shows a non-large title navigation bar.
-   func setupNavigationBar(for controller: CategoriesController) {
-      controller.navigationItem.title = "Categories"
-      controller.navigationItem.largeTitleDisplayMode = .never
-      navigationController.setNavigationBarHidden(false, animated: true)
+   func categoriesController(
+      _ categoriesController: CategoriesController, didRemoveCategoryAtIndex index: Int
+   ) {
+      categoryManager.remove(atIndex: index)
    }
-   
-   /// Handles a new category request, by showing a category creation controller.
-   func categoriesControllerDidRequestNewCategory(_ controller: CategoriesController) {
-      let categoryCreationController = CategoryCreationController(
-         categoryManager: categoryManager, delegate: self
-      )
-      navigationController.present(categoryCreationController, animated: true, completion: nil)
+
+   func categoriesController(
+      _ controller: CategoriesController,
+      didMoveCategoryAtIndex origin: Int,
+      toIndex destination: Int
+   ) {
+      categoryManager.move(categoryAtIndex: origin, to: destination)
    }
    
    /// Handles a category controller's color dot being tapped, by creating a color picker popover
@@ -105,29 +126,5 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
       colorPickerController.preferredContentSize = CGSize(width: 250, height: 200)
       
       return colorPickerController
-   }
-}
-
-// MARK: - Category Creation Controller Delegate
-
-extension CategoriesCoordinator: CategoryCreationControllerDelegate {
-   
-   #warning("Delete me.")
-   func setupNavigationBar(for controller: CategoryCreationController) { }
-   
-   func categoryCreationControllerDidCancel(
-      _ categoryCreationController: CategoryCreationController
-   ) {
-      navigationController.dismiss(animated: true, completion: nil)
-   }
-   
-   /// Saves the category associated with a category creation controller.
-   /// This also causes the controller to be dismissed.
-   func categoryCreationController(
-      _ categoryCreationController: CategoryCreationController,
-      didRequestSaveForCategory category: Category
-   ) {
-      _ = categoryManager.insert(category, atIndex: 0)
-      navigationController.dismiss(animated: true)
    }
 }

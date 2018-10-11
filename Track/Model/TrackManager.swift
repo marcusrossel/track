@@ -169,7 +169,7 @@ final class TrackManager {
       onDate date: Date = Date(),
       to duration: TimeInterval
    ) -> Bool {
-      guard duration < Track.maximumDuration else { return false }
+      guard duration >= 0 && duration < Track.maximumDuration else { return false }
       
       let dateStamp = Track.timeStamp(for: date)
       let trackPredicate: (Track) -> Bool = { track in
@@ -183,6 +183,27 @@ final class TrackManager {
       
       idleTracks.insert(newTrack)
       return true
+   }
+   
+   @discardableResult
+   func removeAllTracks(for category: Category) -> [Track] {
+      // Removes all of the idle tracks of the given category and collects them.
+      let removedIdles: [Track] = idleTracks.compactMap { idleTrack in
+         // Guards for tracks of the given category.
+         guard idleTrack.category == category else { return nil }
+         
+         // Removes the track.
+         return idleTracks.remove(idleTrack)
+      }
+      
+      // Completes if there is no running track, or it's not of the given category.
+      guard let runningTrack = runningTrack, runningTrack.category == category else {
+         return removedIdles
+      }
+      
+      // Removes the running track and returns it with the removed idles.
+      running = nil
+      return removedIdles
    }
    
    static func tracks(for category: Category, from startDate: Date, until endDate: Date)

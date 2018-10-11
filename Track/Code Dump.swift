@@ -8,6 +8,29 @@
 
 import UIKit
 
+// MARK: - To Do
+
+/*
+ 
+ + Remove all delegate methods `setupNavigationBar`
+ + Make better factories
+ 
+ >> Timer Tab Coordinator:
+  - Introduce a `State` enum with selecting and timing states (and perhaps others like transitioning
+    with an associated value to pass information to the new state).
+ 
+ >> Image Loader:
+  - Make the methods static. Instantiation has seemed pointless so far.
+ 
+ >> Timer Controller:
+  - Introduce a `State` enum with tracking, idle and editing states
+  - Add more fades and animations
+  - add minor "Hour(s)"/"h", "Minute(s)"/"min" and "Second(s)"/"s" labels
+  - show action sheet for 3 seconds, saying that you can not exceed todays time, when necessary
+  - Transfer tracking state when switching categories dynamically
+ 
+*/
+
 // MARK: - Extensions
 
 extension Int {

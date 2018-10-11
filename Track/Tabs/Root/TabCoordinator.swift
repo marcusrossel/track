@@ -11,7 +11,7 @@ import UIKit
 // MARK: - Tab Coordinator
 
 /// The coordinator managing the app's tabbed design.
-final class TabCoordinator: NSObject, RootCoordinator, Broadcaster {
+final class TabCoordinator: NSObject, RootCoordinator {
    
    /// A mapping of tabs to their corresponding coordinators.
    private var tabCoordinators: EnumMap<Tab, Coordinator>!
@@ -28,8 +28,9 @@ final class TabCoordinator: NSObject, RootCoordinator, Broadcaster {
    private let tabBarController = UITabBarController()
    
    /// The container storing the instances observing the coordinator.
-   var observers: [ObjectIdentifier: AnyTabCoordinatorObserver] = [:]
+   private var observers: [ObjectIdentifier: AnyTabCoordinatorObserver] = [:]
    
+   /// Creates a tab coordinator.
    init(categoryManager: CategoryManager, trackManager: TrackManager) {
       // Phase 2.
       super.init()
@@ -134,10 +135,33 @@ extension TabCoordinator: UITabBarControllerDelegate {
    }
 }
 
-// MARK: - Tab Coordinator Observer
+// MARK: - Observation
+
+extension TabCoordinator {
+   
+   func addObserver(_ observer: TabCoordinatorObserver) {
+      observers[ObjectIdentifier(observer)] = AnyTabCoordinatorObserver(observer)
+   }
+   
+   func removeObserver(_ observer: TabCoordinatorObserver) {
+      observers[ObjectIdentifier(observer)] = nil
+   }
+   
+   private func notifyObservers(with closure: (TabCoordinatorObserver) -> ()) {
+      for (id, typeErasedWrapper) in observers {
+         if let observer = typeErasedWrapper.observer {
+            closure(observer)
+         } else {
+            observers[id] = nil
+         }
+      }
+   }
+}
 
 #warning("Unused.")
-protocol TabCoordinatorObserver: ObserverType {
+// MARK: - Tab Coordinator Observer
+
+protocol TabCoordinatorObserver: AnyObject {
    
    func selectedTabWillChange(from origin: Tab, to destination: Tab)
 }
@@ -147,16 +171,7 @@ extension TabCoordinatorObserver {
    func selectedTabWillChange(from origin: Tab, to destination: Tab) { }
 }
 
-/// A workaround for the missing ability of protocol existentials to conform to protocols.
-final class AnyTabCoordinatorObserver: TabCoordinatorObserver {
-   
-   private let observer: TabCoordinatorObserver
-   
-   init(_ observer: TabCoordinatorObserver) {
-      self.observer = observer
-   }
-   
-   func selectedTabWillChange(from origin: Tab, to destination: Tab) {
-      observer.selectedTabWillChange(from: origin, to: destination)
-   }
+final class AnyTabCoordinatorObserver {
+   private(set) weak var observer: TabCoordinatorObserver?
+   init(_ observer: TabCoordinatorObserver) { self.observer = observer }
 }

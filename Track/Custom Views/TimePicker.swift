@@ -30,7 +30,7 @@ final class TimePicker: UIView {
       )
    }
    
-   private var isEditing: Bool {
+   var isEditing: Bool {
       return coverStack.isHidden
    }
    
@@ -151,9 +151,6 @@ extension TimePicker: UIPickerViewDataSource, UIPickerViewDelegate {
       
       if selectionIsLexicographicallyGreater {
          setDuration(to: TimeInterval.passedOfDay(atDate: now, accordingTo: Track.calendar))
-         
-         #warning("Idea")
-         // show action sheet for 3 seconds, saying that you can not exceed todays time
       }
    }
 
@@ -197,7 +194,7 @@ extension TimePicker {
          view.setContentCompressionResistancePriority(.required, for: .vertical)
          view.setContentHuggingPriority(.required, for: .vertical)
          
-         view.heightAnchor.constraint(equalTo: pickerView.heightAnchor, multiplier: 0.30)
+         view.heightAnchor.constraint(equalTo: pickerView.heightAnchor, multiplier: 0.32)
             .isActive = true
       }
    }

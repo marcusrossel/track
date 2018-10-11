@@ -8,20 +8,20 @@
 
 // MARK: - Category Manager
 
-final class CategoryManager: Broadcaster {
+final class CategoryManager {
    
    private(set) var categories: [Category] = [] {
       didSet { notifyObservers { $0.categoryManagerDidChange(self) } }
    }
    
-   var observers: [ObjectIdentifier: AnyCategoryManagerObserver] = [:]
+   private var observers: [ObjectIdentifier: AnyCategoryManagerObserver] = [:]
    
    init() { }
    
    init?(categories: [Category]) {
       for category in categories {
          guard !self.categories.contains(category) else { return nil }
-         category.addObserver(AnyCategoryObserver(self))
+         category.addObserver(self)
          self.categories.append(category)
       }
    }
@@ -35,20 +35,14 @@ final class CategoryManager: Broadcaster {
    func insert(_ newCategory: Category, atIndex index: Int) -> Bool {
       guard !categories.contains(newCategory) else { return false }
       
-      newCategory.addObserver(AnyCategoryObserver(self))
+      newCategory.addObserver(self)
       categories.insert(newCategory, at: index)
       return true
    }
    
    func move(categoryAtIndex origin: Int, to destination: Int) {
-      let destinationIsEnd = destination == (categories.count - 1)
       let category = categories.remove(at: origin)
-      
-      if destinationIsEnd {
-         categories.append(category)
-      } else {
-         categories.insert(category, at: destination)
-      }
+      categories.insert(category, at: destination)
       
       notifyObservers { $0.categoryManagerDidChange(self) }
    }
@@ -66,7 +60,7 @@ final class CategoryManager: Broadcaster {
    func remove(atIndex index: Int) {
       let category = categories.remove(at: index)
       
-      category.removeObserver(AnyCategoryObserver(self))
+      category.removeObserver(self)
       notifyObservers { $0.categoryManager(self, didRemoveCategory: category) }
    }
 }
@@ -87,6 +81,30 @@ extension CategoryManager: Codable {
    }
 }
 
+// MARK: - Observation
+
+extension CategoryManager {
+   
+   func addObserver(_ observer: CategoryManagerObserver) {
+      observers[ObjectIdentifier(observer)] = AnyCategoryManagerObserver(observer)
+   }
+   
+   func removeObserver(_ observer: CategoryManagerObserver) {
+      observers[ObjectIdentifier(observer)] = nil
+   }
+   
+   private func notifyObservers(with closure: (CategoryManagerObserver) -> ()) {
+      for (id, typeErasedWrapper) in observers {
+         if let observer = typeErasedWrapper.observer {
+            closure(observer)
+         } else {
+            observers[id] = nil
+         }
+      }
+   }
+   
+}
+
 // MARK: - Category Observer
 
 extension CategoryManager: CategoryObserver {
@@ -104,7 +122,7 @@ extension CategoryManager: CategoryObserver {
 
 // MARK: - Category Manager Observer
 
-protocol CategoryManagerObserver: ObserverType {
+protocol CategoryManagerObserver: AnyObject {
    
    func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category)
    
@@ -115,40 +133,8 @@ protocol CategoryManagerObserver: ObserverType {
    func categoryManagerDidChange(_ categoryManager: CategoryManager)
 }
 
-/// Default implementations making the observer methods optional.
-extension CategoryManagerObserver {
-   
-//   func categoryManager(
-//      _ categoryManager: CategoryManager, didRemoveCategory category: Category
-//   ) { }
-//
-//   func categoryManager(
-//      _ categoryManager: CategoryManager, observedChangeInCategory category: Category
-//   ) { }
-//
-//   func categoryManagerDidChange(_ categoryManager: CategoryManager) { }
-}
-
 /// A workaround for the missing ability of protocol existentials to conform to protocols.
-final class AnyCategoryManagerObserver: CategoryManagerObserver {
-   
-   private let observer: CategoryManagerObserver
-   
-   init(_ observer: CategoryManagerObserver) {
-      self.observer = observer
-   }
-   
-   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
-      observer.categoryManager(categoryManager, didRemoveCategory: category)
-   }
-   
-   func categoryManager(
-      _ categoryManager: CategoryManager, observedChangeInCategory category: Category
-   ) {
-      observer.categoryManager(categoryManager, observedChangeInCategory: category)
-   }
-   
-   func categoryManagerDidChange(_ categoryManager: CategoryManager) {
-      observer.categoryManagerDidChange(categoryManager)
-   }
+final class AnyCategoryManagerObserver {
+   private(set) weak var observer: CategoryManagerObserver?
+   init(_ observer: CategoryManagerObserver) { self.observer = observer }
 }

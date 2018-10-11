@@ -8,53 +8,34 @@
 
 import UIKit
 
-#warning("Idea")
-// Add more fades and animations
-//
-// change the look of the time picker labels
-//
-// add !minor! "Hour(s)"/"h", "Minute(s)"/"min" and "Second(s)"/"s" labels 
-
 // MARK: - Timer Controller
 
 /// A view controller that displays the current track state for a given category.
-/// Additionally the controller provides means of changing the a category's track state, as well as
-/// an interface for switching to another category.
+/// Additionally the controller provides means of changing a category's track state, manipulating
+/// the tracked amount of time, as well as an interface for switching to another category.
 final class TimerController: UIViewController {
 
-   /// A type providing data needed to display a sensible view.
+   /// A type providing data needed for the controller to function.
    private var dataSource: TimerControllerDataSource
    
-   /// A coordinator that provides external (delegate) functionality.
+   /// A delegate providing functionality external to the timer controller.
    private var delegate: TimerControllerDelegate?
 
    /// The category whose track is currently being managed by the controller.
    var category: Category {
       didSet {
-         setTimerDuration()
-         categoryIsRunning = dataSource.categoryIsRunning(category)
-         delegate?.timerController(self, isTrackingCategory: category)
-      }
-   }
-   
-   #warning("Barely pulling its weight. Should maybe be a function performing the didSet.")
-   /// An indicator for whether the category's current track is running or not.
-   /// This information is used to avoid redundant update requests for the category's track.
-   private var categoryIsRunning: Bool {
-      didSet {
-         updateTimer.invalidate()
-         playButton.isHidden = categoryIsRunning
-         pauseButton.isHidden = !categoryIsRunning
+         setTimePickerDuration()
          
-         if categoryIsRunning {
-            setTimerDuration()
-            updateTimer = makeUpdateTimer()
-         }
+         let categoryIsRunning = dataSource.categoryIsRunning(category)
+         updateForTrackingState(running: categoryIsRunning)
+      
+         delegate?.timerController(self, switchedToCategory: category)
       }
    }
    
-   private(set) var isEditingDuration = false {
-      didSet { playButton.isEnabled = !isEditingDuration }
+   /// An indicater for whether the time picker is currently in editing mode or not.
+   var isEditingDuration: Bool {
+      return timePicker.isEditing
    }
    
    /// A timer used to continuously update the timer controller's state.
@@ -75,6 +56,7 @@ final class TimerController: UIViewController {
    /// The button used to dynamically switch between the category being tracked.
    let switchButton = UIButton()
 
+   /// Creates a timer controller.
    init(
       category: Category,
       dataSource: TimerControllerDataSource,
@@ -84,66 +66,65 @@ final class TimerController: UIViewController {
       self.category = category
       self.dataSource = dataSource
       self.delegate = delegate
-      categoryIsRunning = dataSource.categoryIsRunning(category)
 
       // Phase 2.
       super.init(nibName: nil, bundle: nil)
       
       // Phase 3.
       view.backgroundColor = .white
-      setTimerDuration()
-      if categoryIsRunning { updateTimer = makeUpdateTimer() }
+      setTimePickerDuration()
+      if dataSource.categoryIsRunning(category) { setUpdateTimer() }
       
       setupButtons()
       setupLayoutConstraints()
-      
-      delegate?.timerController(self, isTrackingCategory: category)
    }
 
-   /// Sets up all buttons' image and action method.
+   /// Sets up all buttons' images, sized and action methods.
    private func setupButtons() {
       let imageLoader = ImageLoader(useDefaultSizes: false)
       let defaultSize = ImageLoader.Button.defaultSize
+      let categoryIsRunning = dataSource.categoryIsRunning(category)
       
       // Collects each buttons information in a tuple.
-      let buttonInfo = [
-         (playButton,   ImageLoader.Button.play, 2 * defaultSize, #selector(didPressPlay)  ),
-         (pauseButton,  .pause,                  2 * defaultSize, #selector(didPressPause) ),
-         (stopButton,   .stop,                   defaultSize,     #selector(didPressStop)  ),
-         (switchButton, .switch,                 defaultSize,     #selector(didPressSwitch))
+      let buttonInfo: [(UIButton, ImageLoader.Button, CGSize, Selector, Bool)] = [
+         (playButton,   .play,   2 * defaultSize, #selector(didPressPlay),   categoryIsRunning ),
+         (pauseButton,  .pause,  2 * defaultSize, #selector(didPressPause),  !categoryIsRunning),
+         (stopButton,   .stop,   defaultSize,     #selector(didPressStop),   false             ),
+         (switchButton, .switch, defaultSize,     #selector(didPressSwitch), false             )
       ]
       
       // Sets up each button using the tuples defined before.
-      for item in buttonInfo {
-         let image = imageLoader[button: item.1].resizedKeepingAspect(forSize: item.2)
-         item.0.setImage(image, for: .normal)
-         item.0.addTarget(self, action: item.3, for: .touchUpInside)
+      for (button, type, size, action, isHidden) in buttonInfo {
+         let image = imageLoader[button: type].resizedKeepingAspect(forSize: size)
+         
+         button.setImage(image, for: .normal)
+         button.addTarget(self, action: action, for: .touchUpInside)
+         button.isHidden = isHidden
       }
-      
-      // Sets the correct play/pause state.
-      playButton.isHidden = categoryIsRunning
-      pauseButton.isHidden = !categoryIsRunning
    }
 
-   /// Creates a timer calling `setTimerDuration` every second.
-   private func makeUpdateTimer() -> Timer {
-      return Timer.scheduledTimer(
-         timeInterval: 1,
-         target: self,
-         selector: #selector(setTimerDuration),
-         userInfo: nil,
-         repeats: true
+   /// Sets the update timer to a timer calling `setTimePickerDuration` every second.
+   private func setUpdateTimer() {
+      updateTimer = Timer.scheduledTimer(
+         timeInterval: 1, target: self,
+         selector: #selector(setTimePickerDuration),
+         userInfo: nil, repeats: true
       )
    }
    
-   @objc private func setTimerDuration() {
+   /// Sets the duration of the time picker to the current track duration of the controller's
+   /// category.
+   @objc private func setTimePickerDuration() {
       let duration = dataSource.track(for: category).duration
       timePicker.setDuration(to: duration)
    }
    
-   override func viewWillAppear(_ animated: Bool) {
-      super.viewWillAppear(animated)
-      delegate?.setupNavigationBar(for: self)
+   /// Updates the controller to be able to handle a given tracking state.
+   func updateForTrackingState(running: Bool) {
+      updateTimer.invalidate()
+      playButton.isHidden = running
+      pauseButton.isHidden = !running
+      if running { setUpdateTimer() }
    }
    
    // MARK: - Requirements
@@ -158,19 +139,13 @@ extension TimerController {
    
    /// The action method called, when the play button is pressed.
    @objc private func didPressPlay() {
-      // Sanity check.
-      guard !categoryIsRunning else { fatalError() }
-      categoryIsRunning = true
-      
+      updateForTrackingState(running: true)
       delegate?.timerController(self, needsPlayForCategory: category)
    }
    
    /// The action method called, when the pause button is pressed.
    @objc private func didPressPause() {
-      // Sanity check.
-      guard categoryIsRunning else { fatalError() }
-      categoryIsRunning = false
-      
+      updateForTrackingState(running: false)
       delegate?.timerControllerNeedsPause(self)
    }
    
@@ -191,23 +166,33 @@ extension TimerController {
 
 extension TimerController {
    
+   /// Allows the tracked duration of the current category to be manipulated.
    func beginDurationEditing() {
+      // Makes sure the controller is not already in dutation editing mode.
       guard !isEditingDuration else { return }
-      isEditingDuration = true
       
-      if categoryIsRunning { didPressPause() }
+      // Sets up the controller for duration editing.
+      playButton.isEnabled = false
+      switchButton.isEnabled = false
+      if dataSource.categoryIsRunning(category) { didPressPause() }
+      
+      // Goes into duration editing mode.
       timePicker.beginEditing()
    }
    
-   #warning("Transfer track state from before if possible.")
+   /// Resumes the controller's "normal" state, if it was previously in duration editing mode.
    func endDurationEditing() {
+      // Makes sure the controller is in dutation editing mode.
       guard isEditingDuration else { return }
-      isEditingDuration = false
       
+      // Unwinds the controller from editing mode.
+      playButton.isEnabled = true
+      switchButton.isEnabled = true
       timePicker.endEditing()
-      let newDuration = timePicker.selection
       
-      delegate?.timerController(self, needsUpdatedDuration: newDuration)
+      // Propagates the duration change to the delegate.
+      let newDuration = timePicker.selection
+      delegate?.timerController(self, updatedDuration: newDuration, forCategory: category)
    }
 }
 
@@ -227,7 +212,7 @@ extension TimerController {
       AutoLayoutHelper(rootView: view, viewToConstrain: enclosingStackView).constrainView()
    }
    
-   /// Creates a stack view lying out the buttons used in a timer controller.
+   /// Creates a stack view laying out the buttons used in a timer controller.
    private func makeButtonStackView() -> UIStackView {
       let stackView = UIStackView(
          arrangedSubviews: [stopButton, playButton, pauseButton, switchButton]
@@ -255,10 +240,12 @@ protocol TimerControllerDataSource {
 /// A delegate providing functionality external to a timer controller.
 protocol TimerControllerDelegate {
    
-   func timerController(_ timerController: TimerController, isTrackingCategory category: Category)
+   func timerController(_ timerController: TimerController, switchedToCategory category: Category)
    
    func timerController(
-      _ timerController: TimerController, needsUpdatedDuration duration: TimeInterval
+      _ timerController: TimerController,
+      updatedDuration duration: TimeInterval,
+      forCategory category: Category
    )
    
    func timerController(_ timerController: TimerController, needsPlayForCategory category: Category)
@@ -268,30 +255,4 @@ protocol TimerControllerDelegate {
    func timerControllerNeedsStop(_ timerController: TimerController)
    
    func timerControllerNeedsSwitch(_ timerController: TimerController)
-   
-   func setupNavigationBar(for controller: TimerController)
-}
-
-/// Default implementations making the delegate methods optional.
-extension TimerControllerDelegate {
-   
-//   func timerController(
-//      _ timerController: TimerController, isTrackingCategory category: Category
-//   ) { }
-//
-//   func timerController(
-//      _ timerController: TimerController, needsUpdatedDuration duration: TimeInterval
-//   ) { }
-//
-//   func timerController(
-//      _ timerController: TimerController, needsPlayForCategory category: Category
-//   ) { }
-//
-//   func timerControllerNeedsPause(_ timerController: TimerController) { }
-//
-//   func timerControllerNeedsStop(_ timerController: TimerController) { }
-//
-//   func timerControllerNeedsSwitch(_ timerController: TimerController) { }
-//
-//   func setupNavigationBar(for controller: TimerController) { }
 }
