@@ -96,6 +96,12 @@ final class TimerTabCoordinator: NSObject, Coordinator {
 
       navigationController.pushViewController(controller, animated: true)
    }
+   
+   /// A method that should be called by any object managing a timer tab coordinator, when the
+   /// coordinator's content is about to disappear from view.
+   func willDisappear() {
+      UIApplication.shared.statusBarStyle = .default
+   }
 }
 
 // MARK: - Category Manager Observer
@@ -105,12 +111,10 @@ extension TimerTabCoordinator: CategoryManagerObserver {
    /// Removes all tracks associated with the given category and stops the current timer controller
    /// if necessary.
    func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
-      // Makes sure the currently shown view controller is a timer controller managing a track for
+      // Stops the currently shown view controller if it is a timer controller managing a track for
       // the given category.
-      if timerController?.category == category {
-         // Shows a category selection controller.
-         let selectionController = controllerFactory.makeCategorySelectionController()
-         navigationController.setViewControllers([selectionController], animated: true)
+      if let timerController = timerController, timerController.category == category {
+         timerControllerNeedsStop(timerController)
       }
       
       // Removes all of the tracks associated with the category.
@@ -179,10 +183,10 @@ extension TimerTabCoordinator: NavigationControllerObserver {
       navigationController.navigationBar.isTranslucent = false
       
       // Sets the title text color.
-      let textColor: UIColor = category.color.isLight ? .black : .white
+      let textColor: UIColor = category.color.isLight ? #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1) : #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
       navigationController.navigationBar.largeTitleTextAttributes = [.foregroundColor: textColor]
       
-      // Sets the status back color.
+      // Sets the status bar color.
       UIApplication.shared.statusBarStyle = category.color.isLight ? .default : .lightContent
       
       // Sets the timer edit button's image and color.
@@ -202,7 +206,7 @@ extension TimerTabCoordinator: NavigationControllerObserver {
       
       // Sets the timer edit button's image and color.
       timerEditButton.image = image
-      timerEditButton.tintColor = timerController.category.color.isLight ? .black : .white
+      timerEditButton.tintColor = timerController.category.color.isLight ? #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1) : #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
    }
    
    /// Sets up navigation bar properties which are not tied to a controller's navigation item.
@@ -212,10 +216,6 @@ extension TimerTabCoordinator: NavigationControllerObserver {
       
       navigationController.navigationBar.prefersLargeTitles = true
       navigationController.setNavigationBarHidden(false, animated: true)
-      
-      // Sets all colors related to the navigation bar to default values, as they might have been
-      // changed by previous showing of a timer controller.
-      navigationController.navigationBar.setColorsToDefault()
    }
 }
 
@@ -269,6 +269,10 @@ extension TimerTabCoordinator: TimerControllerDataSource, TimerControllerDelegat
    /// selection controller.
    func timerControllerNeedsStop(_ timerController: TimerController) {
       trackManager.stopRunning()
+      
+      // Sets navigation and status bar related properties back to default.
+      UIApplication.shared.statusBarStyle = .default
+      navigationController.navigationBar.setColorsToDefault()
       
       let selectionController = controllerFactory.makeCategorySelectionController()
       navigationController.setViewControllers([selectionController], animated: true)

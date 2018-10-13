@@ -83,6 +83,13 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
       categoryManager.move(categoryAtIndex: origin, to: destination)
    }
    
+   func categoriesControllerDidStartEditingCategoryTitle(
+      _ categoriesController: CategoriesController
+   ) {
+      navigationController.navigationBar.isUserInteractionEnabled = false
+      navigationController.navigationBar.tintColor = #colorLiteral(red: 0.5960784314, green: 0.5960784314, blue: 0.6156862745, alpha: 1)
+   }
+   
    /// Handles a category controller's color dot being tapped, by creating a color picker popover
    /// and changing the associated category's color according to the selection.
    func categoriesController(

@@ -32,11 +32,12 @@ final class EditableCategoryCell: CategoryCell {
    private func setupTextField() {
       textField.isUserInteractionEnabled = true
       textField.clearButtonMode = .whileEditing
+      textField.returnKeyType = .done
       
       textField.placeholder = "Category Title"
       
       textField.borderStyle = .roundedRect
-      textField.backgroundColor = UIColor(white: 0.97, alpha: 1)
+      textField.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
    }
    
    /// Initializes additional properties on the color dot.

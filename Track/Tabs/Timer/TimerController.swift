@@ -71,7 +71,7 @@ final class TimerController: UIViewController {
       super.init(nibName: nil, bundle: nil)
       
       // Phase 3.
-      view.backgroundColor = .white
+      view.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
       setTimePickerDuration()
       if dataSource.categoryIsRunning(category) { setUpdateTimer() }
       

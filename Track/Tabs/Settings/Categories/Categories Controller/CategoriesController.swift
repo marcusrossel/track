@@ -14,6 +14,16 @@ import UIKit
 /// color. They can also be reordered or deleted.
 /// Additionally the controller provides the pathway for adding new categories.
 final class CategoriesController: UITableViewController {
+   
+   /// An enum describing the states in which a categories controller can be.
+   enum State {
+      case idle
+      case editing
+      case modifyingTitle(categoryContainer: CategoryContainer)
+   }
+   
+   /// The current state of the categories controller.
+   private(set) var state: State
 
    /// A coordinator that provides external (delegate) functionality.
    weak var delegate: CategoriesControllerDelegate?
@@ -27,6 +37,7 @@ final class CategoriesController: UITableViewController {
    /// Optionally a delegate can be provided to add external functionality.
    init(categories: [Category], delegate: CategoriesControllerDelegate? = nil) {
       // Phase 1.
+      state = .idle
       self.delegate = delegate
       
       // Phase 2.
@@ -116,16 +127,15 @@ extension CategoriesController {
          }
          
       case .modifiers:
-         
          // Sets up and returns the cell.
-         guard let action = ModificationAction(rawValue: indexPath.row) else {
+         guard let modificationAction = ModificationAction(rawValue: indexPath.row) else {
             fatalError("Internal inconsistency in categories controller.")
          }
          
-         let actionMethod: (ButtonCell) -> () = [.add: addAction, .edit: editAction][action]!
+         let handler: (ButtonCell) -> () = [.add: addAction, .edit: editAction][modificationAction]!
 
          return cellFactory.makeModifierCell(
-            for: indexPath, forModificationAction: action, withAction: actionMethod
+            for: indexPath, fromModificationAction: modificationAction, withHandler: handler
          )
       }
    }
@@ -140,8 +150,9 @@ extension CategoriesController {
    }
    
    private func editAction(_: ButtonCell) {
-      // Toggles the editing mode.
+      // Toggles the editing mode and updates the state accordingly.
       setEditing(!isEditing, animated: true)
+      state = isEditing ? .editing : .idle
       
       // Gets the path of the cell that induced the toggle.
       let editCellPath = IndexPath(
@@ -220,7 +231,7 @@ extension CategoriesController {
       let conformationController = UIAlertController(
          title: "Delete \"\(category.title)\"?",
          message: "All tracks for this category will be removed.",
-         preferredStyle: .alert
+         preferredStyle: .actionSheet
       )
       
       // Creates the alert controllers actions and adds them to it.
@@ -258,28 +269,42 @@ extension CategoriesController {
 }
 
 // MARK: - Text Field Delegate
-#warning("Broken")
 
 extension CategoriesController: UITextFieldDelegate {
    
-   private func category(associatedWith textField: UITextField) -> Category? {
+   private func cellIndex(associatedWith textField: UITextField) -> Int? {
       let categoriesCellCount = tableView.numberOfRows(inSection: Section.categories.rawValue)
+      
       for row in 0..<categoriesCellCount {
          let indexPath = IndexPath(row: row, section: Section.categories.rawValue)
-         guard let cell = tableView.cellForRow(at: indexPath) as? CategoryCell else {
+         
+         guard let cell = tableView.cellForRow(at: indexPath) as? EditableCategoryCell else {
             fatalError("Accessed unexpected type of table view cell.")
          }
          
-         if cell.textField === textField {
-            return logicController.categoryContainers[row] as? Category
-         }
+         if cell.textField === textField { return row }
       }
       
       return nil
    }
    
+   /// Editing is only allowed if the controller is in the idle state.
    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-      textField.returnKeyType = .done
+      // Makes sure the controller is in the idle state.
+      guard case .idle = state else { return false }
+      
+      // Gets the container being modified.
+      guard let cellIndex = cellIndex(associatedWith: textField) else {
+         fatalError("Internal inconsistency in categories controller.")
+      }
+      let container = logicController.categoryContainers[cellIndex]
+      
+      // Transfers to the editing state and propagates that event to the delegate.
+      state = .modifyingTitle(categoryContainer: container)
+      tableView.reloadSections([Section.modifiers.rawValue], with: .automatic)      
+      
+      delegate?.categoriesControllerDidStartEditingCategoryTitle(self)
+      
       return true
    }
    
@@ -287,9 +312,12 @@ extension CategoriesController: UITextFieldDelegate {
       guard let trimmedText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) else {
          fatalError("Expected text field to contain text.")
       }
-      guard let category = category(associatedWith: textField) else {
+      guard let cellIndex = cellIndex(associatedWith: textField) else {
          fatalError("Expected to find a category associated with the text field.")
       }
+      
+      #warning("Compiler silencer: as! Category")
+      let category = logicController.categoryContainers[cellIndex] as! Category
       
       guard category.rename(to: trimmedText) else {
          textField.resignFirstResponder()
@@ -320,9 +348,13 @@ extension CategoriesController: UITextFieldDelegate {
    }
    
    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-      guard let category = category(associatedWith: textField) else {
+      guard let cellIndex = cellIndex(associatedWith: textField) else {
          fatalError("Expected to find a category associated with the text field.")
       }
+      
+      #warning("Compiler silencer: as! Category")
+      let category = logicController.categoryContainers[cellIndex] as! Category
+      
       textField.fadeTransition(duration: 0.4)
       textField.text = category.title
       return true
@@ -347,5 +379,9 @@ protocol CategoriesControllerDelegate: CategoriesLogicControllerDelegate {
    
    func categoriesController(
       _ controller: CategoriesController, didTapColorDotForCell cell: EditableCategoryCell
+   )
+   
+   func categoriesControllerDidStartEditingCategoryTitle(
+      _ categoriesController: CategoriesController
    )
 }

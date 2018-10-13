@@ -54,7 +54,7 @@ final class TimePicker: UIView {
    
    private func setupCoverStack() {
       for view in [UIView(), UIView()] {
-         view.backgroundColor = .white
+         view.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
          coverStack.addArrangedSubview(view)
       }
       

@@ -27,9 +27,6 @@ final class TabCoordinator: NSObject, RootCoordinator {
    /// The tab bar controller displaying the coordinators content.
    private let tabBarController = UITabBarController()
    
-   /// The container storing the instances observing the coordinator.
-   private var observers: [ObjectIdentifier: AnyTabCoordinatorObserver] = [:]
-   
    /// Creates a tab coordinator.
    init(categoryManager: CategoryManager, trackManager: TrackManager) {
       // Phase 2.
@@ -97,7 +94,7 @@ final class TabCoordinator: NSObject, RootCoordinator {
 
 extension TabCoordinator: UITabBarControllerDelegate {
    
-   /// The method used to determine from which tab control is handed over to which other tab.
+   /// Makes sure the status bar is colored correctly when switching from the timer tab.
    func tabBarController(
       _ tabBarController: UITabBarController,
       shouldSelect viewController: UIViewController
@@ -115,8 +112,18 @@ extension TabCoordinator: UITabBarControllerDelegate {
          fatalError("Received invalid tab tag.")
       }
       
-      notifyObservers { $0.selectedTabWillChange(from: currentTab, to: nextTab) }
+      // Performs specific tab switching actions, if the tabs have actually changed.
+      if currentTab != nextTab { tabWillSwitch(from: currentTab, to: nextTab) }
+      
       return true
+   }
+   
+   /// A dumping ground for specific actions that need to be performed when switching tabs.
+   private func tabWillSwitch(from origin: Tab, to destination: Tab) {
+      // Tells the timer tab coordinator that it is about to disappear, if appropriate.
+      if case .timer = origin {
+         (tabCoordinators[.timer] as? TimerTabCoordinator)?.willDisappear()
+      }
    }
    
    /// Causes the selected controller's (and therefore tab's) coordinator to run.
@@ -133,45 +140,4 @@ extension TabCoordinator: UITabBarControllerDelegate {
       tabCoordinators[tab].run()
       runHistory[tab] = true
    }
-}
-
-// MARK: - Observation
-
-extension TabCoordinator {
-   
-   func addObserver(_ observer: TabCoordinatorObserver) {
-      observers[ObjectIdentifier(observer)] = AnyTabCoordinatorObserver(observer)
-   }
-   
-   func removeObserver(_ observer: TabCoordinatorObserver) {
-      observers[ObjectIdentifier(observer)] = nil
-   }
-   
-   private func notifyObservers(with closure: (TabCoordinatorObserver) -> ()) {
-      for (id, typeErasedWrapper) in observers {
-         if let observer = typeErasedWrapper.observer {
-            closure(observer)
-         } else {
-            observers[id] = nil
-         }
-      }
-   }
-}
-
-#warning("Unused.")
-// MARK: - Tab Coordinator Observer
-
-protocol TabCoordinatorObserver: AnyObject {
-   
-   func selectedTabWillChange(from origin: Tab, to destination: Tab)
-}
-
-extension TabCoordinatorObserver {
-   
-   func selectedTabWillChange(from origin: Tab, to destination: Tab) { }
-}
-
-final class AnyTabCoordinatorObserver {
-   private(set) weak var observer: TabCoordinatorObserver?
-   init(_ observer: TabCoordinatorObserver) { self.observer = observer }
 }

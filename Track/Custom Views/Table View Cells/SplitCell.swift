@@ -56,7 +56,7 @@ final class SplitCell: UITableViewCell {
       super.init(style: style, reuseIdentifier: reuseIdentifier)
       
       // Phase 3.
-      backgroundColor = .clear
+      backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
       setupCollectionView(with: flowLayout)
       
       // Sets up the cell's auto layout constraints.
@@ -80,7 +80,7 @@ final class SplitCell: UITableViewCell {
       
       // Makes sure the collection view is only a means of presentation, not interaction.
       collectionView.isScrollEnabled = false
-      collectionView.backgroundColor = .clear
+      collectionView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
    }
    
    // MARK: - Requirements
@@ -119,9 +119,9 @@ extension SplitCell: UICollectionViewDataSource {
    /// A convenience method for giving a subcell its default style.
    private func styleSubcell(_ cell: UICollectionViewCell) {
       cell.contentView.layer.cornerRadius = 15
-      cell.contentView.layer.borderColor = UIColor(white: 0.9, alpha: 1).cgColor
+      cell.contentView.layer.borderColor = #colorLiteral(red: 0.9212026, green: 0.9212026, blue: 0.9212026, alpha: 1)
       cell.contentView.layer.borderWidth = .tableViewBorder
-      cell.contentView.backgroundColor = .white
+      cell.contentView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
    }
 }
 

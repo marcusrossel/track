@@ -36,7 +36,7 @@ final class CategoriesLogicController {
    /// Inserts a category prototype at the front of the category containers.
    /// The index of the new prototype is returned.
    func addPrototype() -> Int {
-      let prototype: CategoryContainer = .prototype(title: "", color: .black)
+      let prototype: CategoryContainer = .prototype(title: "", color: #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1))
       categoryContainers.insert(prototype, at: 0)
       
       return 0

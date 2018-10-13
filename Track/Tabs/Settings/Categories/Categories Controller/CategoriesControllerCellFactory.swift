@@ -49,7 +49,7 @@ extension CategoriesController {
          case let .prototype(title, color):
             cell.title = title
             cell.color = color
-            cell.backgroundColor = UIColor(white: 0.95, alpha: 1)
+            cell.backgroundColor = #colorLiteral(red: 0.9623028636, green: 0.9623028636, blue: 0.9623028636, alpha: 1)
          }
          
          return cell
@@ -58,8 +58,8 @@ extension CategoriesController {
       /// Uses a given modification action to setup a button cell at a given index path.
       func makeModifierCell(
          for indexPath: IndexPath,
-         forModificationAction modificationAction: ModificationAction,
-         withAction action: ((ButtonCell) -> ())?
+         fromModificationAction modificationAction: ModificationAction,
+         withHandler handler: ((ButtonCell) -> ())?
       ) -> ButtonCell {
          // Gets the cell.
          guard
@@ -83,7 +83,8 @@ extension CategoriesController {
          }
          
          // Sets properties independant of modification action type.
-         cell.tapHandler = action
+         cell.tapHandler = handler
+         if case .modifyingTitle = owner.state { cell.isEnabled = false }
          
          return cell
       }

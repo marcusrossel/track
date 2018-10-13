@@ -48,7 +48,7 @@ final class ColorDot: UIView {
       
       // Phase 3.
       setDrawPaths()
-      backgroundColor = .clear
+      backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
    }
 
    /// Draws the circle with the specified diameter and color.
@@ -73,7 +73,7 @@ final class ColorDot: UIView {
       
       // Makes adjustments if the color is to light.
       if colorIsLight {
-         UIColor(white: 0.8, alpha: 1).setStroke()
+         #colorLiteral(red: 0.8336849809, green: 0.8336849809, blue: 0.8336849809, alpha: 1).setStroke()
          circle.stroke()
       }
       

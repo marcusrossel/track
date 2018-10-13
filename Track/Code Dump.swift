@@ -29,7 +29,7 @@ import UIKit
   - show action sheet for 3 seconds, saying that you can not exceed todays time, when necessary
  
  >> Categories Controller:
-  - Outsource some logic from the "Table View Editing" section into the logic controller
+  - Properly split up categories controller's responsibilities
  
 */
 
@@ -166,10 +166,6 @@ extension UIColor {
    
    var isLight: Bool {
       return luminosity > 0.5
-   }
-   
-   static var systemBlue: UIColor {
-      return UIColor(red: 0, green: 122, blue: 255, alpha: 1)
    }
 }
 

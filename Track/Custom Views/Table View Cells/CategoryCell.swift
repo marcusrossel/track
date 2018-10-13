@@ -48,7 +48,7 @@ class CategoryCell: ViewTextFieldCell {
       super.init(style: style, reuseIdentifier: reuseIdentifier)
       
       // Phase 3.
-      colorDot = ColorDot(diameter: 40, color: .black)
+      colorDot = ColorDot(diameter: 40, color: #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0))
       colorDot.isUserInteractionEnabled = false
       
       setupTextField()
