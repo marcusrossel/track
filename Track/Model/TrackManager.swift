@@ -169,7 +169,7 @@ final class TrackManager {
       onDate date: Date = Date(),
       to duration: TimeInterval
    ) -> Bool {
-      guard duration >= 0 && duration < Track.maximumDuration else { return false }
+      guard duration >= 0 && duration <= Track.maximumDuration else { return false }
       
       let dateStamp = Track.timeStamp(for: date)
       let trackPredicate: (Track) -> Bool = { track in
@@ -237,8 +237,4 @@ extension TrackManager: CategoryManagerObserver {
       self.idleTracks = self.idleTracks.filter { track in track.category != category }
       if self.running?.category == category { self.running = nil }
    }
-   
-   #warning("Delete us!")
-   func categoryManagerDidChange(_ categoryManager: CategoryManager) {}
-   func categoryManager(_ categoryManager: CategoryManager, observedChangeInCategory category: Category) { }
 }

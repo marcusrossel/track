@@ -10,6 +10,7 @@ import UIKit
 
 // MARK: - Settings Root Controller
 
+/// A view controller that shows and manages the list of all settings options.
 final class SettingsRootController: UITableViewController {
    
    /// A delegate providing functionality external to a settings root controller.

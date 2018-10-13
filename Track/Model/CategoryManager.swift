@@ -133,6 +133,19 @@ protocol CategoryManagerObserver: AnyObject {
    func categoryManagerDidChange(_ categoryManager: CategoryManager)
 }
 
+extension CategoryManagerObserver {
+   
+   func categoryManager(
+      _ categoryManager: CategoryManager, didRemoveCategory category: Category
+   ) { }
+   
+   func categoryManagerDidChange(_ categoryManager: CategoryManager) { }
+   
+   func categoryManager(
+      _ categoryManager: CategoryManager, observedChangeInCategory category: Category
+   ) { }
+}
+
 /// A workaround for the missing ability of protocol existentials to conform to protocols.
 final class AnyCategoryManagerObserver {
    private(set) weak var observer: CategoryManagerObserver?

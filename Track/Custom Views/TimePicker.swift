@@ -75,7 +75,7 @@ extension TimePicker {
    
    @discardableResult
    func setDuration(to duration: TimeInterval) -> Bool {
-      guard duration >= 0 && duration < Track.maximumDuration else { return false }
+      guard duration >= 0 && duration <= Track.maximumDuration else { return false }
       
       let (hours, minutes, seconds, _) = duration.decomposed
       for (component, value) in [hours, minutes, seconds].enumerated() {

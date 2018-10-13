@@ -12,10 +12,10 @@ import UIKit
 
 /*
  
- + Remove all delegate methods `setupNavigationBar`
  + Make better factories
  
  >> Timer Tab Coordinator:
+  - Add navigation bar handler
   - Introduce a `State` enum with selecting and timing states (and perhaps others like transitioning
     with an associated value to pass information to the new state).
  
@@ -27,7 +27,9 @@ import UIKit
   - Add more fades and animations
   - add minor "Hour(s)"/"h", "Minute(s)"/"min" and "Second(s)"/"s" labels
   - show action sheet for 3 seconds, saying that you can not exceed todays time, when necessary
-  - Transfer tracking state when switching categories dynamically
+ 
+ >> Categories Controller:
+  - Outsource some logic from the "Table View Editing" section into the logic controller
  
 */
 
@@ -162,8 +164,8 @@ extension UIColor {
          .reduce(0) { result, item in result + item.1 * pow(decomposed[item.0], 2.2) }
    }
    
-   static func highlightColor(contrasting color: UIColor) -> UIColor {
-      return (color.luminosity > 0.5) ? .black : .white
+   var isLight: Bool {
+      return luminosity > 0.5
    }
    
    static var systemBlue: UIColor {

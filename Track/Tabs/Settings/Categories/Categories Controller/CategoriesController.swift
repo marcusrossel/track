@@ -34,10 +34,10 @@ final class CategoriesController: UITableViewController {
       
       // Phase 3.
       logicController = CategoriesLogicController(
-         owner: self, categoryContainers: categories, delegate: delegate
+         owner: self, categories: categories, delegate: delegate
       )
       
-      cellFactory = CellFactory(owner: self, logicController: logicController)
+      cellFactory = CellFactory(owner: self)
       
       setupTableView()
    }
@@ -88,10 +88,13 @@ extension CategoriesController {
    /// - .modifiers: as cases in `ModificationAction`.
    /// - .categories: as categories in the category manager.
    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-      switch Section(rawValue: section) {
-      case .categories?: return logicController.categoryContainers.count
-      case .modifiers?: return ModificationAction.allCases.count
-      default: fatalError("Non exhaustive switch over variable domain.")
+      guard let section = Section(rawValue: section) else {
+         fatalError("Internal inconsistency in categories controller.")
+      }
+      
+      switch section {
+      case .categories: return logicController.categoryContainers.count
+      case .modifiers: return ModificationAction.allCases.count
       }
    }
    
@@ -106,39 +109,48 @@ extension CategoriesController {
       // Sets up the cell according to its section.
       switch section {
       case .categories:
-         guard
-            let cell = tableView.dequeueReusableCell(
-               withIdentifier: EditableCategoryCell.identifier, for: indexPath
-            ) as? EditableCategoryCell
-         else {
-            fatalError("Dequeued unexpected type of table view cell.")
-         }
-         
-         // Sets up and returns the cell.
          let container = logicController.categoryContainers[indexPath.row]
-         cellFactory.setupCategoriesCell(cell, fromContainer: container) { cell in
+         
+         return cellFactory.makeCategoryCell(for: indexPath, fromContainer: container) { cell in
             self.delegate?.categoriesController(self, didTapColorDotForCell: cell)
          }
-   
-         return cell
          
       case .modifiers:
-         guard
-            let cell = tableView.dequeueReusableCell(
-               withIdentifier: ButtonCell.identifier, for: indexPath
-            ) as? ButtonCell
-         else {
-            fatalError("Dequeued unexpected type of table view cell.")
-         }
          
          // Sets up and returns the cell.
-         guard let modificationAction = ModificationAction(rawValue: indexPath.row) else {
+         guard let action = ModificationAction(rawValue: indexPath.row) else {
             fatalError("Internal inconsistency in categories controller.")
          }
-         cellFactory.setupModifierCell(cell, forModificationAction: modificationAction)
          
-         return cell
+         let actionMethod: (ButtonCell) -> () = [.add: addAction, .edit: editAction][action]!
+
+         return cellFactory.makeModifierCell(
+            for: indexPath, forModificationAction: action, withAction: actionMethod
+         )
       }
+   }
+   
+   private func addAction(_: ButtonCell) {
+      let prototypeRow = self.logicController.addPrototype()
+      let prototypePath = IndexPath(row: prototypeRow, section: Section.categories.rawValue)
+      
+      tableView.beginUpdates()
+      tableView.insertRows(at: [prototypePath], with: .automatic)
+      tableView.endUpdates()
+   }
+   
+   private func editAction(_: ButtonCell) {
+      // Toggles the editing mode.
+      setEditing(!isEditing, animated: true)
+      
+      // Gets the path of the cell that induced the toggle.
+      let editCellPath = IndexPath(
+         row: ModificationAction.edit.rawValue,
+         section: Section.modifiers.rawValue
+      )
+      
+      // Reloads the cell that induced the toggle.
+      tableView.reloadRows(at: [editCellPath], with: .fade)
    }
 }
 
@@ -186,15 +198,15 @@ extension CategoriesController {
       guard case .delete = editingStyle else { return }
       
       // Deletes a the cell right away if it is just a prototype.
-      guard let category = logicController.categoryContainers[indexPath.row] as? Category else {
-         _ = logicController.removePrototype(at: indexPath.row)
+      guard case let .category(category) = logicController.categoryContainers[indexPath.row] else {
+         logicController.removeContainer(at: indexPath.row)
          tableView.deleteRows(at: [indexPath], with: .automatic)
          return
       }
 
       // Prompts the user for confirmation of deletion and only then deletes the category.
       promptForDeletionConfirmation(of: category) {
-         _ = self.logicController.removeCategory(at: indexPath.row)
+         self.logicController.removeContainer(at: indexPath.row)
          tableView.deleteRows(at: [indexPath], with: .automatic)
       }
    }
@@ -258,7 +270,6 @@ extension CategoriesController: UITextFieldDelegate {
             fatalError("Accessed unexpected type of table view cell.")
          }
          
-         #warning("Compiler silencer: as? Category")
          if cell.textField === textField {
             return logicController.categoryContainers[row] as? Category
          }

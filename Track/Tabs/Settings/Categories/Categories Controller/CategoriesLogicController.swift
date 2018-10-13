@@ -25,50 +25,37 @@ final class CategoriesLogicController {
    /// Creates a categories logic controller.
    init(
       owner: CategoriesController,
-      categoryContainers: [CategoryContainer],
+      categories: [Category],
       delegate: CategoriesLogicControllerDelegate? = nil
    ) {
       self.owner = owner
-      self.categoryContainers = categoryContainers
+      self.categoryContainers = categories.map { .category($0) }
       self.delegate = delegate
    }
    
    /// Inserts a category prototype at the front of the category containers.
    /// The index of the new prototype is returned.
    func addPrototype() -> Int {
-      let prototype = Category.Prototype()
+      let prototype: CategoryContainer = .prototype(title: "", color: .black)
       categoryContainers.insert(prototype, at: 0)
       
       return 0
    }
    
-   /// Removes a prototype at the given index, if it actually refers to a prototype.
-   /// The return value indicated whether removal was successful.
-   func removePrototype(at index: Int) -> Bool {
-      // Makes sure the index refers to a prototype.
-      guard categoryContainers[index] is Category.Prototype else { return false }
+   /// Removes a container at the given index.
+   func removeContainer(at index: Int) {
+      let removed = categoryContainers.remove(at: index)
       
-      categoryContainers.remove(at: index)
-      return true
-   }
-   
-   /// Removes a category at the given index, if it actually refers to a category.
-   /// The return value indicated whether removal was successful.
-   func removeCategory(at index: Int) -> Bool {
-      // Makes sure the index refers to a category.
-      guard categoryContainers[index] is Category else { return false }
-      
-      // Removes the category and propagates the event to the delegate.
-      categoryContainers.remove(at: index)
-      delegate?.categoriesController(owner, didRemoveCategoryAtIndex: index)
-      
-      return true
+      // Propagates the event to the delegate, if the removed container was a category.
+      if case .category = removed {
+         delegate?.categoriesController(owner, didRemoveCategoryAtIndex: index)
+      }
    }
    
    /// Moves a container at a given origin to a given destination.
    func moveContainer(at origin: Int, to destination: Int) {
       // If the container in question is just a prototype, simply move it.
-      guard categoryContainers[origin] is Category else {
+      guard case .category = categoryContainers[origin] else {
          let container = categoryContainers.remove(at: origin)
          categoryContainers.insert(container, at: destination)
          return
@@ -96,7 +83,8 @@ final class CategoriesLogicController {
    /// category containers.
    private func categoryIndex(forContainerIndex containerIndex: Int) -> Int {
       return (0..<containerIndex).reduce(0) { result, index in
-         result + (categoryContainers[index] is Category ? 1 : 0)
+         if case .category = categoryContainers[index] { return result + 1}
+         return result
       }
    }
 }

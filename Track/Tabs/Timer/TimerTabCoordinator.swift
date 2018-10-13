@@ -179,8 +179,11 @@ extension TimerTabCoordinator: NavigationControllerObserver {
       navigationController.navigationBar.isTranslucent = false
       
       // Sets the title text color.
-      let textColor = UIColor.highlightColor(contrasting: category.color)
+      let textColor: UIColor = category.color.isLight ? .black : .white
       navigationController.navigationBar.largeTitleTextAttributes = [.foregroundColor: textColor]
+      
+      // Sets the status back color.
+      UIApplication.shared.statusBarStyle = category.color.isLight ? .default : .lightContent
       
       // Sets the timer edit button's image and color.
       updateTimerEditButton(for: timerController)
@@ -199,7 +202,7 @@ extension TimerTabCoordinator: NavigationControllerObserver {
       
       // Sets the timer edit button's image and color.
       timerEditButton.image = image
-      timerEditButton.tintColor = .highlightColor(contrasting: timerController.category.color)
+      timerEditButton.tintColor = timerController.category.color.isLight ? .black : .white
    }
    
    /// Sets up navigation bar properties which are not tied to a controller's navigation item.
