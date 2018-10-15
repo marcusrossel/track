@@ -13,11 +13,21 @@ import UIKit
 final class Category {
 
    /// All instantiated instances of categories at the current point in time.
-   private static var allInstances: Set<Category> = []
+   private static var allInstances: Set<Weak<Category>> = []
    
    // Checks if the given title is not empty, and no other category exists with the same title.
    private static func titleAllowsInstantiation(_ title: String) -> Bool {
-      return !title.isEmpty && Category.allInstances.allSatisfy { $0.title != title }
+      // Shortcuts if the title is empty.
+      guard !title.isEmpty else { return false }
+      
+      // Determines whether there already exists a category of the given title, while also removing
+      // those `Weak`-containers from `allInstances`, whose objects have been deallocated.
+      let titleIsUnique = Category.allInstances.reduce(true) { uniquenessStatus, nextCategory in
+         guard let category = nextCategory.object else { return uniquenessStatus }
+         return uniquenessStatus && category.title != title
+      }
+      
+      return titleIsUnique
    }
    
    /// A non-empty title that uniquely identifies a category.
@@ -35,16 +45,18 @@ final class Category {
 
    init?(title: String, color: UIColor) {
       guard Category.titleAllowsInstantiation(title) else { return nil }
-      defer { Category.allInstances.insert(self) }
+      defer { Category.allInstances.insert(Weak(self)) }
       
       // Sets the category's properties.
       self.title = title
       self.color = color
    }
    
-   /// Makes sure the category is removed from the ones in use, when it is deinitialized.
+   // MARK: - Logging
+
+   #warning("Logging.")
    deinit {
-      Category.allInstances.remove(self)
+      print("Deinialized category \"\(title)\".")
    }
    
    /// Changes the category's title to the given one, if no other category (in `allInstances`) has

@@ -62,6 +62,7 @@ extension CategoriesCoordinator: NavigationControllerObserver {
       // Makes sure the navigation bar is still shown and setup correctly.
       navigationController.setNavigationBarHidden(false, animated: true)
       navigationController.navigationBar.prefersLargeTitles = false
+      navigationController.navigationBar.tintAdjustmentMode = .normal
    }
 }
 
@@ -83,6 +84,18 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
       categoryManager.move(categoryAtIndex: origin, to: destination)
    }
    
+   func categoriesController(
+      _ categoriesController: CategoriesController,
+      didAddCategory newCategory: Category,
+      atIndex index: Int
+   ) {
+      guard categoryManager.insert(newCategory, atIndex: index) else {
+         fatalError(
+            "Internal inconsistency between categories logic controller and category manager."
+         )
+      }
+   }
+   
    func categoriesControllerDidStartEditingCategoryTitle(
       _ categoriesController: CategoriesController
    ) {
@@ -90,15 +103,27 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
       navigationController.navigationBar.tintColor = #colorLiteral(red: 0.5960784314, green: 0.5960784314, blue: 0.6156862745, alpha: 1)
    }
    
+   func categoriesControllerDidEndEditingCategoryTitle(
+      _ categoriesController: CategoriesController
+   ) {
+      navigationController.navigationBar.isUserInteractionEnabled = true
+      navigationController.navigationBar.tintColor = nil
+   }
+   
    /// Handles a category controller's color dot being tapped, by creating a color picker popover
    /// and changing the associated category's color according to the selection.
    func categoriesController(
       _ controller: CategoriesController,
-      didTapColorDotForCell cell: EditableCategoryCell
+      needsColorChangeForContainerAtIndexPath containerIndexPath: IndexPath
    ) {
-      // Gets the category associated with the tapped color dot's cell.
-      guard let category = categoryManager.uniqueCategory(with: cell.title) else {
-         fatalError("Expected category manager to contain exactly one category for title.")
+      // Gets the category container associated with the given container index path.
+      let container = controller.categoryContainers[containerIndexPath.row]
+      
+      // Gets the category container associated with the given container index path.
+      guard
+         let cell = controller.tableView.cellForRow(at: containerIndexPath) as? CategoryCell
+      else {
+         fatalError("Internal inconsistency in categories controller.")
       }
 
       // Sets up a color picker with the color dot's color.
@@ -109,13 +134,8 @@ extension CategoriesCoordinator: CategoriesControllerDelegate {
          presentedController: makeController(for: colorPicker),
          sourceView: cell.colorDot
       ) {
-         category.color = colorPicker.selection
-         
-         // Reloads the affected cell.
-         guard let cellPath = controller.tableView.indexPath(for: cell) else {
-            fatalError("Expected cell to be part of table view.")
-         }
-         controller.tableView.reloadRows(at: [cellPath], with: .fade)
+         container.color = colorPicker.selection
+         controller.tableView.reloadRows(at: [containerIndexPath], with: .fade)
          
          self.popoverHandler = nil
       }

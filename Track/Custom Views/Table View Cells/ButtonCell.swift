@@ -68,6 +68,7 @@ final class ButtonCell: ViewTextFieldCell {
    private func setupImageView() {
       leadingView = UIImageView()
       leadingView.isUserInteractionEnabled = false
+      leadingView.tintAdjustmentMode = .normal
    }
    
    /// An action method, delegating taps of the cell to the handler.

@@ -16,3 +16,14 @@ final class Weak<Object> where Object: AnyObject {
       self.object = object
    }
 }
+
+extension Weak: Equatable, Hashable where Object: Hashable {
+   
+   static func == (lhs: Weak<Object>, rhs: Weak<Object>) -> Bool {
+      return lhs.object == rhs.object
+   }
+   
+   func hash(into hasher: inout Hasher) {
+      hasher.combine(object.hashValue)
+   }
+}

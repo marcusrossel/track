@@ -50,6 +50,8 @@ final class TimerTabControllerFactory {
       self.owner = owner
       self.categoryManager = categoryManager
       self.editButtonClosure = editButtonClosure
+      
+      categoryManager.addObserver(self)
    }
    
    /// Returns a timer controller for the specified category.
@@ -97,5 +99,19 @@ final class TimerTabControllerFactory {
       }
       
       return controller
+   }
+}
+
+// MARK: - Category Manager Observer
+
+extension TimerTabControllerFactory: CategoryManagerObserver {
+   
+   // Removes cached controllers, if they contain the removed category.
+   func categoryManager(_ categoryManager: CategoryManager, didRemoveCategory category: Category) {
+      if cachedTimerController?.category == category { cachedTimerController = nil }
+      
+      if cachedSelectionController?.categories.contains(category) == true {
+         cachedSelectionController = nil
+      }
    }
 }

@@ -8,6 +8,18 @@
 
 import UIKit
 
+// MARK: - Bug
+
+/*
+ 
+ >> Timer Controller:
+  - Create a category with title X and color Y. Create a prototype with title X and color Z.
+    Delete the category.
+    Edit title of prototype -> Completion of editing will keep showing the type as prototype.
+    Go back to settings root controller and open categories option again
+    -> the prototype is gone, and there is again a category of title X and color Y.
+*/
+
 // MARK: - To Do
 
 /*
@@ -29,6 +41,7 @@ import UIKit
   - show action sheet for 3 seconds, saying that you can not exceed todays time, when necessary
  
  >> Categories Controller:
+  - Create a seperate prototypes section, when adding a new cell
   - Properly split up categories controller's responsibilities
  
 */

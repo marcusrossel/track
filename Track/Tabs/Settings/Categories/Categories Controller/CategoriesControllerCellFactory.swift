@@ -25,7 +25,7 @@ extension CategoriesController {
       /// Uses a given category container to setup a category cell for a given index path.
       func makeCategoryCell(
          for indexPath: IndexPath,
-         fromContainer container: CategoryContainer,
+         fromContainer container: CategoryConvertible,
          withColorTapHandler tapHandler: ((EditableCategoryCell) -> ())?
       ) -> EditableCategoryCell {
          // Gets the cell.
@@ -40,16 +40,14 @@ extension CategoriesController {
          // Sets properties that are independant of container type.
          cell.textField.delegate = owner
          cell.colorTapHandler = tapHandler
+         cell.title = container.title
+         cell.color = container.color
          
-         // Differentiates between the category container types.
-         switch container {
-         case let .category(category):
-            cell.title = category.title
-            cell.color = category.color
-         case let .prototype(title, color):
-            cell.title = title
-            cell.color = color
-            cell.backgroundColor = #colorLiteral(red: 0.9623028636, green: 0.9623028636, blue: 0.9623028636, alpha: 1)
+         // Sets properties specific to prototypes.
+         if container is Category.Prototype {
+            cell.backgroundColor = #colorLiteral(red: 0.878935039, green: 0.878935039, blue: 0.878935039, alpha: 1)
+         } else {
+            cell.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
          }
          
          return cell
@@ -84,7 +82,11 @@ extension CategoriesController {
          
          // Sets properties independant of modification action type.
          cell.tapHandler = handler
-         if case .modifyingTitle = owner.state { cell.isEnabled = false }
+         if case .modifyingTitle = owner.state {
+            cell.isEnabled = false
+         } else {
+            cell.isEnabled = true
+         }
          
          return cell
       }

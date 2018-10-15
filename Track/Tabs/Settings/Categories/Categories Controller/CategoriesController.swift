@@ -19,7 +19,7 @@ final class CategoriesController: UITableViewController {
    enum State {
       case idle
       case editing
-      case modifyingTitle(categoryContainer: CategoryContainer)
+      case modifyingTitle(containerIndex: Int)
    }
    
    /// The current state of the categories controller.
@@ -31,7 +31,13 @@ final class CategoriesController: UITableViewController {
    /// A logic controller specific to the categories controller.
    private var logicController: CategoriesLogicController!
    
+   /// The factory used by the controller, to generate its table view cells.
    private var cellFactory: CellFactory!
+   
+   /// The category containers currently being shown by the categories controller.
+   var categoryContainers: [CategoryConvertible] {
+      return logicController.categoryContainers
+   }
    
    /// Creates a new categories controller from a category manager.
    /// Optionally a delegate can be provided to add external functionality.
@@ -44,9 +50,7 @@ final class CategoriesController: UITableViewController {
       super.init(style: .grouped)
       
       // Phase 3.
-      logicController = CategoriesLogicController(
-         owner: self, categories: categories, delegate: delegate
-      )
+      logicController = CategoriesLogicController(categories: categories)
       
       cellFactory = CellFactory(owner: self)
       
@@ -104,7 +108,7 @@ extension CategoriesController {
       }
       
       switch section {
-      case .categories: return logicController.categoryContainers.count
+      case .categories: return categoryContainers.count
       case .modifiers: return ModificationAction.allCases.count
       }
    }
@@ -120,10 +124,12 @@ extension CategoriesController {
       // Sets up the cell according to its section.
       switch section {
       case .categories:
-         let container = logicController.categoryContainers[indexPath.row]
+         let container = categoryContainers[indexPath.row]
          
          return cellFactory.makeCategoryCell(for: indexPath, fromContainer: container) { cell in
-            self.delegate?.categoriesController(self, didTapColorDotForCell: cell)
+            self.delegate?.categoriesController(
+               self, needsColorChangeForContainerAtIndexPath: indexPath
+            )
          }
          
       case .modifiers:
@@ -209,16 +215,27 @@ extension CategoriesController {
       guard case .delete = editingStyle else { return }
       
       // Deletes a the cell right away if it is just a prototype.
-      guard case let .category(category) = logicController.categoryContainers[indexPath.row] else {
-         logicController.removeContainer(at: indexPath.row)
-         tableView.deleteRows(at: [indexPath], with: .automatic)
+      guard let category = categoryContainers[indexPath.row] as? Category else {
+         let removed = logicController.removeContainer(at: indexPath.row)
+         self.tableView.deleteRows(at: [indexPath], with: .automatic)
+         
+         // Propagates the event to the delegate, if the removed container was a category.
+         if removed is Category {
+            delegate?.categoriesController(self, didRemoveCategoryAtIndex: indexPath.row)
+         }
+         
          return
       }
 
       // Prompts the user for confirmation of deletion and only then deletes the category.
       promptForDeletionConfirmation(of: category) {
-         self.logicController.removeContainer(at: indexPath.row)
+         let removed = self.logicController.removeContainer(at: indexPath.row)
          tableView.deleteRows(at: [indexPath], with: .automatic)
+         
+         // Propagates the event to the delegate, if the removed container was a category.
+         if removed is Category {
+            self.delegate?.categoriesController(self, didRemoveCategoryAtIndex: indexPath.row)
+         }
       }
    }
    
@@ -264,7 +281,14 @@ extension CategoriesController {
          fatalError("Internal inconsistency in `CategoriesController`.")
       }
       
-      logicController.moveContainer(at: sourcePath.row, to: destinationPath.row)
+      // Propagates the event to the delegate, if the moved container was a category.
+      if let indices = logicController.moveContainer(at: sourcePath.row, to: destinationPath.row) {
+         delegate?.categoriesController(
+            self,
+            didMoveCategoryAtIndex: indices.categoryOrigin,
+            toIndex: indices.categoryDestination
+         )
+      }
    }
 }
 
@@ -297,10 +321,9 @@ extension CategoriesController: UITextFieldDelegate {
       guard let cellIndex = cellIndex(associatedWith: textField) else {
          fatalError("Internal inconsistency in categories controller.")
       }
-      let container = logicController.categoryContainers[cellIndex]
       
       // Transfers to the editing state and propagates that event to the delegate.
-      state = .modifyingTitle(categoryContainer: container)
+      state = .modifyingTitle(containerIndex: cellIndex)
       tableView.reloadSections([Section.modifiers.rawValue], with: .automatic)      
       
       delegate?.categoriesControllerDidStartEditingCategoryTitle(self)
@@ -308,56 +331,90 @@ extension CategoriesController: UITextFieldDelegate {
       return true
    }
    
+   /// Makes sure the text field does not implement its "default behaviour" upon pressing the return
+   /// button.
    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-      guard let trimmedText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) else {
-         fatalError("Expected text field to contain text.")
-      }
-      guard let cellIndex = cellIndex(associatedWith: textField) else {
-         fatalError("Expected to find a category associated with the text field.")
-      }
-      
-      #warning("Compiler silencer: as! Category")
-      let category = logicController.categoryContainers[cellIndex] as! Category
-      
-      guard category.rename(to: trimmedText) else {
-         textField.resignFirstResponder()
-         
-         let explainationController = UIAlertController(
-            title: "Invalid Title",
-            message: "A title can not be empty or in use.",
-            preferredStyle: .alert
-         )
-         let changeTitleAction = UIAlertAction(title: "Change Title", style: .default) { _ in
-            textField.becomeFirstResponder()
-         }
-         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            textField.fadeTransition(duration: 0.3)
-            textField.text = category.title
-         }
-         
-         explainationController.addAction(changeTitleAction)
-         explainationController.addAction(cancelAction)
-         
-         present(explainationController, animated: true, completion: nil)
-         return false
-      }
-      
-      textField.text = trimmedText
       textField.resignFirstResponder()
-      return true
+      return false
    }
    
    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-      guard let cellIndex = cellIndex(associatedWith: textField) else {
-         fatalError("Expected to find a category associated with the text field.")
+      // Makes sure the controller is even in the right state for ending text field editing.
+      guard case .modifyingTitle(let containerIndex) = state else {
+         fatalError("Internal inconsistency in categories controller.")
       }
       
-      #warning("Compiler silencer: as! Category")
-      let category = logicController.categoryContainers[cellIndex] as! Category
+      // Gets the text field's text in trimmed form.
+      guard let trimmedText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) else {
+         fatalError("Expected text field to contain text.")
+      }
       
-      textField.fadeTransition(duration: 0.4)
-      textField.text = category.title
+      // Handles ending editing differently for categories and prototypes.
+      switch categoryContainers[containerIndex] {
+      case let category as Category:
+         // Indicates success if the category's title has not changed.
+         guard category.title != trimmedText else { break }
+         
+         // Tries to rename the category and records if that was successful.
+         let renameSuccess = category.rename(to: trimmedText)
+         
+         // Does not allow ending editing if the rename was unsuccessful.
+         guard renameSuccess else {
+            explainContinuedEditing()
+            return false
+         }
+         
+      case let prototype as Category.Prototype:
+         // Renames the prototype and tries to turn it into a category.
+         prototype.title = trimmedText
+         
+         // Tries to categorize the prototype and notifies the delegate upon success.
+         if let (newCategory, categoryIndex) = logicController.categorize(prototype) {
+            delegate?.categoriesController(
+               self, didAddCategory: newCategory, atIndex: categoryIndex
+            )
+         }
+         
+         // Ending the editing of a prototype is always successful.
+         
+      default:
+         fatalError("Non exhaustive switch over variable domain.")
+      }
+      
+      // This point is only reached if editing is allowed to be ended.
       return true
+   }
+   
+   func textFieldDidEndEditing(_ textField: UITextField) {
+      // Makes sure the controller is even in the right state for ending text field editing.
+      guard case .modifyingTitle(let containerIndex) = state else {
+         fatalError("Internal inconsistency in categories controller.")
+      }
+      
+      // Reloads the cell that was modified.
+      let containerPath = IndexPath(row: containerIndex, section: Section.categories.rawValue)
+      tableView.reloadRows(at: [containerPath], with: .automatic)
+      
+      // Returns the controller to the idle state and reenables the modifier buttons.
+      state = .idle
+      tableView.reloadSections([Section.modifiers.rawValue], with: .automatic)
+      
+      // Propagates the event to the delegate.
+      delegate?.categoriesControllerDidEndEditingCategoryTitle(self)
+   }
+
+   /// Shows an alert view explaining why text field editing could not be ended.
+   private func explainContinuedEditing() {
+      let explainationController = UIAlertController(
+         title: "Invalid Title",
+         message: "A title can not be empty or in use.",
+         preferredStyle: .alert
+      )
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      
+      explainationController.addAction(okAction)
+      
+      present(explainationController, animated: true, completion: nil)
    }
    
    func textField(
@@ -375,13 +432,34 @@ extension CategoriesController: UITextFieldDelegate {
 // MARK: - Categories Controller Delegate
 
 /// A delegate providing functionality external to a categories controller.
-protocol CategoriesControllerDelegate: CategoriesLogicControllerDelegate {
+protocol CategoriesControllerDelegate: AnyObject {
    
    func categoriesController(
-      _ controller: CategoriesController, didTapColorDotForCell cell: EditableCategoryCell
+      _ categoriesController: CategoriesController, didRemoveCategoryAtIndex index: Int
+   )
+   
+   func categoriesController(
+      _ categoriesController: CategoriesController,
+      didMoveCategoryAtIndex source: Int,
+      toIndex destination: Int
+   )
+   
+   func categoriesController(
+      _ categoriesController: CategoriesController,
+      didAddCategory newCategory: Category,
+      atIndex index: Int
+   )
+   
+   func categoriesController(
+      _ controller: CategoriesController,
+      needsColorChangeForContainerAtIndexPath containerIndexPath: IndexPath
    )
    
    func categoriesControllerDidStartEditingCategoryTitle(
+      _ categoriesController: CategoriesController
+   )
+   
+   func categoriesControllerDidEndEditingCategoryTitle(
       _ categoriesController: CategoriesController
    )
 }
